@@ -6,6 +6,7 @@ import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositor
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
+import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.GetTransactionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,7 @@ data class TransactionListState(
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
-    private val repositoryImpl: TransactionRepositoryImpl
+    private val repository: TransactionRepository
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -36,7 +37,7 @@ class TransactionViewModel @Inject constructor(
     private val _selectedFilter = MutableStateFlow<TransactionType?>(null)
     val selectedFilter: StateFlow<TransactionType?> = _selectedFilter.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(true)
+    private val _isLoading = MutableStateFlow(false)
 
     val listState: StateFlow<TransactionListState> = combine(
         getTransactionsUseCase(),
@@ -63,19 +64,8 @@ class TransactionViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = TransactionListState()
+        initialValue = TransactionListState(isLoading = true)
     )
-
-    init {
-        viewModelScope.launch {
-            try {
-                repositoryImpl.ensureInitialized()
-                _isLoading.value = false
-            } catch (e: Exception) {
-                _isLoading.value = false
-            }
-        }
-    }
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
@@ -101,19 +91,19 @@ class TransactionViewModel @Inject constructor(
                 date = date,
                 notes = notes
             )
-            repositoryImpl.addTransaction(transaction)
+            repository.addTransaction(transaction)
         }
     }
 
     fun deleteTransaction(id: String) {
         viewModelScope.launch {
-            repositoryImpl.deleteTransaction(id)
+            repository.deleteTransaction(id)
         }
     }
 
     fun updateTransaction(transaction: Transaction) {
         viewModelScope.launch {
-            repositoryImpl.updateTransaction(transaction)
+            repository.updateTransaction(transaction)
         }
     }
 }

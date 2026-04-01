@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
+import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.BalanceSummary
 import com.sandeep.personalfinancecompanion.domain.usecase.CalculateBalanceUseCase
 import com.sandeep.personalfinancecompanion.domain.usecase.GetTransactionsUseCase
@@ -29,7 +30,7 @@ sealed interface HomeUiState {
 class HomeViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val calculateBalanceUseCase: CalculateBalanceUseCase,
-    private val repositoryImpl: TransactionRepositoryImpl
+    private val repository: TransactionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -48,8 +49,7 @@ class HomeViewModel @Inject constructor(
             try {
                 _uiState.value = HomeUiState.Loading
 
-                // Trigger initial data fetch from the Fake API
-                repositoryImpl.ensureInitialized()
+                repository.ensureInitialized()
 
                 // Observe transactions reactively
                 getTransactionsUseCase().collect { transactions ->

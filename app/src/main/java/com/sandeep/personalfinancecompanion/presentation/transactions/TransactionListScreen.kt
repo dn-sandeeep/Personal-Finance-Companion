@@ -64,16 +64,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.Calendar
 
-// Brand Colors matching the reference design
-private val TealDark = Color(0xFF0D6B58)
-private val TextDark = Color(0xFF1A1A2E)
-private val TextGrey = Color(0xFF6B7280)
-private val BackgroundWhite = Color(0xFFF8FAF9)
-private val SearchBackground = Color(0xFFEDEDED)
-private val MintLight = Color(0xFFBBE5D5)
-private val MintDarkText = Color(0xFF2C5646)
-private val ActionButtonBg = Color(0xFFF6F6F6)
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TransactionListScreen(
@@ -85,11 +75,12 @@ fun TransactionListScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val colorScheme = MaterialTheme.colorScheme
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundWhite)
+            .background(colorScheme.background)
     ) {
         // ──── Top Bar ────
         Row(
@@ -102,13 +93,13 @@ fun TransactionListScreen(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(TextDark),
+                    .background(colorScheme.onSurface),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Profile",
-                    tint = Color.White,
+                    tint = colorScheme.surface,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -119,7 +110,7 @@ fun TransactionListScreen(
                 text = "The Ledger",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = TealDark,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
 
@@ -128,13 +119,13 @@ fun TransactionListScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(SearchBackground),
+                        .background(colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notifications",
-                        tint = TealDark,
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -148,7 +139,7 @@ fun TransactionListScreen(
             Text(
                 text = "CASH FLOW ARCHIVE",
                 style = MaterialTheme.typography.labelSmall,
-                color = TealDark,
+                color = colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
@@ -156,7 +147,7 @@ fun TransactionListScreen(
                 text = "Transactions",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = TextDark,
+                color = colorScheme.onSurface,
                 fontSize = 34.sp
             )
         }
@@ -172,18 +163,18 @@ fun TransactionListScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 placeholder = { 
-                    Text("Search entries...", color = Color.Gray) 
+                    Text("Search entries...", color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) 
                 },
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
+                    Icon(Icons.Default.Search, contentDescription = "Search", tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                 },
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = SearchBackground,
-                    focusedContainerColor = SearchBackground,
+                    unfocusedContainerColor = colorScheme.surfaceVariant,
+                    focusedContainerColor = colorScheme.surfaceVariant,
                     unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = Color.Transparent,
-                    cursorColor = TealDark
+                    cursorColor = colorScheme.primary
                 ),
                 singleLine = true
             )
@@ -197,14 +188,14 @@ fun TransactionListScreen(
                         .weight(1f)
                         .height(48.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(ActionButtonBg)
+                        .background(colorScheme.secondaryContainer)
                         .clickable { },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(Icons.Default.FilterList, contentDescription = "Filters", tint = TextDark)
+                    Icon(Icons.Default.FilterList, contentDescription = "Filters", tint = colorScheme.onSecondaryContainer)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Filters", fontWeight = FontWeight.SemiBold, color = TextDark)
+                    Text("Filters", fontWeight = FontWeight.SemiBold, color = colorScheme.onSecondaryContainer)
                 }
 
                 // Calendar Button
@@ -213,12 +204,12 @@ fun TransactionListScreen(
                         .weight(1f)
                         .height(48.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(ActionButtonBg)
+                        .background(colorScheme.secondaryContainer)
                         .clickable { },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(Icons.Default.CalendarToday, contentDescription = "Calendar", tint = TextDark)
+                    Icon(Icons.Default.CalendarToday, contentDescription = "Calendar", tint = colorScheme.onSecondaryContainer)
                 }
             }
 
@@ -253,7 +244,7 @@ fun TransactionListScreen(
         when {
             listState.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TealDark)
+                    CircularProgressIndicator(color = colorScheme.primary)
                 }
             }
             listState.transactions.isEmpty() -> {
@@ -291,14 +282,14 @@ fun TransactionListScreen(
                                 Text(
                                     text = dateHeader.uppercase(),
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = TextGrey,
+                                    color = colorScheme.onSurfaceVariant,
                                     letterSpacing = 1.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "${if (netAmount >= 0) "+" else "-"}\$${String.format("%,.2f", kotlin.math.abs(netAmount))} Net",
+                                    text = "${if (netAmount >= 0) "+" else "-"}\u20B9${String.format("%,.2f", kotlin.math.abs(netAmount))} Net",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = TextGrey
+                                    color = colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -342,8 +333,9 @@ private fun Chip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val bgColor = if (isSelected) TealDark else MintLight
-    val textColor = if (isSelected) Color.White else MintDarkText
+    val colorScheme = MaterialTheme.colorScheme
+    val bgColor = if (isSelected) colorScheme.primary else colorScheme.primaryContainer
+    val textColor = if (isSelected) colorScheme.onPrimary else colorScheme.onPrimaryContainer
 
     Box(
         modifier = Modifier
@@ -384,7 +376,7 @@ private fun SwipeableTransactionItem(
         backgroundContent = {
             val color by animateColorAsState(
                 targetValue = when (dismissState.targetValue) {
-                    SwipeToDismissBoxValue.EndToStart -> ExpenseRed
+                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
                     else -> Color.Transparent
                 },
                 label = "swipe_color"
@@ -401,7 +393,7 @@ private fun SwipeableTransactionItem(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onError
                 )
             }
         },
@@ -421,7 +413,6 @@ private fun formatDateHeader(dateMillis: Long): String {
     val txYear = cal.get(Calendar.YEAR)
     val txDay = cal.get(Calendar.DAY_OF_YEAR)
 
-    // Example output from SimpleDateFormat
     val format = SimpleDateFormat("MMM dd", Locale.getDefault())
     val dateString = format.format(Date(dateMillis)).uppercase()
 

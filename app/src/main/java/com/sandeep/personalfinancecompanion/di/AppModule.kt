@@ -44,12 +44,4 @@ object AppModule {
     ): TransactionRepository {
         return TransactionRepositoryImpl(apiService)
     }
-
-    @Provides
-    @Singleton
-    fun provideTransactionRepositoryImpl(
-        apiService: TransactionApiService
-    ): TransactionRepositoryImpl {
-        return TransactionRepositoryImpl(apiService)
-    }
 }

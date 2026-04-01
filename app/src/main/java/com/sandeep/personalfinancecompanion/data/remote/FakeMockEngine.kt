@@ -4,11 +4,11 @@ import com.sandeep.personalfinancecompanion.data.remote.dto.TransactionDto
 import com.sandeep.personalfinancecompanion.data.remote.dto.TransactionListResponse
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.engine.mock.toByteArray
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
@@ -60,7 +60,7 @@ object FakeMockEngine {
 
             // POST /api/transactions
             path == "/api/transactions" && request.method == HttpMethod.Post -> {
-                val body = request.body.toByteArray().decodeToString()
+                val body = (request.body as? TextContent)?.text ?: ""
                 val dto = json.decodeFromString(TransactionDto.serializer(), body)
                 val newDto = dto.copy(id = (nextId++).toString())
                 transactionsStore.add(0, newDto)
@@ -73,7 +73,7 @@ object FakeMockEngine {
 
             // PUT /api/transactions/{id}
             path.startsWith("/api/transactions/") && request.method == HttpMethod.Put -> {
-                val body = request.body.toByteArray().decodeToString()
+                val body = (request.body as? TextContent)?.text ?: ""
                 val dto = json.decodeFromString(TransactionDto.serializer(), body)
                 val index = transactionsStore.indexOfFirst { it.id == dto.id }
                 if (index != -1) {

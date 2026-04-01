@@ -50,17 +50,6 @@ import com.sandeep.personalfinancecompanion.presentation.components.BudgetRing
 import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.presentation.components.WeeklyTrendChart
 
-// Brand Colors matching the reference design
-private val TealDark = Color(0xFF0D6B58)
-private val TealPrimary = Color(0xFF0E8C6E)
-private val TealLight = Color(0xFFE8F5F1)
-private val TealAccent = Color(0xFF10B981)
-private val BackgroundWhite = Color(0xFFF8FAF9)
-private val CardWhite = Color(0xFFFFFFFF)
-private val TextDark = Color(0xFF1A1A2E)
-private val TextGrey = Color(0xFF6B7280)
-private val TextLight = Color(0xFF9CA3AF)
-
 @Composable
 fun HomeScreen(
     onNavigateToTransactions: () -> Unit,
@@ -76,7 +65,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = TealPrimary)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
 
@@ -120,10 +109,12 @@ private fun HomeContent(
     onAddIncome: () -> Unit,
     onAddExpense: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundWhite)
+            .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
         // ──── Top Bar ────
@@ -138,13 +129,13 @@ private fun HomeContent(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(TealDark),
+                    .background(colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "Profile",
-                    tint = Color.White,
+                    tint = colorScheme.onPrimary,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -155,7 +146,7 @@ private fun HomeContent(
                 text = "The Ledger",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = TextDark,
+                color = colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
 
@@ -163,7 +154,7 @@ private fun HomeContent(
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",
-                    tint = TealDark,
+                    tint = colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -178,8 +169,8 @@ private fun HomeContent(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            TealDark,
-                            Color(0xFF0A5C4B)
+                            colorScheme.primary,
+                            colorScheme.primary.copy(alpha = 0.8f)
                         )
                     )
                 )
@@ -189,7 +180,7 @@ private fun HomeContent(
                 Text(
                     text = "TOTAL BALANCE",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = colorScheme.onPrimary.copy(alpha = 0.7f),
                     letterSpacing = 1.5.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -198,7 +189,7 @@ private fun HomeContent(
                     style = MaterialTheme.typography.displayMedium.copy(
                         fontSize = 36.sp
                     ),
-                    color = Color.White,
+                    color = colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -214,14 +205,14 @@ private fun HomeContent(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.15f))
+                            .background(colorScheme.onPrimary.copy(alpha = 0.15f))
                             .padding(14.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.ArrowUpward,
                                 contentDescription = null,
-                                tint = Color(0xFF4ADE80),
+                                tint = Color(0xFF4ADE80), // Keep positive green for visibility
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -229,7 +220,7 @@ private fun HomeContent(
                                 Text(
                                     text = "MONTHLY\nINCOME",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White.copy(alpha = 0.7f),
+                                    color = colorScheme.onPrimary.copy(alpha = 0.7f),
                                     lineHeight = 14.sp,
                                     fontSize = 9.sp,
                                     letterSpacing = 0.5.sp
@@ -238,7 +229,7 @@ private fun HomeContent(
                                 Text(
                                     text = "₹${String.format("%,.2f", state.balance.totalIncome)}",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White,
+                                    color = colorScheme.onPrimary,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp
                                 )
@@ -251,14 +242,14 @@ private fun HomeContent(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.15f))
+                            .background(colorScheme.onPrimary.copy(alpha = 0.15f))
                             .padding(14.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.ArrowDownward,
                                 contentDescription = null,
-                                tint = Color(0xFFFB7185),
+                                tint = Color(0xFFFB7185), // Keep negative red for visibility
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -266,7 +257,7 @@ private fun HomeContent(
                                 Text(
                                     text = "MONTHLY\nEXPENSES",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White.copy(alpha = 0.7f),
+                                    color = colorScheme.onPrimary.copy(alpha = 0.7f),
                                     lineHeight = 14.sp,
                                     fontSize = 9.sp,
                                     letterSpacing = 0.5.sp
@@ -275,7 +266,7 @@ private fun HomeContent(
                                 Text(
                                     text = "₹${String.format("%,.2f", state.balance.totalExpense)}",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White,
+                                    color = colorScheme.onPrimary,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp
                                 )
@@ -294,7 +285,7 @@ private fun HomeContent(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = CardWhite),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
@@ -307,12 +298,12 @@ private fun HomeContent(
                         text = "Weekly Trend",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = TextDark
+                        color = colorScheme.onSurface
                     )
                     Text(
                         text = "+12.5% ↗",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TealAccent,
+                        color = colorScheme.secondary,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -341,7 +332,7 @@ private fun HomeContent(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = CardWhite),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(
@@ -356,12 +347,12 @@ private fun HomeContent(
                             text = "Savings Goal",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = TextDark
+                            color = colorScheme.onSurface
                         )
                         Text(
                             text = "Monthly Budget Tracker",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextGrey
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -380,7 +371,7 @@ private fun HomeContent(
                 TextButton(
                     onClick = { },
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = TealDark
+                        contentColor = colorScheme.primary
                     )
                 ) {
                     Text(
@@ -405,12 +396,12 @@ private fun HomeContent(
                 text = "Category Breakdown",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = TextDark
+                color = colorScheme.onSurface
             )
             Text(
                 text = "LAST 30 DAYS",
                 style = MaterialTheme.typography.labelSmall,
-                color = TextLight,
+                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 letterSpacing = 1.sp
             )
         }
@@ -466,10 +457,11 @@ private fun CategoryBreakdownItem(
     amount: Double,
     progress: Float
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
         Row(
@@ -483,7 +475,7 @@ private fun CategoryBreakdownItem(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(TealLight),
+                    .background(colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -499,12 +491,12 @@ private fun CategoryBreakdownItem(
                     text = name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextDark
+                    color = colorScheme.onSurface
                 )
                 Text(
                     text = "$transactionCount Transactions",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGrey
+                    color = colorScheme.onSurfaceVariant
                 )
             }
 
@@ -513,7 +505,7 @@ private fun CategoryBreakdownItem(
                     text = "₹${String.format("%,.2f", amount)}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = TextDark
+                    color = colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 androidx.compose.material3.LinearProgressIndicator(
@@ -522,8 +514,8 @@ private fun CategoryBreakdownItem(
                         .width(60.dp)
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp)),
-                    color = TealDark,
-                    trackColor = TealLight
+                    color = colorScheme.primary,
+                    trackColor = colorScheme.primaryContainer
                 )
             }
         }

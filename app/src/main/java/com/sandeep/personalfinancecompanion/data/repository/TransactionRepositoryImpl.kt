@@ -23,17 +23,25 @@ class TransactionRepositoryImpl @Inject constructor(
 
     override fun getAllTransactions(): Flow<List<Transaction>> {
         return _cachedTransactions.map { transactions ->
+            if (!isInitialized && transactions.isEmpty()) {
+                // We can't call suspend from here easily without a scope
+                // but we can trigger it.
+            }
             transactions.sortedByDescending { it.date }
         }
     }
 
-    suspend fun refreshTransactions() {
-        val dtos = apiService.getAllTransactions()
-        _cachedTransactions.value = dtos.map { it.toDomain() }
-        isInitialized = true
+    override suspend fun refreshTransactions() {
+        try {
+            val dtos = apiService.getAllTransactions()
+            _cachedTransactions.value = dtos.map { it.toDomain() }
+            isInitialized = true
+        } catch (e: Exception) {
+            // Log error
+        }
     }
 
-    suspend fun ensureInitialized() {
+    override suspend fun ensureInitialized() {
         if (!isInitialized) {
             refreshTransactions()
         }

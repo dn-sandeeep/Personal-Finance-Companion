@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,26 +23,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.personalfinancecompanion.presentation.home.HomeViewModel
 
-private val BackgroundWhite = Color(0xFFFBFBFB)
-private val TextDark = Color(0xFF1A1A2E)
-private val TextGrey = Color(0xFF6B7280)
-private val TealDark = Color(0xFF034A42)
-private val TealPrimary = Color(0xFF086C5A)
-private val TealLight = Color(0xFFEDF5F4)
-private val BrownCardBg = Color(0xFF8C5331)
-private val BrownIconBg = Color(0xFFA56641)
-private val GreyCardBg = Color(0xFFF6F6F6)
-private val DashGrey = Color(0xFFE5E7EB)
-private val TealProgressTrack = Color(0xFFDFEAE6)
-
 @Composable
 fun GoalScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundWhite)
+            .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
         // App Bar
@@ -61,13 +49,13 @@ fun GoalScreen(
                 text = "Active Goals",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = TextDark
+                color = colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Tracking your path to financial equilibrium.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextGrey,
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
             
@@ -83,24 +71,24 @@ fun GoalScreen(
             
             SmallGoalCard(
                 icon = Icons.Default.FlightTakeoff,
-                iconBgColor = Color(0xFFD3E7DC),
-                iconTintColor = TealDark,
+                iconBgColor = colorScheme.primaryContainer,
+                iconTintColor = colorScheme.primary,
                 title = "Travel Fund",
                 progress = 0.42f,
-                progressColor = TealDark,
-                trackColor = Color(0xFFA6BCB3)
+                progressColor = colorScheme.primary,
+                trackColor = colorScheme.outlineVariant
             )
             
             Spacer(modifier = Modifier.height(12.dp))
             
             SmallGoalCard(
                 icon = Icons.Default.Security,
-                iconBgColor = Color(0xFFFBECE4),
-                iconTintColor = BrownCardBg,
+                iconBgColor = colorScheme.secondaryContainer,
+                iconTintColor = colorScheme.secondary,
                 title = "Emergency",
                 progress = 0.88f,
-                progressColor = BrownCardBg,
-                trackColor = Color(0xFFD2B29A)
+                progressColor = colorScheme.secondary,
+                trackColor = colorScheme.outlineVariant
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -118,6 +106,7 @@ fun GoalScreen(
 
 @Composable
 private fun GoalTopBar() {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -129,13 +118,13 @@ private fun GoalTopBar() {
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(TealDark),
+                .background(colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = "Profile",
-                tint = Color.White,
+                tint = colorScheme.onPrimary,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -146,7 +135,7 @@ private fun GoalTopBar() {
             text = "The Ledger",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = TealDark,
+            color = colorScheme.primary,
             modifier = Modifier.weight(1f)
         )
 
@@ -154,7 +143,7 @@ private fun GoalTopBar() {
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications",
-                tint = TealDark,
+                tint = colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -163,10 +152,11 @@ private fun GoalTopBar() {
 
 @Composable
 private fun PrimaryObjectiveCard() {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = TealLight),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -182,14 +172,14 @@ private fun PrimaryObjectiveCard() {
                 // Pill
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFC7E2DC), RoundedCornerShape(12.dp))
+                        .background(colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = "PRIMARY OBJECTIVE",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TealDark,
+                        color = colorScheme.primary,
                         letterSpacing = 1.sp
                     )
                 }
@@ -199,12 +189,12 @@ private fun PrimaryObjectiveCard() {
                         text = "65%",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = TealDark
+                        color = colorScheme.primary
                     )
                     Text(
                         text = "Complete",
                         fontSize = 11.sp,
-                        color = TealDark,
+                        color = colorScheme.primary,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -213,10 +203,10 @@ private fun PrimaryObjectiveCard() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Save $2,000 for a\nnew laptop",
+                text = "Save ₹2,000 for a\nnew laptop",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = TextDark,
+                color = colorScheme.onPrimaryContainer,
                 lineHeight = 28.sp
             )
             
@@ -228,8 +218,8 @@ private fun PrimaryObjectiveCard() {
                     .fillMaxWidth()
                     .height(10.dp)
                     .clip(RoundedCornerShape(5.dp)),
-                color = TealPrimary,
-                trackColor = TealProgressTrack
+                color = colorScheme.primary,
+                trackColor = colorScheme.surfaceVariant
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -243,14 +233,14 @@ private fun PrimaryObjectiveCard() {
                     Text(
                         text = "Saved",
                         fontSize = 12.sp,
-                        color = TextGrey
+                        color = colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "$1,300.00",
+                        text = "₹1,300.00",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextDark
+                        color = colorScheme.onSurface
                     )
                 }
                 
@@ -259,21 +249,21 @@ private fun PrimaryObjectiveCard() {
                     modifier = Modifier
                         .height(30.dp)
                         .width(1.dp)
-                        .background(Color(0xFFDDECE7))
+                        .background(colorScheme.outlineVariant)
                 )
                 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Target",
                         fontSize = 12.sp,
-                        color = TextGrey
+                        color = colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "$2,000.00",
+                        text = "₹2,000.00",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextDark
+                        color = colorScheme.onSurface
                     )
                 }
             }
@@ -283,10 +273,11 @@ private fun PrimaryObjectiveCard() {
 
 @Composable
 private fun NoSpendChallengeCard() {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BrownCardBg),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.secondary),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -297,13 +288,13 @@ private fun NoSpendChallengeCard() {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(BrownIconBg, RoundedCornerShape(12.dp)),
+                    .background(colorScheme.onSecondary.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.LocalFireDepartment,
                     contentDescription = "Fire",
-                    tint = Color(0xFFFFDAB9),
+                    tint = colorScheme.onSecondary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -314,7 +305,7 @@ private fun NoSpendChallengeCard() {
                 text = "No Spend Challenge",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = colorScheme.onSecondary
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -322,7 +313,7 @@ private fun NoSpendChallengeCard() {
             Text(
                 text = "Avoiding non-essential purchases this\nweek.",
                 fontSize = 12.sp,
-                color = Color(0xFFE5CCBF),
+                color = colorScheme.onSecondary.copy(alpha = 0.8f),
                 lineHeight = 18.sp
             )
             
@@ -333,14 +324,14 @@ private fun NoSpendChallengeCard() {
                     text = "7-day",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.White
+                    color = colorScheme.onSecondary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "STREAK!",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = colorScheme.onSecondary,
                     letterSpacing = 1.sp,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
@@ -359,10 +350,11 @@ private fun SmallGoalCard(
     progressColor: Color,
     trackColor: Color
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = GreyCardBg),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -391,7 +383,7 @@ private fun SmallGoalCard(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextDark
+                    color = colorScheme.onSurface
                 )
             }
             
@@ -406,13 +398,13 @@ private fun SmallGoalCard(
                     Text(
                         text = "Progress",
                         fontSize = 10.sp,
-                        color = TextGrey
+                        color = colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "${(progress * 100).toInt()}%",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextDark
+                        color = colorScheme.onSurface
                     )
                 }
                 
@@ -434,13 +426,14 @@ private fun SmallGoalCard(
 
 @Composable
 private fun CreateNewGoalButton() {
+    val colorScheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
             .drawBehind {
                 drawRoundRect(
-                    color = DashGrey,
+                    color = colorScheme.outlineVariant,
                     style = Stroke(
                         width = 4f
                     ),
@@ -455,13 +448,13 @@ private fun CreateNewGoalButton() {
             Box(
                 modifier = Modifier
                     .size(26.dp)
-                    .background(Color(0xFF333333), CircleShape),
+                    .background(colorScheme.onSurface.copy(alpha = 0.8f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
-                    tint = Color.White,
+                    tint = colorScheme.surface,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -470,7 +463,7 @@ private fun CreateNewGoalButton() {
                 text = "Create New Goal",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextDark
+                color = colorScheme.onSurface
             )
         }
     }
@@ -478,10 +471,11 @@ private fun CreateNewGoalButton() {
 
 @Composable
 private fun SavingVelocityCard() {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -493,7 +487,7 @@ private fun SavingVelocityCard() {
                 Icon(
                     imageVector = Icons.Default.ShowChart,
                     contentDescription = null,
-                    tint = TealDark,
+                    tint = colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -501,7 +495,7 @@ private fun SavingVelocityCard() {
                     text = "SAVING VELOCITY",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TealDark,
+                    color = colorScheme.primary,
                     letterSpacing = 1.sp
                 )
             }
@@ -512,7 +506,7 @@ private fun SavingVelocityCard() {
                 text = "On track to reach your\nlaptop goal 2 weeks\nearly.",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = TextDark,
+                color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 lineHeight = 24.sp
             )
@@ -522,7 +516,7 @@ private fun SavingVelocityCard() {
             Text(
                 text = "Your reduced spending in 'Dining'\nover the last 7 days has\naccelerated your progress by 12%.",
                 fontSize = 13.sp,
-                color = TextGrey,
+                color = colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp
             )
             
@@ -533,18 +527,18 @@ private fun SavingVelocityCard() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .background(Color(0xFFF2F4F3), RoundedCornerShape(12.dp))
+                    .background(colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
                 val heights = listOf(0.4f, 0.5f, 0.35f, 0.7f, 1.0f)
                 val colors = listOf(
-                    Color(0xFFB9CEC6),
-                    Color(0xFFA1BCB3),
-                    Color(0xFF89ABA0),
-                    Color(0xFF679486),
-                    Color(0xFF034A42)
+                    colorScheme.primary.copy(alpha = 0.4f),
+                    colorScheme.primary.copy(alpha = 0.5f),
+                    colorScheme.primary.copy(alpha = 0.6f),
+                    colorScheme.primary.copy(alpha = 0.8f),
+                    colorScheme.primary
                 )
                 
                 heights.forEachIndexed { index, fraction ->

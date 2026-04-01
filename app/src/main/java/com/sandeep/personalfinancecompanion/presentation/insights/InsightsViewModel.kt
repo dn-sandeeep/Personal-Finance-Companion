@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
+import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.BalanceSummary
 import com.sandeep.personalfinancecompanion.domain.usecase.CalculateBalanceUseCase
 import com.sandeep.personalfinancecompanion.domain.usecase.GetTransactionsUseCase
@@ -30,7 +31,7 @@ data class InsightsState(
 class InsightsViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val calculateBalanceUseCase: CalculateBalanceUseCase,
-    private val repositoryImpl: TransactionRepositoryImpl
+    private val repository: TransactionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(InsightsState())
@@ -43,7 +44,7 @@ class InsightsViewModel @Inject constructor(
     private fun loadInsights() {
         viewModelScope.launch {
             try {
-                repositoryImpl.ensureInitialized()
+                repository.ensureInitialized()
 
                 getTransactionsUseCase().collect { transactions ->
                     val balance = calculateBalanceUseCase(transactions)

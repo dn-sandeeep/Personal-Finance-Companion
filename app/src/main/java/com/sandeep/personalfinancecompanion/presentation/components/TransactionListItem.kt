@@ -29,33 +29,28 @@ import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 
-// Brand Colors matching the reference design
-private val TealDark = Color(0xFF0D6B58)
-private val TextDark = Color(0xFF1A1A2E)
-private val TextGrey = Color(0xFF6B7280)
-private val CardWhite = Color(0xFFFFFFFF)
-
 @Composable
 fun TransactionListItem(
     transaction: Transaction,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val isIncome = transaction.type == TransactionType.INCOME
     val amountPrefix = if (isIncome) "+" else "-"
     
-    // Assigning specific badge colors based on category to match design aesthetic
+    // Assigning specific badge colors based on category
     val badgeColor = when (transaction.category) {
-        Category.FOOD, Category.BILLS -> Color(0xFFFFDBCF) // Light orange/peach
-        Category.TRANSPORT -> Color(0xFFCFE8E0) // Light green
-        Category.SALARY, Category.INVESTMENT, Category.FREELANCE -> Color(0xFF9FF3E5) // Cyan/teal light
-        else -> Color(0xFFE8F5F1) // Default Teal Light
+        Category.FOOD, Category.BILLS -> colorScheme.errorContainer.copy(alpha = 0.5f)
+        Category.TRANSPORT -> colorScheme.secondaryContainer
+        Category.SALARY, Category.INVESTMENT, Category.FREELANCE -> colorScheme.primaryContainer
+        else -> colorScheme.surfaceVariant
     }
 
-    val amountColor = if (isIncome) TealDark else TextDark
+    val amountColor = if (isIncome) colorScheme.primary else colorScheme.onSurface
 
     // Derive Status logic based on type/category for visual matching
     val statusText = if (isIncome) "CLEARED" else "PENDING"
-    val statusColor = if (isIncome) TealDark else TextGrey
+    val statusColor = if (isIncome) colorScheme.primary else colorScheme.onSurfaceVariant
 
     // Title mapping (Fallback to Category if Notes are empty)
     val title = if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
@@ -64,7 +59,7 @@ fun TransactionListItem(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -98,14 +93,14 @@ fun TransactionListItem(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = TextDark,
+                    color = colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextGrey,
+                    color = colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -119,7 +114,7 @@ fun TransactionListItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "$amountPrefix\$${String.format("%,.2f", transaction.amount)}",
+                    text = "$amountPrefix₹${String.format("%,.2f", transaction.amount)}",
                     style = MaterialTheme.typography.titleLarge,
                     color = amountColor,
                     fontWeight = FontWeight.Bold,
@@ -128,14 +123,13 @@ fun TransactionListItem(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // Add tiny visual bar for certain expenses (like The Glass Bistro in design) or text status
-                if (transaction.category == Category.FOOD) {
+                if (transaction.category == Category.FOOD && !isIncome) {
                     Box(
                         modifier = Modifier
                             .width(30.dp)
                             .height(4.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color(0xFF92400E))
+                            .background(colorScheme.secondary)
                     )
                 } else {
                     Text(

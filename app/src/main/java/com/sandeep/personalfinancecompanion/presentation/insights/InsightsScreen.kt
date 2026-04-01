@@ -29,13 +29,13 @@ import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.presentation.components.PieChart
 import com.sandeep.personalfinancecompanion.ui.theme.ExpenseRed
 import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
-import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val colorScheme = MaterialTheme.colorScheme
 
     when {
         state.isLoading -> {
@@ -43,7 +43,7 @@ fun InsightsScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = PrimaryAccent)
+                CircularProgressIndicator(color = colorScheme.primary)
             }
         }
 
@@ -71,6 +71,7 @@ fun InsightsScreen(
 
 @Composable
 private fun InsightsContent(state: InsightsState) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -82,7 +83,8 @@ private fun InsightsContent(state: InsightsState) {
         Text(
             text = "Insights",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -164,7 +166,8 @@ private fun InsightsContent(state: InsightsState) {
         Text(
             text = "Spending by Category",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -172,7 +175,7 @@ private fun InsightsContent(state: InsightsState) {
         Card(
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
@@ -192,11 +195,12 @@ private fun StatCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = colorScheme.surfaceVariant
         )
     ) {
         Column(
@@ -205,13 +209,14 @@ private fun StatCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onSurface
             )
         }
     }

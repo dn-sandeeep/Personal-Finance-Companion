@@ -42,7 +42,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
-import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -238,7 +237,7 @@ fun AddEditTransactionScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryAccent
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text(
