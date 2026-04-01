@@ -1,5 +1,6 @@
 package com.sandeep.personalfinancecompanion.presentation.goal
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,11 +24,29 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.personalfinancecompanion.presentation.home.HomeViewModel
 
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.sandeep.personalfinancecompanion.domain.model.Goal
+
 @Composable
 fun GoalScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: GoalViewModel = hiltViewModel()
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val goals by viewModel.goals.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        GoalTypePickerDialog(
+            onDismiss = { showDialog = false },
+            onGoalSelected = { title, target, icon, color ->
+                viewModel.createNewGoal(title, target, icon, color)
+                showDialog = false
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,31 +86,22 @@ fun GoalScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            SmallGoalCard(
-                icon = Icons.Default.FlightTakeoff,
-                iconBgColor = colorScheme.primaryContainer,
-                iconTintColor = colorScheme.primary,
-                title = "Travel Fund",
-                progress = 0.42f,
-                progressColor = colorScheme.primary,
-                trackColor = colorScheme.outlineVariant
-            )
+            goals.forEach { goal ->
+                SmallGoalCard(
+                    icon = getIconForName(goal.iconName),
+                    iconBgColor = Color(android.graphics.Color.parseColor(goal.colorHex)).copy(alpha = 0.2f),
+                    iconTintColor = Color(android.graphics.Color.parseColor(goal.colorHex)),
+                    title = goal.title,
+                    progress = goal.progress,
+                    progressColor = Color(android.graphics.Color.parseColor(goal.colorHex)),
+                    trackColor = colorScheme.outlineVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             
-            SmallGoalCard(
-                icon = Icons.Default.Security,
-                iconBgColor = colorScheme.secondaryContainer,
-                iconTintColor = colorScheme.secondary,
-                title = "Emergency",
-                progress = 0.88f,
-                progressColor = colorScheme.secondary,
-                trackColor = colorScheme.outlineVariant
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            CreateNewGoalButton()
+            CreateNewGoalButton(onClick = { showDialog = true })
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -99,6 +109,70 @@ fun GoalScreen(
             
             Spacer(modifier = Modifier.height(100.dp))
         }
+    }
+}
+
+@Composable
+fun GoalTypePickerDialog(
+    onDismiss: () -> Unit,
+    onGoalSelected: (String, Double, String, String) -> Unit
+) {
+    val predefinedGoals = listOf(
+        Triple("New Car", 25000.0, "DirectionsCar"),
+        Triple("Dream Home", 500000.0, "Home"),
+        Triple("New Phone", 1000.0, "Smartphone"),
+        Triple("Education", 15000.0, "School"),
+        Triple("Retirement", 1000000.0, "TrendingUp")
+    )
+    val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select a Goal") },
+        text = {
+            Column {
+                predefinedGoals.forEachIndexed { index, (title, target, icon) ->
+                    val color = colors[index % colors.size]
+                    TextButton(
+                        onClick = { onGoalSelected(title, target, icon, color) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = getIconForName(icon),
+                                contentDescription = null,
+                                tint = Color(android.graphics.Color.parseColor(color))
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(title)
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text("₹$target", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+fun getIconForName(name: String): ImageVector {
+    return when (name) {
+        "FlightTakeoff" -> Icons.Default.FlightTakeoff
+        "Security" -> Icons.Default.Security
+        "DirectionsCar" -> Icons.Default.DirectionsCar
+        "Home" -> Icons.Default.Home
+        "Smartphone" -> Icons.Default.Smartphone
+        "School" -> Icons.Default.School
+        "TrendingUp" -> Icons.Default.TrendingUp
+        else -> Icons.Default.Star
     }
 }
 
@@ -377,7 +451,7 @@ private fun SmallGoalCard(
 }
 
 @Composable
-private fun CreateNewGoalButton() {
+private fun CreateNewGoalButton(onClick: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
@@ -393,7 +467,8 @@ private fun CreateNewGoalButton() {
                 )
             }
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.Transparent),
+            .background(Color.Transparent)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
