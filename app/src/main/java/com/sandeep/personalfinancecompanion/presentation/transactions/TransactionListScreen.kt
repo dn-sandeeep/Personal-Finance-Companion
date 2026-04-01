@@ -82,55 +82,6 @@ fun TransactionListScreen(
             .fillMaxSize()
             .background(colorScheme.background)
     ) {
-        // ──── Top Bar ────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(colorScheme.onSurface),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    tint = colorScheme.surface,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Text(
-                text = "The Ledger",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.primary,
-                modifier = Modifier.weight(1f)
-            )
-
-            IconButton(onClick = { }) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -142,13 +93,6 @@ fun TransactionListScreen(
                 color = colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
-            )
-            Text(
-                text = "Transactions",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface,
-                fontSize = 34.sp
             )
         }
 
@@ -180,40 +124,6 @@ fun TransactionListScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Filters Button
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(colorScheme.secondaryContainer)
-                        .clickable { },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(Icons.Default.FilterList, contentDescription = "Filters", tint = colorScheme.onSecondaryContainer)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Filters", fontWeight = FontWeight.SemiBold, color = colorScheme.onSecondaryContainer)
-                }
-
-                // Calendar Button
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(colorScheme.secondaryContainer)
-                        .clickable { },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(Icons.Default.CalendarToday, contentDescription = "Calendar", tint = colorScheme.onSecondaryContainer)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             // ──── Activity Chips ────
             Row(

@@ -110,55 +110,13 @@ private fun HomeContent(
     onAddExpense: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
+            .padding(top = 8.dp)
     ) {
-        // ──── Top Bar ────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Profile Avatar
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    tint = colorScheme.onPrimary,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Text(
-                text = "The Ledger",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
 
         // ──── Balance Card ────
         Box(

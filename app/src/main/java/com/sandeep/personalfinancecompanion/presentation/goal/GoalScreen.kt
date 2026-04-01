@@ -34,8 +34,6 @@ fun GoalScreen(
             .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
-        // App Bar
-        GoalTopBar()
         
         // Content Padding
         Column(
@@ -100,52 +98,6 @@ fun GoalScreen(
             SavingVelocityCard()
             
             Spacer(modifier = Modifier.height(100.dp))
-        }
-    }
-}
-
-@Composable
-private fun GoalTopBar() {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Profile Avatar
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(colorScheme.primary),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                tint = colorScheme.onPrimary,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Text(
-            text = "The Ledger",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-
-        IconButton(onClick = { }) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications",
-                tint = colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
         }
     }
 }
