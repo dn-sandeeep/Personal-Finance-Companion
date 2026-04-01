@@ -78,15 +78,6 @@ private fun InsightsContent(state: InsightsState) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Insights",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onSurface
-        )
-
         Spacer(modifier = Modifier.height(20.dp))
 
         // Quick Stats Row
