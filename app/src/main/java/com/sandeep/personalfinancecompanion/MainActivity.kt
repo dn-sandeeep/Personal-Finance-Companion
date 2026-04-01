@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +22,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -50,6 +54,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinanceApp() {
     val navController = rememberNavController()
@@ -60,8 +65,32 @@ fun FinanceApp() {
     // Show bottom bar only on main tabs
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }
 
+    val topBarTitle = when {
+        currentRoute == Screen.Home.route -> "Home"
+        currentRoute == Screen.Transactions.route -> "History"
+        currentRoute == Screen.Goals.route -> "Goals"
+        currentRoute == Screen.Insights.route -> "Insights"
+        currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
+        else -> "Finance Companion"
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = topBarTitle,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             AnimatedVisibility(
@@ -126,7 +155,8 @@ fun FinanceApp() {
     ) { innerPadding ->
         AppNavigation(
             navController = navController,
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }

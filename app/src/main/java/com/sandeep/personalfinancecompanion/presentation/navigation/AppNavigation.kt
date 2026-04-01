@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -23,13 +24,15 @@ import com.sandeep.personalfinancecompanion.presentation.transactions.Transactio
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier
 ) {
     val transactionViewModel: TransactionViewModel = hiltViewModel()
 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
+        modifier = modifier,
         enterTransition = {
             fadeIn(animationSpec = tween(300))
         },
