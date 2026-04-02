@@ -21,6 +21,14 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.sandeep.personalfinancecompanion.domain.model.Category
+
+data class CategoryStats(
+    val category: Category,
+    val amount: Double,
+    val transactionCount: Int,
+    val percentage: Float
+)
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
@@ -30,8 +38,11 @@ sealed interface HomeUiState {
         val budgetLimit: Double,
         val totalExpense: Double,
         val weeklyTrend: List<BarEntry>,
+        val categoryExpenses: List<CategoryStats> = emptyList(),
         val selectedDayTransactions: List<Transaction>? = null,
-        val selectedDayLabel: String? = null
+        val selectedDayLabel: String? = null,
+        val selectedCategoryTransactions: List<Transaction>? = null,
+        val selectedCategoryLabel: String? = null
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -76,12 +87,37 @@ class HomeViewModel @Inject constructor(
                     val balance = calculateBalanceUseCase(transactions)
                     val weeklyTrend = calculateWeeklyTrend(transactions)
                     
+                    val thirtyDaysAgo = Calendar.getInstance().apply {
+                        add(Calendar.DAY_OF_YEAR, -30)
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                    }.timeInMillis
+
+                    val last30DaysExpenses = transactions.filter {
+                        it.date >= thirtyDaysAgo && it.type == com.sandeep.personalfinancecompanion.domain.model.TransactionType.EXPENSE
+                    }
+                    val total30DaysExpense = last30DaysExpenses.sumOf { it.amount }.toFloat()
+                    val categoryStatsList = last30DaysExpenses
+                        .groupBy { it.category }
+                        .map { (cat, txs) ->
+                            val amount = txs.sumOf { it.amount }
+                            CategoryStats(
+                                category = cat,
+                                amount = amount,
+                                transactionCount = txs.size,
+                                percentage = if (total30DaysExpense > 0f) (amount.toFloat() / total30DaysExpense) else 0f
+                            )
+                        }
+                        .sortedByDescending { it.amount }
+
                     _uiState.value = HomeUiState.Success(
                         balance = balance,
                         recentTransactions = transactions.take(5),
                         budgetLimit = currentBudgetLimit,
                         totalExpense = balance.totalExpense,
-                        weeklyTrend = weeklyTrend
+                        weeklyTrend = weeklyTrend,
+                        categoryExpenses = categoryStatsList
                     )
                 }
             } catch (e: Exception) {
@@ -181,7 +217,30 @@ class HomeViewModel @Inject constructor(
         if (currentState is HomeUiState.Success) {
             _uiState.value = currentState.copy(
                 selectedDayTransactions = null,
-                selectedDayLabel = null
+                selectedDayLabel = null,
+                selectedCategoryTransactions = null,
+                selectedCategoryLabel = null
+            )
+        }
+    }
+
+    fun selectCategory(category: Category) {
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Success) {
+            val thirtyDaysAgo = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_YEAR, -30)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+            }.timeInMillis
+
+            val filteredTransactions = allTransactions.filter {
+                it.category == category && it.date >= thirtyDaysAgo && it.type == com.sandeep.personalfinancecompanion.domain.model.TransactionType.EXPENSE
+            }.sortedByDescending { it.date }
+
+            _uiState.value = currentState.copy(
+                selectedCategoryTransactions = filteredTransactions,
+                selectedCategoryLabel = category.displayName
             )
         }
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -526,38 +527,50 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (state.recentTransactions.isEmpty()) {
+        if (state.categoryExpenses.isEmpty()) {
             EmptyState(
                 emoji = "💸",
                 title = "No transactions yet",
                 subtitle = "Tap + to add your first one!"
             )
         } else {
-            // Group expenses by category and show top categories
-            val totalExpense = state.totalExpense.toFloat()
-            val expensesByCategory = state.recentTransactions
-                .filter { it.type == TransactionType.EXPENSE }
-                .groupBy { it.category }
-                .mapValues { entry ->
-                    Pair(entry.value.sumOf { it.amount }, entry.value.size)
+            // Premium Segmented Bar Summary
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                ) {
+                    state.categoryExpenses.forEach { stats ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .weight(stats.percentage.coerceAtLeast(0.01f))
+                                .background(getCategoryColor(stats.category))
+                        )
+                    }
                 }
-                .toList()
-                .sortedByDescending { it.second.first }
-                .take(5)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                expensesByCategory.forEach { (category, data) ->
-                    val (amount, count) = data
-                    val progress = if (totalExpense > 0) (amount / totalExpense).toFloat() else 0f
+                state.categoryExpenses.forEach { stats ->
                     CategoryBreakdownItem(
-                        emoji = category.emoji,
-                        name = category.displayName,
-                        transactionCount = count,
-                        amount = amount,
-                        progress = progress
+                        stats = stats
                     )
                 }
             }
@@ -569,74 +582,120 @@ private fun HomeContent(
 
 @Composable
 private fun CategoryBreakdownItem(
-    emoji: String,
-    name: String,
-    transactionCount: Int,
-    amount: Double,
-    progress: Float
+    stats: CategoryStats
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val categoryColor = getCategoryColor(stats.category)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Emoji Badge
+            // Emoji Badge with custom background
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(colorScheme.primaryContainer),
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(categoryColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = emoji,
-                    style = MaterialTheme.typography.titleMedium
+                    text = stats.category.emoji,
+                    style = MaterialTheme.typography.headlineSmall
                 )
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface
-                )
-                Text(
-                    text = "$transactionCount Transactions",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant
-                )
-            }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stats.category.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                    Text(
+                        text = "₹${String.format("%,.0f", stats.amount)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${stats.transactionCount} transactions",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${(stats.percentage * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = categoryColor
+                    )
+                }
 
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "₹${String.format("%,.2f", amount)}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                androidx.compose.material3.LinearProgressIndicator(
-                    progress = { progress },
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Custom Progress Bar
+                Box(
                     modifier = Modifier
-                        .width(60.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
-                    color = colorScheme.primary,
-                    trackColor = colorScheme.primaryContainer
-                )
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(CircleShape)
+                        .background(colorScheme.surfaceVariant)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(stats.percentage)
+                            .fillMaxHeight()
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        categoryColor.copy(alpha = 0.7f),
+                                        categoryColor
+                                    )
+                                )
+                            )
+                    )
+                }
             }
         }
+    }
+}
+
+private fun getCategoryColor(category: com.sandeep.personalfinancecompanion.domain.model.Category): Color {
+    return when (category) {
+        com.sandeep.personalfinancecompanion.domain.model.Category.FOOD -> Color(0xFFFF9F1C)
+        com.sandeep.personalfinancecompanion.domain.model.Category.TRANSPORT -> Color(0xFF2EC4B6)
+        com.sandeep.personalfinancecompanion.domain.model.Category.SHOPPING -> Color(0xFFE71D36)
+        com.sandeep.personalfinancecompanion.domain.model.Category.ENTERTAINMENT -> Color(0xFF9B5DE5)
+        com.sandeep.personalfinancecompanion.domain.model.Category.BILLS -> Color(0xFF00B4D8)
+        com.sandeep.personalfinancecompanion.domain.model.Category.HEALTH -> Color(0xFFF15BB5)
+        com.sandeep.personalfinancecompanion.domain.model.Category.EDUCATION -> Color(0xFFFEE440)
+        com.sandeep.personalfinancecompanion.domain.model.Category.OTHER -> Color(0xFFADB5BD)
+        else -> Color(0xFF6C757D)
     }
 }
 
