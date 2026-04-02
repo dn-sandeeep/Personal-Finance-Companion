@@ -45,7 +45,26 @@ fun WeeklyTrendChart(
 ) {
     if (entries.isEmpty()) return
 
-    val maxValue = entries.maxOf { it.value }.coerceAtLeast(1f)
+    val maxEntryValue = entries.maxOfOrNull { it.value } ?: 0f
+    
+    // Calculate a "nice" max value for the chart scale
+    val maxValue = when {
+        maxEntryValue <= 0f -> 1000f
+        maxEntryValue <= 1000f -> 1000f
+        maxEntryValue <= 5000f -> 5000f
+        maxEntryValue <= 10000f -> 10000f
+        else -> {
+            val magnitude = Math.pow(10.0, Math.floor(Math.log10(maxEntryValue.toDouble()))).toFloat()
+            (Math.ceil((maxEntryValue / magnitude).toDouble()) * magnitude).toFloat()
+        }
+    }
+
+    val yAxisLabels = listOf(
+        maxValue,
+        maxValue * 0.75f,
+        maxValue * 0.5f,
+        maxValue * 0.25f
+    ).map { it.toInt() }
 
     var animTarget by remember { mutableFloatStateOf(0f) }
     val animProgress by animateFloatAsState(
@@ -58,47 +77,98 @@ fun WeeklyTrendChart(
         animTarget = 1f
     }
 
+    val labelWidth = 45.dp
+
     Column(modifier = modifier.fillMaxWidth()) {
-        // Bar Chart
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
-                .padding(horizontal = 8.dp)
+                .height(150.dp)
         ) {
-            Canvas(
+            // Y-Axis Labels
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
+                    .width(labelWidth)
+                    .height(130.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.End
             ) {
-                val barCount = entries.size
-                val totalWidth = size.width
-                val barWidth = totalWidth / (barCount * 2f)
-                val gap = barWidth
-
-                entries.forEachIndexed { index, entry ->
-                    val barHeight = (entry.value / maxValue) * size.height * animProgress
-                    val x = index * (barWidth + gap) + gap / 2
-
-                    val color = if (entry.isHighlighted) highlightColor else barColorLight
-
-                    drawRoundRect(
-                        color = color,
-                        topLeft = Offset(x, size.height - barHeight),
-                        size = Size(barWidth, barHeight),
-                        cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+                yAxisLabels.forEach { label ->
+                    Text(
+                        text = formatLabel(label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        modifier = Modifier.padding(end = 8.dp)
                     )
+                }
+                Text(
+                    text = "0",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
+
+            // Chart Area
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(130.dp)
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp)
+                ) {
+                    val barCount = entries.size
+                    val totalWidth = size.width
+                    val barWidth = totalWidth / (barCount * 1.8f)
+                    val gap = (totalWidth - (barWidth * barCount)) / (barCount + 1)
+
+                    // Draw Y-axis line
+                    drawLine(
+                        color = Color.LightGray.copy(alpha = 0.5f),
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, size.height),
+                        strokeWidth = 1.dp.toPx()
+                    )
+
+                    // Draw horizontal grid lines
+                    yAxisLabels.forEach { label ->
+                        val y = size.height - (label.toFloat() / maxValue) * size.height
+                        drawLine(
+                            color = Color.LightGray.copy(alpha = 0.2f),
+                            start = Offset(0f, y),
+                            end = Offset(size.width, y),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+
+                    // Draw bars
+                    entries.forEachIndexed { index, entry ->
+                        val barHeight = (entry.value / maxValue) * size.height * animProgress
+                        val x = gap + index * (barWidth + gap)
+
+                        val color = if (entry.isHighlighted) highlightColor else barColorLight
+
+                        drawRoundRect(
+                            color = color,
+                            topLeft = Offset(x, size.height - barHeight),
+                            size = Size(barWidth, barHeight.coerceAtLeast(2.dp.toPx())), // Show tiny bar even for small values
+                            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
+                        )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Labels
+        // X-Axis Labels (Days)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(start = labelWidth),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             entries.forEach { entry ->
@@ -106,13 +176,22 @@ fun WeeklyTrendChart(
                     text = entry.label,
                     style = MaterialTheme.typography.labelSmall,
                     color = if (entry.isHighlighted)
-                        Color(0xFF0D6B58)
+                        highlightColor
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1
                 )
             }
         }
+    }
+}
+
+private fun formatLabel(value: Int): String {
+    return when {
+        value >= 1000000 -> "${value / 1000000}M"
+        value >= 1000 -> "${value / 1000}K"
+        else -> value.toString()
     }
 }

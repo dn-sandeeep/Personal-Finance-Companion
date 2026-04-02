@@ -15,13 +15,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.sandeep.personalfinancecompanion.presentation.components.BarEntry
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(
         val balance: BalanceSummary,
         val recentTransactions: List<Transaction>,
         val budgetLimit: Double,
-        val totalExpense: Double
+        val totalExpense: Double,
+        val weeklyTrend: List<BarEntry>
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -53,11 +60,14 @@ class HomeViewModel @Inject constructor(
                 // Observe transactions reactively
                 getTransactionsUseCase().collect { transactions ->
                     val balance = calculateBalanceUseCase(transactions)
+                    val weeklyTrend = calculateWeeklyTrend(transactions)
+                    
                     _uiState.value = HomeUiState.Success(
                         balance = balance,
                         recentTransactions = transactions.take(5),
                         budgetLimit = _budgetLimit.value,
-                        totalExpense = balance.totalExpense
+                        totalExpense = balance.totalExpense,
+                        weeklyTrend = weeklyTrend
                     )
                 }
             } catch (e: Exception) {
@@ -65,6 +75,53 @@ class HomeViewModel @Inject constructor(
                     message = e.message ?: "An unexpected error occurred"
                 )
             }
+        }
+    }
+
+    private fun calculateWeeklyTrend(transactions: List<Transaction>): List<BarEntry> {
+        val calendar = Calendar.getInstance()
+        val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
+        
+        // Initialize map for the last 7 days with 0.0
+        val dailyExpenses = mutableMapOf<Int, Double>()
+        val days = listOf(
+            Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, 
+            Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
+        )
+        days.forEach { dailyExpenses[it] = 0.0 }
+
+        // Filter transactions for the last 7 days and only expenses
+        val oneWeekAgo = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, -7)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+        }.timeInMillis
+
+        transactions.filter { 
+            it.date >= oneWeekAgo && it.type == com.sandeep.personalfinancecompanion.domain.model.TransactionType.EXPENSE 
+        }.forEach { transaction ->
+            calendar.timeInMillis = transaction.date
+            val day = calendar.get(Calendar.DAY_OF_WEEK)
+            dailyExpenses[day] = (dailyExpenses[day] ?: 0.0) + transaction.amount
+        }
+
+        val dayLabels = mapOf(
+            Calendar.MONDAY to "MON",
+            Calendar.TUESDAY to "TUE",
+            Calendar.WEDNESDAY to "WED",
+            Calendar.THURSDAY to "THU",
+            Calendar.FRIDAY to "FRI",
+            Calendar.SATURDAY to "SAT",
+            Calendar.SUNDAY to "SUN"
+        )
+
+        return days.map { day ->
+            BarEntry(
+                label = dayLabels[day] ?: "",
+                value = dailyExpenses[day]?.toFloat() ?: 0f,
+                isHighlighted = day == currentDay
+            )
         }
     }
 

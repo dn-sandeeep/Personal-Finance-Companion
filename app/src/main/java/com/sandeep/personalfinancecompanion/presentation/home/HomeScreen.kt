@@ -269,15 +269,7 @@ private fun HomeContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 WeeklyTrendChart(
-                    entries = listOf(
-                        BarEntry("MON", 0.6f),
-                        BarEntry("TUE", 0.8f),
-                        BarEntry("WED", 0.5f),
-                        BarEntry("THU", 1.0f, isHighlighted = true),
-                        BarEntry("FRI", 0.7f, isHighlighted = true),
-                        BarEntry("SAT", 0.3f),
-                        BarEntry("SUN", 0.4f)
-                    )
+                    entries = state.weeklyTrend
                 )
             }
         }
