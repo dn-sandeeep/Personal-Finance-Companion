@@ -1,0 +1,15 @@
+./gradlew : e: file:///D:/Projects/A
+ecified: (e: file:///D:/P... as
+e: file:///D:/Projects/Android/Perso
+e: file:///D:/Projects/Android/Perso
+e: file:///D:/Projects/Android/Perso
+23:47 Unresolved reference 'Icons'.
+e: file:///D:/Projects/Android/Perso
+60:47 Unresolved reference 'Icons'.
+e: file:///D:/Projects/Android/Perso
+67:43 Unresolved reference 'Icons'.
+e: file:///D:/Projects/Android/Perso
+e: file:///D:/Projects/Android/Perso
+e: file:///D:/Projects/Android/Perso
+62:53 Unresolved reference 'it'.
+e: file:///D:/Projects/Android/Perso

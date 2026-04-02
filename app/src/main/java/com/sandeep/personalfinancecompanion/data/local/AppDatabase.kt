@@ -4,17 +4,25 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.sandeep.personalfinancecompanion.data.local.dao.TransactionDao
+import com.sandeep.personalfinancecompanion.data.local.dao.GoalDao
 import com.sandeep.personalfinancecompanion.data.local.entity.TransactionEntity
+import com.sandeep.personalfinancecompanion.data.local.entity.GoalEntity
+import com.sandeep.personalfinancecompanion.data.local.entity.GoalContributionEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Provider
 
-@Database(entities = [TransactionEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [TransactionEntity::class, GoalEntity::class, GoalContributionEntity::class],
+    version = 2,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract val transactionDao: TransactionDao
+    abstract val goalDao: GoalDao
 
     class Callback(
         private val databaseProvider: Provider<AppDatabase>

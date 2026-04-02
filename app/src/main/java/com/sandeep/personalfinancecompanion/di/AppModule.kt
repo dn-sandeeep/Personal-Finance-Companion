@@ -8,9 +8,12 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.sandeep.personalfinancecompanion.data.local.AppDatabase
 import com.sandeep.personalfinancecompanion.data.local.dao.TransactionDao
+import com.sandeep.personalfinancecompanion.data.local.dao.GoalDao
 import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
+import com.sandeep.personalfinancecompanion.data.repository.GoalRepositoryImpl
 import com.sandeep.personalfinancecompanion.data.repository.UserPreferencesRepositoryImpl
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
+import com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import dagger.Module
 import dagger.Provides
@@ -37,6 +40,7 @@ object AppModule {
             "finance_db"
         )
         .addCallback(AppDatabase.Callback(provider))
+        .fallbackToDestructiveMigration()
         .build()
     }
 
@@ -48,10 +52,24 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideGoalDao(appDatabase: AppDatabase): GoalDao {
+        return appDatabase.goalDao
+    }
+
+    @Provides
+    @Singleton
     fun provideTransactionRepository(
         dao: TransactionDao
     ): TransactionRepository {
         return TransactionRepositoryImpl(dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoalRepository(
+        dao: GoalDao
+    ): GoalRepository {
+        return GoalRepositoryImpl(dao)
     }
 
     @Provides
