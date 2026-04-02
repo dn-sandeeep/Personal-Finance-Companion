@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
+import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.BalanceSummary
 import com.sandeep.personalfinancecompanion.domain.usecase.CalculateBalanceUseCase
 import com.sandeep.personalfinancecompanion.domain.usecase.GetTransactionsUseCase
@@ -39,17 +40,15 @@ sealed interface HomeUiState {
 class HomeViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val calculateBalanceUseCase: CalculateBalanceUseCase,
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val preferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private var allTransactions: List<Transaction> = emptyList()
-
-    // Budget limit stored in-memory (in real app this would be persisted)
-    private val _budgetLimit = MutableStateFlow(50000.0)
-    val budgetLimit: StateFlow<Double> = _budgetLimit.asStateFlow()
+    private var currentBudgetLimit: Double = 50000.0
 
     init {
         loadDashboard()
@@ -60,6 +59,16 @@ class HomeViewModel @Inject constructor(
             try {
                 _uiState.value = HomeUiState.Loading
 
+                // Collect preferences first to get budget
+                launch {
+                    preferencesRepository.budgetLimitFlow.collect { limit ->
+                        currentBudgetLimit = limit
+                        val currentState = _uiState.value
+                        if (currentState is HomeUiState.Success) {
+                            _uiState.value = currentState.copy(budgetLimit = limit)
+                        }
+                    }
+                }
 
                 // Observe transactions reactively
                 getTransactionsUseCase().collect { transactions ->
@@ -70,7 +79,7 @@ class HomeViewModel @Inject constructor(
                     _uiState.value = HomeUiState.Success(
                         balance = balance,
                         recentTransactions = transactions.take(5),
-                        budgetLimit = _budgetLimit.value,
+                        budgetLimit = currentBudgetLimit,
                         totalExpense = balance.totalExpense,
                         weeklyTrend = weeklyTrend
                     )
@@ -178,11 +187,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun updateBudgetLimit(limit: Double) {
-        _budgetLimit.value = limit
-        // Re-emit state with new limit
-        val currentState = _uiState.value
-        if (currentState is HomeUiState.Success) {
-            _uiState.value = currentState.copy(budgetLimit = limit)
+        viewModelScope.launch {
+            preferencesRepository.updateBudgetLimit(limit)
         }
     }
 

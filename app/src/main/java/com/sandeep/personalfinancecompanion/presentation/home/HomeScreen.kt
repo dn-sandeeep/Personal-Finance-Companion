@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -31,14 +33,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -112,6 +119,9 @@ fun HomeScreen(
                 onAddExpense = onAddExpense,
                 onDaySelected = { dayOfWeek ->
                     viewModel.selectDay(dayOfWeek)
+                },
+                onUpdateBudget = { newLimit ->
+                    viewModel.updateBudgetLimit(newLimit)
                 }
             )
 
@@ -239,9 +249,23 @@ private fun HomeContent(
     onNavigateToTransactions: () -> Unit,
     onAddIncome: () -> Unit,
     onAddExpense: () -> Unit,
-    onDaySelected: (Int) -> Unit
+    onDaySelected: (Int) -> Unit,
+    onUpdateBudget: (Double) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    var showBudgetDialog by remember { mutableStateOf(false) }
+
+    if (showBudgetDialog) {
+        EditBudgetDialog(
+            currentLimit = state.budgetLimit,
+            onDismiss = { showBudgetDialog = false },
+            onConfirm = { newLimit ->
+                showBudgetDialog = false
+                onUpdateBudget(newLimit)
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -425,7 +449,9 @@ private fun HomeContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
@@ -438,6 +464,13 @@ private fun HomeContent(
                             text = "Monthly Budget Tracker",
                             style = MaterialTheme.typography.bodySmall,
                             color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = { showBudgetDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Budget",
+                            tint = colorScheme.primary
                         )
                     }
                 }
@@ -454,13 +487,13 @@ private fun HomeContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(
-                    onClick = { },
+                    onClick = { showBudgetDialog = true },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = colorScheme.primary
                     )
                 ) {
                     Text(
-                        text = "View Details",
+                        text = "Edit Budget",
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -606,3 +639,55 @@ private fun CategoryBreakdownItem(
         }
     }
 }
+
+@Composable
+fun EditBudgetDialog(
+    currentLimit: Double,
+    onDismiss: () -> Unit,
+    onConfirm: (Double) -> Unit
+) {
+    var budgetInput by remember { mutableStateOf(currentLimit.toInt().toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Edit Monthly Budget")
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Set a new monthly spending limit to track against.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = budgetInput,
+                    onValueChange = { newValue: String -> budgetInput = newValue },
+                    label = { Text("Amount (₹)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val newLimit = budgetInput.toDoubleOrNull()
+                    if (newLimit != null && newLimit > 0) {
+                        onConfirm(newLimit)
+                    }
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
