@@ -44,7 +44,6 @@ class InsightsViewModel @Inject constructor(
     private fun loadInsights() {
         viewModelScope.launch {
             try {
-                repository.ensureInitialized()
 
                 getTransactionsUseCase().collect { transactions ->
                     val balance = calculateBalanceUseCase(transactions)

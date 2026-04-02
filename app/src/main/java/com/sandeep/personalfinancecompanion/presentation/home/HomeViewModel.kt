@@ -49,7 +49,6 @@ class HomeViewModel @Inject constructor(
             try {
                 _uiState.value = HomeUiState.Loading
 
-                repository.ensureInitialized()
 
                 // Observe transactions reactively
                 getTransactionsUseCase().collect { transactions ->

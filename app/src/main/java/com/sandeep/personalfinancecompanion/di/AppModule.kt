@@ -1,17 +1,16 @@
 package com.sandeep.personalfinancecompanion.di
 
-import com.sandeep.personalfinancecompanion.data.remote.FakeMockEngine
-import com.sandeep.personalfinancecompanion.data.remote.TransactionApiService
+import android.app.Application
+import androidx.room.Room
+import com.sandeep.personalfinancecompanion.data.local.AppDatabase
+import com.sandeep.personalfinancecompanion.data.local.dao.TransactionDao
 import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -20,28 +19,30 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient {
-        return HttpClient(FakeMockEngine.engine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                    prettyPrint = true
-                })
-            }
-        }
+    fun provideAppDatabase(
+        app: Application,
+        provider: Provider<AppDatabase>
+    ): AppDatabase {
+        return Room.databaseBuilder(
+            app,
+            AppDatabase::class.java,
+            "finance_db"
+        )
+        .addCallback(AppDatabase.Callback(provider))
+        .build()
     }
 
     @Provides
     @Singleton
-    fun provideTransactionApiService(client: HttpClient): TransactionApiService {
-        return TransactionApiService(client)
+    fun provideTransactionDao(appDatabase: AppDatabase): TransactionDao {
+        return appDatabase.transactionDao
     }
 
     @Provides
     @Singleton
     fun provideTransactionRepository(
-        apiService: TransactionApiService
+        dao: TransactionDao
     ): TransactionRepository {
-        return TransactionRepositoryImpl(apiService)
+        return TransactionRepositoryImpl(dao)
     }
 }

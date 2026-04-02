@@ -1,11 +1,11 @@
 package com.sandeep.personalfinancecompanion.data.mapper
 
-import com.sandeep.personalfinancecompanion.data.remote.dto.TransactionDto
+import com.sandeep.personalfinancecompanion.data.local.entity.TransactionEntity
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 
-fun TransactionDto.toDomain(): Transaction {
+fun TransactionEntity.toDomain(): Transaction {
     return Transaction(
         id = id,
         amount = amount,
@@ -24,8 +24,8 @@ fun TransactionDto.toDomain(): Transaction {
     )
 }
 
-fun Transaction.toDto(): TransactionDto {
-    return TransactionDto(
+fun Transaction.toEntity(): TransactionEntity {
+    return TransactionEntity(
         id = id,
         amount = amount,
         type = type.name,
