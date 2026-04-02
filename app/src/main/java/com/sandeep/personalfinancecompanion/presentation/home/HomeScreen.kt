@@ -50,6 +50,18 @@ import com.sandeep.personalfinancecompanion.presentation.components.BudgetRing
 import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.presentation.components.WeeklyTrendChart
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import com.sandeep.personalfinancecompanion.presentation.components.TransactionListItem
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToTransactions: () -> Unit,
@@ -58,6 +70,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val sheetState = rememberModalBottomSheetState()
 
     when (val state = uiState) {
         is HomeUiState.Loading -> {
@@ -96,8 +109,126 @@ fun HomeScreen(
                 state = state,
                 onNavigateToTransactions = onNavigateToTransactions,
                 onAddIncome = onAddIncome,
-                onAddExpense = onAddExpense
+                onAddExpense = onAddExpense,
+                onDaySelected = { dayOfWeek ->
+                    viewModel.selectDay(dayOfWeek)
+                }
             )
+
+            if (state.selectedDayTransactions != null) {
+                ModalBottomSheet(
+                    onDismissRequest = { viewModel.clearSelectedDay() },
+                    sheetState = sheetState,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    dragHandle = {
+                        Box(
+                            modifier = Modifier
+                                .padding(vertical = 12.dp)
+                                .size(width = 32.dp, height = 4.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                        )
+                    }
+                ) {
+                    DayDetailsContent(
+                        dayLabel = state.selectedDayLabel ?: "",
+                        transactions = state.selectedDayTransactions
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DayDetailsContent(
+    dayLabel: String,
+    transactions: List<Transaction>
+) {
+    val timeFormatter = remember { SimpleDateFormat("hh:mm a, MMM dd, yyyy", Locale.getDefault()) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 32.dp)
+    ) {
+        Text(
+            text = "Transactions for $dayLabel",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (transactions.isEmpty()) {
+            EmptyState(
+                emoji = "📅",
+                title = "No transactions",
+                subtitle = "You didn't record any transactions on this day."
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                transactions.forEach { transaction ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Category Emoji
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = transaction.category.emoji)
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = transaction.category.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = timeFormatter.format(Date(transaction.date)),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                if (transaction.notes.isNotEmpty()) {
+                                    Text(
+                                        text = transaction.notes,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+
+                            Text(
+                                text = if (transaction.type == TransactionType.INCOME) "+₹${transaction.amount}" else "-₹${transaction.amount}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (transaction.type == TransactionType.INCOME) Color(0xFF4ADE80) else Color(0xFFFB7185)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -107,7 +238,8 @@ private fun HomeContent(
     state: HomeUiState.Success,
     onNavigateToTransactions: () -> Unit,
     onAddIncome: () -> Unit,
-    onAddExpense: () -> Unit
+    onAddExpense: () -> Unit,
+    onDaySelected: (Int) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Column(
@@ -269,7 +401,10 @@ private fun HomeContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 WeeklyTrendChart(
-                    entries = state.weeklyTrend
+                    entries = state.weeklyTrend,
+                    onBarClick = { entry ->
+                        onDaySelected(entry.dayOfWeek)
+                    }
                 )
             }
         }

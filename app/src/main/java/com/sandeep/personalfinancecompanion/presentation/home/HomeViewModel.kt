@@ -28,7 +28,9 @@ sealed interface HomeUiState {
         val recentTransactions: List<Transaction>,
         val budgetLimit: Double,
         val totalExpense: Double,
-        val weeklyTrend: List<BarEntry>
+        val weeklyTrend: List<BarEntry>,
+        val selectedDayTransactions: List<Transaction>? = null,
+        val selectedDayLabel: String? = null
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -42,6 +44,8 @@ class HomeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private var allTransactions: List<Transaction> = emptyList()
 
     // Budget limit stored in-memory (in real app this would be persisted)
     private val _budgetLimit = MutableStateFlow(50000.0)
@@ -59,6 +63,7 @@ class HomeViewModel @Inject constructor(
 
                 // Observe transactions reactively
                 getTransactionsUseCase().collect { transactions ->
+                    allTransactions = transactions
                     val balance = calculateBalanceUseCase(transactions)
                     val weeklyTrend = calculateWeeklyTrend(transactions)
                     
@@ -120,7 +125,54 @@ class HomeViewModel @Inject constructor(
             BarEntry(
                 label = dayLabels[day] ?: "",
                 value = dailyExpenses[day]?.toFloat() ?: 0f,
-                isHighlighted = day == currentDay
+                isHighlighted = day == currentDay,
+                dayOfWeek = day
+            )
+        }
+    }
+
+    fun selectDay(dayOfWeek: Int) {
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Success) {
+            val calendar = Calendar.getInstance()
+            
+            // Filter transactions for that specific day of week within last 7 days
+            val oneWeekAgo = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_YEAR, -7)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+            }.timeInMillis
+
+            val filteredTransactions = allTransactions.filter { 
+                calendar.timeInMillis = it.date
+                it.date >= oneWeekAgo && calendar.get(Calendar.DAY_OF_WEEK) == dayOfWeek
+            }.sortedByDescending { it.date }
+
+            val dayName = when(dayOfWeek) {
+                Calendar.MONDAY -> "Monday"
+                Calendar.TUESDAY -> "Tuesday"
+                Calendar.WEDNESDAY -> "Wednesday"
+                Calendar.THURSDAY -> "Thursday"
+                Calendar.FRIDAY -> "Friday"
+                Calendar.SATURDAY -> "Saturday"
+                Calendar.SUNDAY -> "Sunday"
+                else -> ""
+            }
+
+            _uiState.value = currentState.copy(
+                selectedDayTransactions = filteredTransactions,
+                selectedDayLabel = dayName
+            )
+        }
+    }
+
+    fun clearSelectedDay() {
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Success) {
+            _uiState.value = currentState.copy(
+                selectedDayTransactions = null,
+                selectedDayLabel = null
             )
         }
     }

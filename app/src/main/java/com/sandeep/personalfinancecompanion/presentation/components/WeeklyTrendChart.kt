@@ -28,17 +28,21 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+
 
 data class BarEntry(
     val label: String,
     val value: Float,
-    val isHighlighted: Boolean = false
+    val isHighlighted: Boolean = false,
+    val dayOfWeek: Int = -1
 )
-
 @Composable
 fun WeeklyTrendChart(
     entries: List<BarEntry>,
     modifier: Modifier = Modifier,
+    onBarClick: (BarEntry) -> Unit = {},
     barColor: Color = Color(0xFF0D6B58),
     barColorLight: Color = Color(0xFFB2DFDB),
     highlightColor: Color = Color(0xFF0D6B58)
@@ -119,6 +123,21 @@ fun WeeklyTrendChart(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(130.dp)
+                        .pointerInput(entries) {
+                            detectTapGestures { offset ->
+                                val barCount = entries.size
+                                val totalWidth = size.width
+                                val barWidth = totalWidth / (barCount * 1.8f)
+                                val gap = (totalWidth - (barWidth * barCount)) / (barCount + 1)
+
+                                entries.forEachIndexed { index, entry ->
+                                    val x = gap + index * (barWidth + gap)
+                                    if (offset.x >= x && offset.x <= x + barWidth) {
+                                        onBarClick(entry)
+                                    }
+                                }
+                            }
+                        }
                 ) {
                     val barCount = entries.size
                     val totalWidth = size.width
