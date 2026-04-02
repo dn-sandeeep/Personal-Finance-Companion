@@ -114,7 +114,7 @@ fun TransactionListItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "$amountPrefix₹${String.format("%,.2f", transaction.amount)}",
+                    text = "${if (isIncome) "+" else "-"}₹${String.format("%,.2f", transaction.amount)}",
                     style = MaterialTheme.typography.titleLarge,
                     color = amountColor,
                     fontWeight = FontWeight.Bold,

@@ -2,26 +2,22 @@ package com.sandeep.personalfinancecompanion.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
+import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
+import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.BalanceSummary
 import com.sandeep.personalfinancecompanion.domain.usecase.CalculateBalanceUseCase
 import com.sandeep.personalfinancecompanion.domain.usecase.GetTransactionsUseCase
+import com.sandeep.personalfinancecompanion.presentation.components.BarEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-import com.sandeep.personalfinancecompanion.presentation.components.BarEntry
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import com.sandeep.personalfinancecompanion.domain.model.Category
+import javax.inject.Inject
 
 data class CategoryStats(
     val category: Category,
@@ -38,7 +34,7 @@ sealed interface HomeUiState {
         val budgetLimit: Double,
         val totalExpense: Double,
         val weeklyTrend: List<BarEntry>,
-        val categoryExpenses: List<CategoryStats> = emptyList(),
+        val categoryExpenses: List<CategoryStats>,
         val selectedDayTransactions: List<Transaction>? = null,
         val selectedDayLabel: String? = null,
         val selectedCategoryTransactions: List<Transaction>? = null,
@@ -95,7 +91,7 @@ class HomeViewModel @Inject constructor(
                     }.timeInMillis
 
                     val last30DaysExpenses = transactions.filter {
-                        it.date >= thirtyDaysAgo && it.type == com.sandeep.personalfinancecompanion.domain.model.TransactionType.EXPENSE
+                        it.date >= thirtyDaysAgo && it.type == TransactionType.EXPENSE
                     }
                     val total30DaysExpense = last30DaysExpenses.sumOf { it.amount }.toFloat()
                     val categoryStatsList = last30DaysExpenses
@@ -149,7 +145,7 @@ class HomeViewModel @Inject constructor(
         }.timeInMillis
 
         transactions.filter { 
-            it.date >= oneWeekAgo && it.type == com.sandeep.personalfinancecompanion.domain.model.TransactionType.EXPENSE 
+            it.date >= oneWeekAgo && it.type == TransactionType.EXPENSE 
         }.forEach { transaction ->
             calendar.timeInMillis = transaction.date
             val day = calendar.get(Calendar.DAY_OF_WEEK)
@@ -235,7 +231,7 @@ class HomeViewModel @Inject constructor(
             }.timeInMillis
 
             val filteredTransactions = allTransactions.filter {
-                it.category == category && it.date >= thirtyDaysAgo && it.type == com.sandeep.personalfinancecompanion.domain.model.TransactionType.EXPENSE
+                it.category == category && it.date >= thirtyDaysAgo && it.type == TransactionType.EXPENSE
             }.sortedByDescending { it.date }
 
             _uiState.value = currentState.copy(

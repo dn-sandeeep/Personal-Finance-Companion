@@ -34,10 +34,32 @@ fun AppNavigation(
         startDestination = Screen.Home.route,
         modifier = modifier,
         enterTransition = {
-            fadeIn(animationSpec = tween(300))
+            fadeIn(animationSpec = tween(500)) + 
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start, 
+                animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+            )
         },
         exitTransition = {
-            fadeOut(animationSpec = tween(300))
+            fadeOut(animationSpec = tween(500)) + 
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start, 
+                animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+            )
+        },
+        popEnterTransition = {
+            fadeIn(animationSpec = tween(500)) + 
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.End, 
+                animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+            )
+        },
+        popExitTransition = {
+            fadeOut(animationSpec = tween(500)) + 
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.End, 
+                animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+            )
         }
     ) {
         composable(Screen.Home.route) {
@@ -90,14 +112,14 @@ fun AppNavigation(
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Up,
-                    tween(400)
-                )
+                    animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(500))
             },
             exitTransition = {
                 slideOutOfContainer(
                     AnimatedContentTransitionScope.SlideDirection.Down,
-                    tween(400)
-                )
+                    animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(500))
             }
         ) { backStackEntry ->
             val typeArg = backStackEntry.arguments?.getString("type") ?: "EXPENSE"

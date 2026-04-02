@@ -199,7 +199,7 @@ fun TransactionListScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "${if (netAmount >= 0) "+" else "-"}\u20B9${String.format("%,.2f", kotlin.math.abs(netAmount))} Net",
+                                    text = "${if (netAmount >= 0) "+" else "-"}₹${String.format("%,.2f", kotlin.math.abs(netAmount))} Net",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onSurfaceVariant
                                 )
@@ -335,7 +335,9 @@ private fun SwipeableTransactionItem(
             }
         }
     ) {
-        TransactionListItem(transaction = transaction)
+        TransactionListItem(
+            transaction = transaction
+        )
     }
 }
 

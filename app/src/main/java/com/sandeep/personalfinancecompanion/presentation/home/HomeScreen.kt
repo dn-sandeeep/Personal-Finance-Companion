@@ -239,7 +239,11 @@ private fun DayDetailsContent(
                             }
 
                             Text(
-                                text = if (transaction.type == TransactionType.INCOME) "+₹${transaction.amount}" else "-₹${transaction.amount}",
+                                text = if (transaction.type == TransactionType.INCOME) {
+                                    "+₹${String.format("%,.2f", transaction.amount)}"
+                                } else {
+                                    "-₹${String.format("%,.2f", transaction.amount)}"
+                                },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = if (transaction.type == TransactionType.INCOME) Color(
