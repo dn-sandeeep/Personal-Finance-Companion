@@ -37,29 +37,4 @@ interface GoalDao {
 
     @Query("DELETE FROM goal_contributions WHERE id = :contributionId")
     suspend fun deleteContribution(contributionId: String)
-
-    @Query("SELECT COUNT(*) FROM goals")
-    suspend fun getGoalsCount(): Int
-
-    @Transaction
-    suspend fun populateIfEmpty() {
-        if (getGoalsCount() == 0) {
-            val goal1Id = "goal_emergency"
-            val goal2Id = "goal_travel"
-
-            insertGoal(GoalEntity(
-                goal1Id, "Emergency Fund", 10000.0, 2500.0, "Security", "#4CAF50"
-            ))
-            insertGoal(GoalEntity(
-                goal2Id, "Travel Fund", 5000.0, 1200.0, "FlightTakeoff", "#2196F3"
-            ))
-
-            insertContribution(GoalContributionEntity(
-                "c1", goal1Id, 1500.0, System.currentTimeMillis() - 86400000 * 2
-            ))
-            insertContribution(GoalContributionEntity(
-                "c2", goal1Id, 1000.0, System.currentTimeMillis() - 86400000
-            ))
-        }
-    }
 }

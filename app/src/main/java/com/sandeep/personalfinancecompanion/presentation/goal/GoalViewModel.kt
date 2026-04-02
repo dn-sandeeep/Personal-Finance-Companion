@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.domain.model.Goal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -18,12 +19,6 @@ class GoalViewModel @Inject constructor(
     
     val goals: StateFlow<List<Goal>> = repository.getAllGoals()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    init {
-        viewModelScope.launch {
-            repository.populateIfEmpty()
-        }
-    }
     
     fun createNewGoal(title: String, targetAmount: Double, iconName: String, colorHex: String) {
         viewModelScope.launch {

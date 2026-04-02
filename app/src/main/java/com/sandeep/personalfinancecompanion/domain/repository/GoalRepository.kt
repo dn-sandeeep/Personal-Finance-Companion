@@ -9,5 +9,4 @@ interface GoalRepository {
     suspend fun insertGoal(goal: Goal)
     suspend fun addContribution(goalId: String, amount: Double)
     suspend fun deleteGoal(id: String)
-    suspend fun populateIfEmpty()
 }

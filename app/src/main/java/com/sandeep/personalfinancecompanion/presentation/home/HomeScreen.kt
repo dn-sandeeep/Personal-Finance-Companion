@@ -64,6 +64,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.presentation.components.TransactionListItem
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -698,16 +699,16 @@ private fun CategoryBreakdownItem(
     }
 }
 
-private fun getCategoryColor(category: com.sandeep.personalfinancecompanion.domain.model.Category): Color {
+private fun getCategoryColor(category: Category): Color {
     return when (category) {
-        com.sandeep.personalfinancecompanion.domain.model.Category.FOOD -> Color(0xFFFF9F1C)
-        com.sandeep.personalfinancecompanion.domain.model.Category.TRANSPORT -> Color(0xFF2EC4B6)
-        com.sandeep.personalfinancecompanion.domain.model.Category.SHOPPING -> Color(0xFFE71D36)
-        com.sandeep.personalfinancecompanion.domain.model.Category.ENTERTAINMENT -> Color(0xFF9B5DE5)
-        com.sandeep.personalfinancecompanion.domain.model.Category.BILLS -> Color(0xFF00B4D8)
-        com.sandeep.personalfinancecompanion.domain.model.Category.HEALTH -> Color(0xFFF15BB5)
-        com.sandeep.personalfinancecompanion.domain.model.Category.EDUCATION -> Color(0xFFFEE440)
-        com.sandeep.personalfinancecompanion.domain.model.Category.OTHER -> Color(0xFFADB5BD)
+        Category.FOOD -> Color(0xFFFF9F1C)
+        Category.TRANSPORT -> Color(0xFF2EC4B6)
+        Category.SHOPPING -> Color(0xFFE71D36)
+        Category.ENTERTAINMENT -> Color(0xFF9B5DE5)
+        Category.BILLS -> Color(0xFF00B4D8)
+        Category.HEALTH -> Color(0xFFF15BB5)
+        Category.EDUCATION -> Color(0xFFFEE440)
+        Category.OTHER -> Color(0xFFADB5BD)
         else -> Color(0xFF6C757D)
     }
 }

@@ -31,15 +31,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppDatabase(
-        app: Application,
-        provider: Provider<AppDatabase>
+        app: Application
     ): AppDatabase {
         return Room.databaseBuilder(
             app,
             AppDatabase::class.java,
             "finance_db"
         )
-        .addCallback(AppDatabase.Callback(provider))
         .fallbackToDestructiveMigration()
         .build()
     }
