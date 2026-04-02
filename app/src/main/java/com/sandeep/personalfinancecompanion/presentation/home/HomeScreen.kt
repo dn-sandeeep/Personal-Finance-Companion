@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -121,12 +122,15 @@ fun HomeScreen(
                 onDaySelected = { dayOfWeek ->
                     viewModel.selectDay(dayOfWeek)
                 },
+                onCategorySelected = { category ->
+                    viewModel.selectCategory(category)
+                },
                 onUpdateBudget = { newLimit ->
                     viewModel.updateBudgetLimit(newLimit)
                 }
             )
 
-            if (state.selectedDayTransactions != null) {
+            if (state.selectedDayTransactions != null || state.selectedCategoryTransactions != null) {
                 ModalBottomSheet(
                     onDismissRequest = { viewModel.clearSelectedDay() },
                     sheetState = sheetState,
@@ -141,9 +145,12 @@ fun HomeScreen(
                         )
                     }
                 ) {
+                    val label = state.selectedDayLabel ?: state.selectedCategoryLabel ?: ""
+                    val txs = state.selectedDayTransactions ?: state.selectedCategoryTransactions
+                    ?: emptyList()
                     DayDetailsContent(
-                        dayLabel = state.selectedDayLabel ?: "",
-                        transactions = state.selectedDayTransactions
+                        dayLabel = label,
+                        transactions = txs
                     )
                 }
             }
@@ -170,7 +177,7 @@ private fun DayDetailsContent(
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
 
         if (transactions.isEmpty()) {
@@ -234,7 +241,9 @@ private fun DayDetailsContent(
                                 text = if (transaction.type == TransactionType.INCOME) "+₹${transaction.amount}" else "-₹${transaction.amount}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (transaction.type == TransactionType.INCOME) Color(0xFF4ADE80) else Color(0xFFFB7185)
+                                color = if (transaction.type == TransactionType.INCOME) Color(
+                                    0xFF4ADE80
+                                ) else Color(0xFFFB7185)
                             )
                         }
                     }
@@ -251,6 +260,7 @@ private fun HomeContent(
     onAddIncome: () -> Unit,
     onAddExpense: () -> Unit,
     onDaySelected: (Int) -> Unit,
+    onCategorySelected: (com.sandeep.personalfinancecompanion.domain.model.Category) -> Unit,
     onUpdateBudget: (Double) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -517,12 +527,15 @@ private fun HomeContent(
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
             )
-            Text(
-                text = "LAST 30 DAYS",
-                style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                letterSpacing = 1.sp
-            )
+            TextButton(onClick = onNavigateToTransactions) {
+                Text(
+                    text = "VIEW ALL",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -564,31 +577,31 @@ private fun HomeContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Column(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                state.categoryExpenses.forEach { stats ->
-                    CategoryBreakdownItem(
-                        stats = stats
-                    )
-                }
+            state.categoryExpenses.forEach { stats ->
+                CategoryBreakdownItem(
+                    stats = stats,
+                    onClick = { onCategorySelected(stats.category) }
+                )
             }
         }
-
-        Spacer(modifier = Modifier.height(100.dp)) // Bottom nav padding
     }
+
+    Spacer(modifier = Modifier.height(100.dp)) // Bottom nav padding
 }
+
 
 @Composable
 private fun CategoryBreakdownItem(
-    stats: CategoryStats
+    stats: CategoryStats,
+    onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val categoryColor = getCategoryColor(stats.category)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -634,9 +647,9 @@ private fun CategoryBreakdownItem(
                         color = colorScheme.onSurface
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
