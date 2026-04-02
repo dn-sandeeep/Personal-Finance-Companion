@@ -403,7 +403,7 @@ private fun NoSpendChallengeCard() {
 
 @Composable
 private fun SmallGoalCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     iconBgColor: Color,
     iconTintColor: Color,
     title: String,
@@ -429,7 +429,7 @@ private fun SmallGoalCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(30.dp)
                         .background(iconBgColor, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -441,7 +441,7 @@ private fun SmallGoalCard(
                     )
                 }
                 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 
                 Text(
                     text = title,
@@ -451,7 +451,7 @@ private fun SmallGoalCard(
                 )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -459,25 +459,25 @@ private fun SmallGoalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = "Progress",
-                        fontSize = 10.sp,
-                        color = colorScheme.onSurfaceVariant
-                    )
+//                    Text(
+//                        text = "Progress",
+//                        fontSize = 13.sp,
+//                        color = colorScheme.onSurfaceVariant
+//                    )
                     Text(
                         text = "${(progress * 100).toInt()}%",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
                 }
-                
-                Box(modifier = Modifier.fillMaxWidth(0.5f)) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Box(modifier = Modifier.fillMaxWidth(1f)) {
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(18.dp)
+                            .height(10.dp)
                             .clip(RoundedCornerShape(4.dp)),
                         color = progressColor,
                         trackColor = trackColor

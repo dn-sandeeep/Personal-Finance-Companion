@@ -584,6 +584,7 @@ private fun HomeContent(
                     onClick = { onCategorySelected(stats.category) }
                 )
             }
+            Spacer(modifier = Modifier.height(15.dp))
         }
     }
 
