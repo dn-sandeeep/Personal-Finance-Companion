@@ -106,4 +106,8 @@ class TransactionViewModel @Inject constructor(
             repository.updateTransaction(transaction)
         }
     }
+
+    suspend fun getTransactionById(id: String): Transaction? {
+        return repository.getTransactionById(id)
+    }
 }

@@ -19,6 +19,9 @@ sealed class Screen(val route: String) {
     data object AddTransaction : Screen("add_transaction/{type}") {
         fun createRoute(type: String = "EXPENSE") = "add_transaction/$type"
     }
+    data object EditTransaction : Screen("edit_transaction/{transactionId}") {
+        fun createRoute(transactionId: String) = "edit_transaction/$transactionId"
+    }
 }
 
 data class BottomNavItem(

@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -69,6 +70,7 @@ import java.util.Calendar
 fun TransactionListScreen(
     snackbarHostState: SnackbarHostState,
     onAddTransaction: () -> Unit,
+    onEditTransaction: (String) -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
 ) {
     val listState by viewModel.listState.collectAsStateWithLifecycle()
@@ -225,7 +227,8 @@ fun TransactionListScreen(
                                             )
                                         }
                                     }
-                                }
+                                },
+                                onEdit = { onEditTransaction(transaction.id) }
                             )
                         }
                     }
@@ -268,15 +271,21 @@ private fun Chip(
 @Composable
 private fun SwipeableTransactionItem(
     transaction: Transaction,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
-            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else {
-                false
+            when (dismissValue) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete()
+                    true
+                }
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onEdit()
+                    false
+                }
+                else -> false
             }
         }
     )
@@ -287,10 +296,23 @@ private fun SwipeableTransactionItem(
             val color by animateColorAsState(
                 targetValue = when (dismissState.targetValue) {
                     SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
                     else -> Color.Transparent
                 },
                 label = "swipe_color"
             )
+
+            val alignment = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                else -> Alignment.Center
+            }
+
+            val icon = when (dismissState.targetValue) {
+                SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Edit
+                else -> null
+            }
 
             Box(
                 modifier = Modifier
@@ -298,16 +320,20 @@ private fun SwipeableTransactionItem(
                     .clip(RoundedCornerShape(16.dp))
                     .background(color)
                     .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.CenterEnd
+                contentAlignment = alignment
             ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.onError
-                )
+                icon?.let {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null,
+                        tint = if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) 
+                            MaterialTheme.colorScheme.onError 
+                        else 
+                            MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
-        },
-        enableDismissFromStartToEnd = false
+        }
     ) {
         TransactionListItem(transaction = transaction)
     }

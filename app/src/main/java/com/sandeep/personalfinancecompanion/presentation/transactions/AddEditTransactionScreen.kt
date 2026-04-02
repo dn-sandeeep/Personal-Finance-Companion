@@ -24,6 +24,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,15 +34,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTransactionScreen(
+    transactionId: String? = null,
     initialType: TransactionType = TransactionType.EXPENSE,
-    onSave: (Double, TransactionType, Category, String, Long) -> Unit,
-    onBack: () -> Unit
+    onSave: (Transaction) -> Unit,
+    onBack: () -> Unit,
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
     var amount by remember { mutableStateOf("") }
     var type by remember { mutableStateOf(initialType) }
@@ -57,6 +63,19 @@ fun AddEditTransactionScreen(
     // Validation
     var amountError by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(transactionId) {
+        if (transactionId != null) {
+            val transaction = viewModel.getTransactionById(transactionId)
+            if (transaction != null) {
+                amount = transaction.amount.toString()
+                type = transaction.type
+                selectedCategory = transaction.category
+                notes = transaction.notes
+                date = transaction.date
+            }
+        }
+    }
+
     val categories = if (type == TransactionType.INCOME) {
         Category.incomeCategories()
     } else {
@@ -69,6 +88,16 @@ fun AddEditTransactionScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = if (transactionId == null) "NEW ENTRY" else "EDIT ENTRY",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp
+        )
+        
         Spacer(modifier = Modifier.height(16.dp))
 
         // Type Selector (Segmented Button)
@@ -200,7 +229,15 @@ fun AddEditTransactionScreen(
                         amountError = "Please enter a valid amount greater than 0"
                     }
                     else -> {
-                        onSave(parsedAmount, type, selectedCategory, notes, date)
+                        val transaction = Transaction(
+                            id = transactionId ?: java.util.UUID.randomUUID().toString(),
+                            amount = parsedAmount,
+                            type = type,
+                            category = selectedCategory,
+                            notes = notes,
+                            date = date
+                        )
+                        onSave(transaction)
                     }
                 }
             },
@@ -213,7 +250,7 @@ fun AddEditTransactionScreen(
             )
         ) {
             Text(
-                text = "Save Transaction",
+                text = if (transactionId == null) "Save Transaction" else "Update Transaction",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

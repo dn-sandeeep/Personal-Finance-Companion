@@ -64,6 +64,9 @@ fun AppNavigation(
                 onAddTransaction = {
                     navController.navigate(Screen.AddTransaction.createRoute())
                 },
+                onEditTransaction = { transactionId ->
+                    navController.navigate(Screen.EditTransaction.createRoute(transactionId))
+                },
                 viewModel = transactionViewModel
             )
         }
@@ -106,11 +109,51 @@ fun AppNavigation(
 
             AddEditTransactionScreen(
                 initialType = initialType,
-                onSave = { amount, type, category, notes, date ->
-                    transactionViewModel.addTransaction(amount, type, category, notes, date)
+                onSave = { transaction ->
+                    transactionViewModel.addTransaction(
+                        transaction.amount,
+                        transaction.type,
+                        transaction.category,
+                        transaction.notes,
+                        transaction.date
+                    )
                     navController.popBackStack()
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                viewModel = transactionViewModel
+            )
+        }
+
+        composable(
+            route = Screen.EditTransaction.route,
+            arguments = listOf(
+                navArgument("transactionId") {
+                    type = NavType.StringType
+                }
+            ),
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up,
+                    tween(400)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(400)
+                )
+            }
+        ) { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getString("transactionId")
+
+            AddEditTransactionScreen(
+                transactionId = transactionId,
+                onSave = { transaction ->
+                    transactionViewModel.updateTransaction(transaction)
+                    navController.popBackStack()
+                },
+                onBack = { navController.popBackStack() },
+                viewModel = transactionViewModel
             )
         }
     }
