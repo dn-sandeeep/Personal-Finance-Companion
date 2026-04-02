@@ -33,11 +33,13 @@ abstract class AppDatabase : RoomDatabase() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             applicationScope.launch {
-                populateDatabase(databaseProvider.get().transactionDao)
+                val db = databaseProvider.get()
+                populateDatabase(db.transactionDao, db.goalDao)
             }
         }
         
-        private suspend fun populateDatabase(dao: TransactionDao) {
+        private suspend fun populateDatabase(transactionDao: TransactionDao, goalDao: GoalDao) {
+            // Dummy Transactions
             val dummyTransactions = listOf(
                 TransactionEntity("1", 55000.0, "INCOME", "SALARY", 1743465600000, "March salary"),
                 TransactionEntity("2", 1200.0, "EXPENSE", "FOOD", 1743552000000, "Groceries at BigBasket"),
@@ -50,7 +52,26 @@ abstract class AppDatabase : RoomDatabase() {
                 TransactionEntity("9", 1500.0, "EXPENSE", "HEALTH", 1744156800000, "Medicine and consultation"),
                 TransactionEntity("10", 5000.0, "INCOME", "INVESTMENT", 1744243200000, "Dividend income")
             )
-            dummyTransactions.forEach { dao.insertTransaction(it) }
+            dummyTransactions.forEach { transactionDao.insertTransaction(it) }
+
+            // Dummy Goals
+            val goal1Id = "goal_emergency"
+            val goal2Id = "goal_travel"
+
+            val dummyGoals = listOf(
+                GoalEntity(goal1Id, "Emergency Fund", 10000.0, 2500.0, "Security", "#4CAF50"),
+                GoalEntity(goal2Id, "Travel Fund", 5000.0, 1200.0, "FlightTakeoff", "#2196F3")
+            )
+            dummyGoals.forEach { goalDao.insertGoal(it) }
+
+            // Dummy Contributions
+            val dummyContributions = listOf(
+                GoalContributionEntity("c1", goal1Id, 1500.0, 1743465600000),
+                GoalContributionEntity("c2", goal1Id, 1000.0, 1743552000000),
+                GoalContributionEntity("c3", goal2Id, 700.0, 1743638400000),
+                GoalContributionEntity("c4", goal2Id, 500.0, 1743724800000)
+            )
+            dummyContributions.forEach { goalDao.insertContribution(it) }
         }
     }
 }

@@ -43,4 +43,8 @@ class GoalRepositoryImpl(
     override suspend fun deleteGoal(id: String) {
         dao.deleteGoal(id)
     }
+
+    override suspend fun populateIfEmpty() {
+        dao.populateIfEmpty()
+    }
 }
