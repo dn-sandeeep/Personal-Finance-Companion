@@ -7,6 +7,8 @@ import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.domain.usecase.GetNoSpendStreakUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class GoalViewModel @Inject constructor(
     private val repository: GoalRepository,
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val getNoSpendStreakUseCase: GetNoSpendStreakUseCase
 ) : ViewModel() {
     
     val goals: StateFlow<List<Goal>> = repository.getAllGoals()
@@ -25,6 +28,9 @@ class GoalViewModel @Inject constructor(
     
     val currency: StateFlow<Currency> = preferencesRepository.currencyFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Currency.INR)
+
+    val noSpendStreak: StateFlow<NoSpendStreak> = getNoSpendStreakUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoSpendStreak(0, "Calculating...", true))
     
     fun createNewGoal(title: String, targetAmount: Double, iconName: String, colorHex: String) {
         viewModelScope.launch {
@@ -44,6 +50,12 @@ class GoalViewModel @Inject constructor(
     fun addSavings(goalId: String, amount: Double) {
         viewModelScope.launch {
             repository.addContribution(goalId, amount)
+        }
+    }
+
+    fun setNoSpendTarget(days: Int) {
+        viewModelScope.launch {
+            preferencesRepository.updateNoSpendTargetDays(days)
         }
     }
 }

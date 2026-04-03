@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
@@ -25,6 +26,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val REMINDER_TIME = stringPreferencesKey("reminder_time")
         val BUDGET_ALERTS_ENABLED = booleanPreferencesKey("budget_alerts_enabled")
         val GOAL_REMINDERS_ENABLED = booleanPreferencesKey("goal_reminders_enabled")
+        val NO_SPEND_TARGET = intPreferencesKey("no_spend_target")
     }
 
     override val budgetLimitFlow: Flow<Double> = dataStore.data
@@ -55,6 +57,11 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val goalRemindersEnabledFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.GOAL_REMINDERS_ENABLED] ?: true
+        }
+
+    override val noSpendTargetDaysFlow: Flow<Int> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.NO_SPEND_TARGET] ?: 7
         }
 
     override suspend fun updateBudgetLimit(limit: Double) {
@@ -90,6 +97,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateGoalRemindersEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.GOAL_REMINDERS_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun updateNoSpendTargetDays(days: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NO_SPEND_TARGET] = days
         }
     }
 }

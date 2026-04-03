@@ -51,6 +51,7 @@ fun GoalScreen(
     val colorScheme = MaterialTheme.colorScheme
     val goals by viewModel.goals.collectAsState()
     val currency by viewModel.currency.collectAsState()
+    val noSpendStreak by viewModel.noSpendStreak.collectAsState()
     var showAddGoalDialog by remember { mutableStateOf(false) }
     var selectedGoal by remember { mutableStateOf<Goal?>(null) }
     var showAddSavingsDialog by remember { mutableStateOf<Goal?>(null) }
@@ -130,7 +131,10 @@ fun GoalScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            NoSpendChallengeCard()
+            NoSpendChallengeCard(
+                streak = noSpendStreak.currentStreak,
+                message = noSpendStreak.message
+            )
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -348,7 +352,10 @@ private fun PrimaryObjectiveCard(currency: Currency) {
 }
 
 @Composable
-private fun NoSpendChallengeCard() {
+private fun NoSpendChallengeCard(
+    streak: Int,
+    message: String
+) {
     val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -387,7 +394,7 @@ private fun NoSpendChallengeCard() {
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Avoiding non-essential purchases this\nweek.",
+                text = message,
                 fontSize = 12.sp,
                 color = colorScheme.onSecondary.copy(alpha = 0.8f),
                 lineHeight = 18.sp
@@ -397,7 +404,7 @@ private fun NoSpendChallengeCard() {
             
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = "7-day",
+                    text = "$streak-day",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = colorScheme.onSecondary
