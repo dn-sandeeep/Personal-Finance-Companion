@@ -30,7 +30,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.ui.theme.ChartColors
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter.formatAmount
 
 data class PieChartEntry(
     val label: String,
@@ -41,6 +43,7 @@ data class PieChartEntry(
 @Composable
 fun PieChart(
     entries: List<PieChartEntry>,
+    currency: Currency,
     modifier: Modifier = Modifier
 ) {
     if (entries.isEmpty()) return
@@ -87,7 +90,7 @@ fun PieChart(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "₹${String.format("%,.0f", total)}",
+                    text = formatAmount(total, currency),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -134,7 +137,7 @@ fun PieChart(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "₹${String.format("%,.0f", entry.value)}",
+                    text = formatAmount(entry.value, currency),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )

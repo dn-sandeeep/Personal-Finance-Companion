@@ -180,7 +180,8 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
         ) {
             PieChart(
                 entries = state.categoryBreakdown,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(20.dp),
+                currency = currency
             )
         }
 
