@@ -1,5 +1,8 @@
 package com.sandeep.personalfinancecompanion.presentation.insights
 
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +38,7 @@ fun InsightsScreen(
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currency by viewModel.currency.collectAsStateWithLifecycle()
     val colorScheme = MaterialTheme.colorScheme
 
     when {
@@ -64,13 +68,13 @@ fun InsightsScreen(
         }
 
         else -> {
-            InsightsContent(state = state)
+            InsightsContent(state = state, currency = currency)
         }
     }
 }
 
 @Composable
-private fun InsightsContent(state: InsightsState) {
+private fun InsightsContent(state: InsightsState, currency: Currency) {
     val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
@@ -118,12 +122,14 @@ private fun InsightsContent(state: InsightsState) {
                         color = IncomeGreen
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "₹${String.format("%,.0f", state.balanceSummary.totalIncome)}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = IncomeGreen
-                    )
+                    Crossfade(targetState = currency, label = "income_anim") { curr ->
+                        Text(
+                            text = CurrencyFormatter.formatAmount(state.balanceSummary.totalIncome, curr),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = IncomeGreen
+                        )
+                    }
                 }
             }
 
@@ -141,12 +147,14 @@ private fun InsightsContent(state: InsightsState) {
                         color = ExpenseRed
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "₹${String.format("%,.0f", state.balanceSummary.totalExpense)}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = ExpenseRed
-                    )
+                    Crossfade(targetState = currency, label = "expense_anim") { curr ->
+                        Text(
+                            text = CurrencyFormatter.formatAmount(state.balanceSummary.totalExpense, curr),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = ExpenseRed
+                        )
+                    }
                 }
             }
         }

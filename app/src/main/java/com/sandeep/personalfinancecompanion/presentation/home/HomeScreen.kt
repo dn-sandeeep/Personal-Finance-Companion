@@ -1,5 +1,8 @@
 package com.sandeep.personalfinancecompanion.presentation.home
 
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -151,7 +154,8 @@ fun HomeScreen(
                     ?: emptyList()
                     DayDetailsContent(
                         dayLabel = label,
-                        transactions = txs
+                        transactions = txs,
+                        currency = state.selectedCurrency
                     )
                 }
             }
@@ -162,7 +166,8 @@ fun HomeScreen(
 @Composable
 private fun DayDetailsContent(
     dayLabel: String,
-    transactions: List<Transaction>
+    transactions: List<Transaction>,
+    currency: Currency
 ) {
     val timeFormatter = remember { SimpleDateFormat("hh:mm a, MMM dd, yyyy", Locale.getDefault()) }
 
@@ -240,9 +245,9 @@ private fun DayDetailsContent(
 
                             Text(
                                 text = if (transaction.type == TransactionType.INCOME) {
-                                    "+₹${String.format("%,.2f", transaction.amount)}"
+                                    "+${CurrencyFormatter.formatAmount(transaction.amount, currency)}"
                                 } else {
-                                    "-₹${String.format("%,.2f", transaction.amount)}"
+                                    "-${CurrencyFormatter.formatAmount(transaction.amount, currency)}"
                                 },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
@@ -274,6 +279,7 @@ private fun HomeContent(
     if (showBudgetDialog) {
         EditBudgetDialog(
             currentLimit = state.budgetLimit,
+            currency = state.selectedCurrency,
             onDismiss = { showBudgetDialog = false },
             onConfirm = { newLimit ->
                 showBudgetDialog = false
@@ -314,14 +320,16 @@ private fun HomeContent(
                     letterSpacing = 1.5.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "₹${String.format("%,.2f", state.balance.currentBalance)}",
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        fontSize = 36.sp
-                    ),
-                    color = colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+                Crossfade(targetState = state.selectedCurrency, label = "balance_anim") { currency ->
+                    Text(
+                        text = CurrencyFormatter.formatAmount(state.balance.currentBalance, currency),
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontSize = 36.sp
+                        ),
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -356,13 +364,15 @@ private fun HomeContent(
                                     letterSpacing = 0.5.sp
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "₹${String.format("%,.2f", state.balance.totalIncome)}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                )
+                                Crossfade(targetState = state.selectedCurrency, label = "income_anim") { currency ->
+                                    Text(
+                                        text = CurrencyFormatter.formatAmount(state.balance.totalIncome, currency),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = colorScheme.onPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                }
                             }
                         }
                     }
@@ -393,13 +403,15 @@ private fun HomeContent(
                                     letterSpacing = 0.5.sp
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "₹${String.format("%,.2f", state.balance.totalExpense)}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = colorScheme.onPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                )
+                                Crossfade(targetState = state.selectedCurrency, label = "expense_anim") { currency ->
+                                    Text(
+                                        text = CurrencyFormatter.formatAmount(state.balance.totalExpense, currency),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = colorScheme.onPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                }
                             }
                         }
                     }
@@ -585,6 +597,7 @@ private fun HomeContent(
             state.categoryExpenses.forEach { stats ->
                 CategoryBreakdownItem(
                     stats = stats,
+                    currency = state.selectedCurrency,
                     onClick = { onCategorySelected(stats.category) }
                 )
             }
@@ -599,6 +612,7 @@ private fun HomeContent(
 @Composable
 private fun CategoryBreakdownItem(
     stats: CategoryStats,
+    currency: Currency,
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -647,7 +661,7 @@ private fun CategoryBreakdownItem(
                         color = colorScheme.onSurface
                     )
                     Text(
-                        text = "₹${String.format("%,.0f", stats.amount)}",
+                        text = CurrencyFormatter.formatAmount(stats.amount, currency),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
@@ -721,6 +735,7 @@ private fun getCategoryColor(category: Category): Color {
 @Composable
 fun EditBudgetDialog(
     currentLimit: Double,
+    currency: Currency,
     onDismiss: () -> Unit,
     onConfirm: (Double) -> Unit
 ) {
@@ -742,7 +757,7 @@ fun EditBudgetDialog(
                 OutlinedTextField(
                     value = budgetInput,
                     onValueChange = { newValue: String -> budgetInput = newValue },
-                    label = { Text("Amount (₹)") },
+                    label = { Text("Amount (${currency.symbol})") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()

@@ -43,7 +43,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 
@@ -69,6 +71,9 @@ fun AddEditTransactionScreen(
 
     // Validation
     var amountError by remember { mutableStateOf<String?>(null) }
+
+    val listState by viewModel.listState.collectAsStateWithLifecycle()
+    val currency = listState.selectedCurrency
 
     LaunchedEffect(transactionId) {
         if (transactionId != null) {
@@ -158,7 +163,7 @@ fun AddEditTransactionScreen(
 
         // Amount
         Text(
-            text = "Amount (₹)",
+            text = "Amount (${currency.symbol})",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

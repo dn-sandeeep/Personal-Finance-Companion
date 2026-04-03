@@ -3,6 +3,7 @@ package com.sandeep.personalfinancecompanion.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
@@ -33,6 +34,7 @@ sealed interface HomeUiState {
         val recentTransactions: List<Transaction>,
         val budgetLimit: Double,
         val totalExpense: Double,
+        val selectedCurrency: Currency,
         val weeklyTrend: List<BarEntry>,
         val categoryExpenses: List<CategoryStats>,
         val selectedDayTransactions: List<Transaction>? = null,
@@ -56,6 +58,7 @@ class HomeViewModel @Inject constructor(
 
     private var allTransactions: List<Transaction> = emptyList()
     private var currentBudgetLimit: Double = 50000.0
+    private var currentCurrency: Currency = Currency.INR
 
     init {
         loadDashboard()
@@ -66,13 +69,23 @@ class HomeViewModel @Inject constructor(
             try {
                 _uiState.value = HomeUiState.Loading
 
-                // Collect preferences first to get budget
+                // Collect preferences first to get budget and currency
                 launch {
                     preferencesRepository.budgetLimitFlow.collect { limit ->
                         currentBudgetLimit = limit
                         val currentState = _uiState.value
                         if (currentState is HomeUiState.Success) {
                             _uiState.value = currentState.copy(budgetLimit = limit)
+                        }
+                    }
+                }
+
+                launch {
+                    preferencesRepository.currencyFlow.collect { currency ->
+                        currentCurrency = currency
+                        val currentState = _uiState.value
+                        if (currentState is HomeUiState.Success) {
+                            _uiState.value = currentState.copy(selectedCurrency = currency)
                         }
                     }
                 }
@@ -112,6 +125,7 @@ class HomeViewModel @Inject constructor(
                         recentTransactions = transactions.take(5),
                         budgetLimit = currentBudgetLimit,
                         totalExpense = balance.totalExpense,
+                        selectedCurrency = currentCurrency,
                         weeklyTrend = weeklyTrend,
                         categoryExpenses = categoryStatsList
                     )

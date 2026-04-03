@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -41,6 +42,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +54,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sandeep.personalfinancecompanion.presentation.profile.components.CurrencySelectionDialog
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 
 @Composable
@@ -59,6 +64,7 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
+    var showCurrencyDialog by remember { mutableStateOf(false) }
 
     // Permission launcher for Android 13+
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -139,14 +145,16 @@ fun ProfileScreen(
             SettingsCard {
                 SettingsItem(
                     title = "Currency",
-                    value = "Default",
-                    icon = Icons.Default.CurrencyExchange
+                    value = "${state.selectedCurrency.flag} ${state.selectedCurrency.code}",
+                    icon = Icons.Default.CurrencyExchange,
+                    onClick = { showCurrencyDialog = true }
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
                 SettingsItem(
                     title = "Export Data",
                     value = "CSV / PDF",
-                    icon = Icons.Default.Download
+                    icon = Icons.Default.Download,
+                    onClick = { /* Export logic */ }
                 )
             }
 
@@ -173,6 +181,14 @@ fun ProfileScreen(
                 )
             }
         }
+    }
+
+    if (showCurrencyDialog) {
+        CurrencySelectionDialog(
+            selectedCurrency = state.selectedCurrency,
+            onCurrencySelected = { viewModel.updateCurrency(it) },
+            onDismiss = { showCurrencyDialog = false }
+        )
     }
 }
 
@@ -292,11 +308,13 @@ fun SettingsToggleItem(
 fun SettingsItem(
     title: String,
     value: String,
-    icon: ImageVector
+    icon: ImageVector,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

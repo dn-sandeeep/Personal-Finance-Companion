@@ -2,6 +2,7 @@ package com.sandeep.personalfinancecompanion.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +17,7 @@ data class ProfileState(
     val reminderTime: String = "20:00",
     val budgetAlertsEnabled: Boolean = true,
     val goalRemindersEnabled: Boolean = true,
+    val selectedCurrency: Currency = Currency.INR,
     val isLoading: Boolean = true
 )
 
@@ -28,13 +30,15 @@ class ProfileViewModel @Inject constructor(
         preferencesRepository.dailyReminderEnabledFlow,
         preferencesRepository.reminderTimeFlow,
         preferencesRepository.budgetAlertsEnabledFlow,
-        preferencesRepository.goalRemindersEnabledFlow
-    ) { daily, time, budget, goals ->
+        preferencesRepository.goalRemindersEnabledFlow,
+        preferencesRepository.currencyFlow
+    ) { daily, time, budget, goals, currency ->
         ProfileState(
             dailyReminderEnabled = daily,
             reminderTime = time,
             budgetAlertsEnabled = budget,
             goalRemindersEnabled = goals,
+            selectedCurrency = currency,
             isLoading = false
         )
     }.stateIn(
@@ -64,6 +68,12 @@ class ProfileViewModel @Inject constructor(
     fun toggleGoalReminders(enabled: Boolean) {
         viewModelScope.launch {
             preferencesRepository.updateGoalRemindersEnabled(enabled)
+        }
+    }
+
+    fun updateCurrency(currency: Currency) {
+        viewModelScope.launch {
+            preferencesRepository.updateCurrency(currency)
         }
     }
 }

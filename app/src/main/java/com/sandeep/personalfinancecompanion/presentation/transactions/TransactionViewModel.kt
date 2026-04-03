@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
@@ -24,6 +25,7 @@ import javax.inject.Inject
 
 data class TransactionListState(
     val transactions: List<Transaction> = emptyList(),
+    val selectedCurrency: Currency = Currency.INR,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -46,10 +48,11 @@ class TransactionViewModel @Inject constructor(
 
     val listState: StateFlow<TransactionListState> = combine(
         getTransactionsUseCase(),
+        preferencesRepository.currencyFlow,
         _searchQuery,
         _selectedFilter,
         _isLoading
-    ) { transactions, query, filter, loading ->
+    ) { transactions, currency, query, filter, loading ->
         val filtered = transactions
             .filter { transaction ->
                 if (filter != null) transaction.type == filter else true
@@ -63,6 +66,7 @@ class TransactionViewModel @Inject constructor(
 
         TransactionListState(
             transactions = filtered,
+            selectedCurrency = currency,
             isLoading = loading,
             error = null
         )

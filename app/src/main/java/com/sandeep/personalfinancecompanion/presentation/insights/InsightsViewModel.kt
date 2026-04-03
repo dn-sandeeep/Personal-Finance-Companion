@@ -13,8 +13,13 @@ import com.sandeep.personalfinancecompanion.presentation.components.PieChartEntr
 import com.sandeep.personalfinancecompanion.ui.theme.ChartColors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,8 +36,12 @@ data class InsightsState(
 class InsightsViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val calculateBalanceUseCase: CalculateBalanceUseCase,
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val preferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
+    
+    val currency: StateFlow<Currency> = preferencesRepository.currencyFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Currency.INR)
 
     private val _state = MutableStateFlow(InsightsState())
     val state: StateFlow<InsightsState> = _state.asStateFlow()

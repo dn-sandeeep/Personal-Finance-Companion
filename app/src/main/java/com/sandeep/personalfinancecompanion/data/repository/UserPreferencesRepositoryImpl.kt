@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -31,9 +32,9 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             preferences[PreferencesKeys.BUDGET_LIMIT] ?: 50000.0
         }
 
-    override val currencyCodeFlow: Flow<String?> = dataStore.data
+    override val currencyFlow: Flow<Currency> = dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.CURRENCY_CODE]
+            Currency.fromCode(preferences[PreferencesKeys.CURRENCY_CODE])
         }
 
     override val dailyReminderEnabledFlow: Flow<Boolean> = dataStore.data
@@ -62,9 +63,9 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateCurrencyCode(code: String) {
+    override suspend fun updateCurrency(currency: Currency) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CURRENCY_CODE] = code
+            preferences[PreferencesKeys.CURRENCY_CODE] = currency.code
         }
     }
 

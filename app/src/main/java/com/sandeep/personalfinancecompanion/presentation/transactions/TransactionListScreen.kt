@@ -1,5 +1,7 @@
 package com.sandeep.personalfinancecompanion.presentation.transactions
 
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -199,7 +201,7 @@ fun TransactionListScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "${if (netAmount >= 0) "+" else "-"}₹${String.format("%,.2f", kotlin.math.abs(netAmount))} Net",
+                                    text = "${if (netAmount >= 0) "+" else "-"}${CurrencyFormatter.formatAmount(kotlin.math.abs(netAmount), listState.selectedCurrency)} Net",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onSurfaceVariant
                                 )
@@ -209,6 +211,7 @@ fun TransactionListScreen(
                         items(items = transactions, key = { it.id }) { transaction ->
                             SwipeableTransactionItem(
                                 transaction = transaction,
+                                currency = listState.selectedCurrency,
                                 onDelete = {
                                     viewModel.deleteTransaction(transaction.id)
                                     scope.launch {
@@ -271,6 +274,7 @@ private fun Chip(
 @Composable
 private fun SwipeableTransactionItem(
     transaction: Transaction,
+    currency: Currency,
     onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
@@ -336,7 +340,8 @@ private fun SwipeableTransactionItem(
         }
     ) {
         TransactionListItem(
-            transaction = transaction
+            transaction = transaction,
+            currency = currency
         )
     }
 }

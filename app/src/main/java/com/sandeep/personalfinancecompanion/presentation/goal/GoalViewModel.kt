@@ -3,8 +3,10 @@ package com.sandeep.personalfinancecompanion.presentation.goal
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.domain.model.Goal
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
+import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -14,11 +16,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GoalViewModel @Inject constructor(
-    private val repository: com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
+    private val repository: GoalRepository,
+    private val preferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
     
     val goals: StateFlow<List<Goal>> = repository.getAllGoals()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    
+    val currency: StateFlow<Currency> = preferencesRepository.currencyFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Currency.INR)
     
     fun createNewGoal(title: String, targetAmount: Double, iconName: String, colorHex: String) {
         viewModelScope.launch {

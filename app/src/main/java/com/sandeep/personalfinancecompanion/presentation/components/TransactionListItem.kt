@@ -1,5 +1,7 @@
 package com.sandeep.personalfinancecompanion.presentation.components
 
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +34,7 @@ import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 @Composable
 fun TransactionListItem(
     transaction: Transaction,
+    currency: Currency,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -114,7 +117,7 @@ fun TransactionListItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "${if (isIncome) "+" else "-"}₹${String.format("%,.2f", transaction.amount)}",
+                    text = "${if (isIncome) "+" else "-"}${CurrencyFormatter.formatAmount(transaction.amount, currency)}",
                     style = MaterialTheme.typography.titleLarge,
                     color = amountColor,
                     fontWeight = FontWeight.Bold,
