@@ -61,6 +61,7 @@ import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.presentation.components.TransactionListItem
 import com.sandeep.personalfinancecompanion.ui.theme.ExpenseRed
+import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -116,7 +117,7 @@ fun TransactionListScreen(
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = "Search", tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                 },
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = colorScheme.surfaceVariant,
                     focusedContainerColor = colorScheme.surfaceVariant,
@@ -201,9 +202,9 @@ fun TransactionListScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "${if (netAmount >= 0) "+" else "-"}${CurrencyFormatter.formatAmount(kotlin.math.abs(netAmount), listState.selectedCurrency)} Net",
+                                    text = "${CurrencyFormatter.formatAmount(kotlin.math.abs(netAmount), listState.selectedCurrency)} Net",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = colorScheme.onSurfaceVariant
+                                    color = if (netAmount >= 0) IncomeGreen else ExpenseRed
                                 )
                             }
                         }
