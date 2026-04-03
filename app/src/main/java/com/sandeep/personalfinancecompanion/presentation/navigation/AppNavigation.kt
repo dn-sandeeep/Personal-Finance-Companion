@@ -17,6 +17,7 @@ import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.presentation.goal.GoalScreen
 import com.sandeep.personalfinancecompanion.presentation.home.HomeScreen
 import com.sandeep.personalfinancecompanion.presentation.insights.InsightsScreen
+import com.sandeep.personalfinancecompanion.presentation.profile.ProfileScreen
 import com.sandeep.personalfinancecompanion.presentation.transactions.AddEditTransactionScreen
 import com.sandeep.personalfinancecompanion.presentation.transactions.TransactionListScreen
 import com.sandeep.personalfinancecompanion.presentation.transactions.TransactionViewModel
@@ -101,6 +102,12 @@ fun AppNavigation(
             InsightsScreen()
         }
 
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
         composable(
             route = Screen.AddTransaction.route,
             arguments = listOf(
@@ -156,14 +163,14 @@ fun AppNavigation(
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Up,
-                    tween(400)
-                )
+                    animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(500))
             },
             exitTransition = {
                 slideOutOfContainer(
                     AnimatedContentTransitionScope.SlideDirection.Down,
-                    tween(400)
-                )
+                    animationSpec = tween(500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(500))
             }
         ) { backStackEntry ->
             val transactionId = backStackEntry.arguments?.getString("transactionId")

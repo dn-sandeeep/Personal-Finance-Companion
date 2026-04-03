@@ -7,7 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -40,18 +43,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.sandeep.personalfinancecompanion.presentation.navigation.AppNavigation
 import com.sandeep.personalfinancecompanion.presentation.navigation.Screen
 import com.sandeep.personalfinancecompanion.presentation.navigation.bottomNavItems
 import com.sandeep.personalfinancecompanion.ui.theme.PersonalFinanceCompanionTheme
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.activity.viewModels
+import androidx.navigation.compose.rememberNavController
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val mainViewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Triggering mainViewModel initialization to start observing and scheduling
+        mainViewModel
         enableEdgeToEdge()
         setContent {
             PersonalFinanceCompanionTheme {
@@ -107,7 +115,13 @@ fun FinanceApp() {
                 actions = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 12.dp)
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                navController.navigate(Screen.Profile.route)
+                            }
+                            .padding(8.dp)
                     ) {
                         Text(
                             text = "User",

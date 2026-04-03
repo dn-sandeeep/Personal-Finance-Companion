@@ -35,8 +35,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
@@ -60,8 +66,6 @@ fun AddEditTransactionScreen(
     var notes by remember { mutableStateOf("") }
     var date by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var expanded by remember { mutableStateOf(false) }
-
-    val listState by viewModel.listState.collectAsStateWithLifecycle()
 
     // Validation
     var amountError by remember { mutableStateOf<String?>(null) }
@@ -93,13 +97,27 @@ fun AddEditTransactionScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = if (transactionId == null) "NEW ENTRY" else "EDIT ENTRY",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (transactionId == null) "NEW ENTRY" else "EDIT ENTRY",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+            
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = MaterialTheme.colorScheme.outline
+                )
+            }
+        }
         
         Spacer(modifier = Modifier.height(16.dp))
 
