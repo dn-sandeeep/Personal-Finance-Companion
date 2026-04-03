@@ -104,7 +104,7 @@ fun TransactionListScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // ──── Search & Filters ────
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.onSearchQueryChanged(it) },

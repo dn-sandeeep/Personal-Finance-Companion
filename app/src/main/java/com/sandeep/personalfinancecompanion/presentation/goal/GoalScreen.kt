@@ -139,7 +139,7 @@ fun GoalScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 10.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             

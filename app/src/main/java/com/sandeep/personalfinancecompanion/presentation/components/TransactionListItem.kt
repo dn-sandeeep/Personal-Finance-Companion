@@ -41,7 +41,7 @@ fun TransactionListItem(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val isIncome = transaction.type == TransactionType.INCOME
-    
+
     // Assigning specific badge colors based on category
     val badgeColor = when (transaction.category) {
         Category.FOOD, Category.BILLS -> colorScheme.errorContainer.copy(alpha = 0.5f)
@@ -57,7 +57,8 @@ fun TransactionListItem(
     val statusColor = if (isIncome) IncomeGreen else ExpenseRed
 
     // Title mapping (Fallback to Category if Notes are empty)
-    val title = if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
+    val title =
+        if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
     val subtitle = transaction.category.displayName
 
     Card(
@@ -119,32 +120,22 @@ fun TransactionListItem(
             ) {
                 Text(
                     text = CurrencyFormatter.formatAmount(transaction.amount, currency),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = if (isIncome) IncomeGreen else ExpenseRed,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
-//                if (transaction.category == Category.FOOD && !isIncome) {
-//                    Box(
-//                        modifier = Modifier
-//                            .width(30.dp)
-//                            .height(4.dp)
-//                            .clip(RoundedCornerShape(2.dp))
-//                            .background(colorScheme.secondary)
-//                    )
-//                } else {
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = statusColor,
-                        fontSize = 10.sp,
-                        letterSpacing = 0.5.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                //}
+
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = statusColor,
+                    fontSize = 10.sp,
+                    letterSpacing = 0.5.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

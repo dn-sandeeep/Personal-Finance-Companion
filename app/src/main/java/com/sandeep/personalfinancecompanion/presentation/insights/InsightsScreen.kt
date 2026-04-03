@@ -80,14 +80,14 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 10.dp)
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Quick Stats Row
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             StatCard(
                 title = "Top Category",
@@ -101,21 +101,21 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Income vs Expense Overview
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Card(
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = IncomeGreen.copy(alpha = 0.1f)
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = "Total Income",
                         style = MaterialTheme.typography.labelMedium,
@@ -135,12 +135,12 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
 
             Card(
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = ExpenseRed.copy(alpha = 0.1f)
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = "Total Expense",
                         style = MaterialTheme.typography.labelMedium,
@@ -172,7 +172,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Card(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(
                 containerColor = colorScheme.surface
             ),
@@ -180,7 +180,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
         ) {
             PieChart(
                 entries = state.categoryBreakdown,
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(25.dp),
                 currency = currency
             )
         }
@@ -198,13 +198,13 @@ private fun StatCard(
     val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorScheme.surfaceVariant
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(10.dp)
         ) {
             Text(
                 text = title,
