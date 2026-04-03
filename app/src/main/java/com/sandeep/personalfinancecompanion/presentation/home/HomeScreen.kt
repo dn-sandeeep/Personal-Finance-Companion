@@ -270,7 +270,7 @@ private fun HomeContent(
     onAddIncome: () -> Unit,
     onAddExpense: () -> Unit,
     onDaySelected: (Int) -> Unit,
-    onCategorySelected: (com.sandeep.personalfinancecompanion.domain.model.Category) -> Unit,
+    onCategorySelected: (Category) -> Unit,
     onUpdateBudget: (Double) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -293,15 +293,15 @@ private fun HomeContent(
             .fillMaxSize()
             .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(top = 8.dp)
+            .padding(horizontal = 10.dp, vertical = 10.dp)
     ) {
 
         // ──── Balance Card ────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .clip(RoundedCornerShape(24.dp))
+                .padding(horizontal = 0.dp)
+                .clip(RoundedCornerShape(15.dp))
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
@@ -419,14 +419,14 @@ private fun HomeContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // ──── Weekly Trend Card ────
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(20.dp),
+                .padding(horizontal = 0.dp),
+            shape = RoundedCornerShape(15.dp),
             colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
@@ -442,12 +442,12 @@ private fun HomeContent(
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
-                    Text(
-                        text = "+12.5% ↗",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.secondary,
-                        fontWeight = FontWeight.SemiBold
-                    )
+//                    Text(
+//                        text = "+12.5% ↗",
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = colorScheme.secondary,
+//                        fontWeight = FontWeight.SemiBold
+//                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -461,19 +461,19 @@ private fun HomeContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // ──── Savings Goal Card ────
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            shape = RoundedCornerShape(20.dp),
+                .padding(horizontal = 0.dp),
+            shape = RoundedCornerShape(15.dp),
             colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
@@ -514,19 +514,8 @@ private fun HomeContent(
                     strokeWidth = 12.dp
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+               Spacer(modifier = Modifier.height(10.dp))
 
-                TextButton(
-                    onClick = { showBudgetDialog = true },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = colorScheme.primary
-                    )
-                ) {
-                    Text(
-                        text = "Edit Budget",
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
             }
         }
 
@@ -624,7 +613,7 @@ private fun CategoryBreakdownItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -638,7 +627,7 @@ private fun CategoryBreakdownItem(
             Box(
                 modifier = Modifier
                     .size(52.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(15.dp))
                     .background(categoryColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
@@ -718,6 +707,7 @@ private fun CategoryBreakdownItem(
             }
         }
     }
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
 private fun getCategoryColor(category: Category): Color {

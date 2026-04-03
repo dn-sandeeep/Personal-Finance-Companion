@@ -3,6 +3,7 @@ package com.sandeep.personalfinancecompanion.presentation.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,10 +27,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
+import com.sandeep.personalfinancecompanion.ui.theme.BudgetCaution
+import com.sandeep.personalfinancecompanion.ui.theme.BudgetDanger
+import com.sandeep.personalfinancecompanion.ui.theme.BudgetSafe
 
 
 data class BarEntry(
@@ -141,7 +144,7 @@ fun WeeklyTrendChart(
                 ) {
                     val barCount = entries.size
                     val totalWidth = size.width
-                    val barWidth = totalWidth / (barCount * 1.8f)
+                    val barWidth = totalWidth / (barCount * 1f)
                     val gap = (totalWidth - (barWidth * barCount)) / (barCount + 1)
 
                     // Draw Y-axis line
@@ -168,7 +171,22 @@ fun WeeklyTrendChart(
                         val barHeight = (entry.value / maxValue) * size.height * animProgress
                         val x = gap + index * (barWidth + gap)
 
-                        val color = if (entry.isHighlighted) highlightColor else barColorLight
+                        // Dynamic Color Logic based on value thresholds
+                        // Using Budget colors from Color.kt: Safe (Green), Caution (Orange), Danger (Red)
+                        val dynamicBarColor = when {
+                            entry.value == 0f -> Color.LightGray.copy(alpha = 0.3f)
+                            entry.value < 500f -> BudgetSafe
+                            entry.value < 1500f -> BudgetCaution
+                            else -> BudgetDanger
+                        }
+
+                        // Use dynamicBarColor as the base. If highlighted (current day), use full opacity.
+                        // Otherwise, use slightly reduced opacity to make the current day stand out.
+                        val color = if (entry.isHighlighted) {
+                            dynamicBarColor
+                        } else {
+                            dynamicBarColor.copy(alpha = 0.6f)
+                        }
 
                         drawRoundRect(
                             color = color,
