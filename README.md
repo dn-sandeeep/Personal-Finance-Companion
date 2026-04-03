@@ -10,31 +10,46 @@ The heart of the app where you get an instant snapshot of your financial health.
 - **Budget Ring:** A visual representation of your monthly spending against your budget.
 - **Weekly Trend Chart:** Analyze your spending patterns over the last 7 days with interactive bar charts.
 
-![Dashboard Screenshot](https://via.placeholder.com/300x600?text=Dashboard+Home)
+<img width="200" height="600" alt="home screen" src="https://github.com/user-attachments/assets/25e0b20c-03f2-4f36-83d0-d8a2ee5cf344" />
 
 ### 📝 Transaction Management
 Effortlessly record and categorize every penny.
-- **Add/Edit Transactions:** Quickly log income or expenses with details like amount, category, date, and description.
 - **Transaction History:** A comprehensive list of all your activities with powerful filtering.
 - **Categories:** Organize your spending into intuitive categories (Food, Transport, Entertainment, etc.).
+- **Add Transactions:** Quickly log income or expenses with details like amount, category, date, and description.
+- **Edit Transaction:** Swipe right on the transaction that you need to edit.
+- **Delete Transaction:** Swipe left on the transaction that you need to delete.
 
-![Transactions Screenshot](https://via.placeholder.com/300x600?text=Transaction+List) ![Add Transaction](https://via.placeholder.com/300x600?text=Add+Transaction)
+<img width="200" height="600" alt="Trandsaction history" src="https://github.com/user-attachments/assets/0b5a5dff-2892-4b7d-bca1-c1426ca96fda" />
+
+<img width="200" height="600" alt="add transaction" src="https://github.com/user-attachments/assets/25d5c1d3-409d-451c-9343-2c49547249d3" />
+
+<img width="200" height="600" alt="Edit trandsaction" src="https://github.com/user-attachments/assets/0a0c203f-2368-4f74-b313-97b47944eee8" />
+
+<img width="200" height="600" alt="Delete trandsaction" src="https://github.com/user-attachments/assets/08aaa065-0c79-4198-b307-046a5f067477" />
+
 
 ### 🎯 Financial Goals
 Save for what matters most.
-- **Goal Tracking:** Create specific financial goals (e.g., "New Car", "Vacation Fund").
+- **Goal Tracking:** Create specific financial goals (e.g., "New Car", "Dream Home").
 - **Contribution Log:** Record contributions towards your goals and watch your progress bar grow.
 - **Target Dates:** Stay motivated with clear deadlines for each goal.
+- **Prioritize Goal:** Prioritize your goal that is important to you.
+- **No Spend Challenge:** User can choose the days for the challenge to avoid non-essential spends (e.g., entertainment, food)
 
-![Goals Screenshot](https://via.placeholder.com/300x600?text=Financial+Goals)
+<img width="200" height="600" alt="Goal" src="https://github.com/user-attachments/assets/1df24c88-40ab-45bf-8110-ce8ab30827fa" />
+
+<img width="200" height="600" alt="Goal-2" src="https://github.com/user-attachments/assets/c3ffd0fd-12d5-4020-a252-da86d90decdf" />
+
 
 ### 📊 Advanced Insights
-Data-driven decisions for better saving.
+Data-driven decisions for better savings.
 - **Pie Charts:** Visualize your spending distribution across different categories.
 - **Category Analysis:** Identify where most of your money goes and find opportunities to save.
 - **Dynamic Filtering:** View insights for different time periods (Weekly, Monthly, Yearly).
 
-![Insights Screenshot](https://via.placeholder.com/300x600?text=Spending+Insights)
+<img width="200" height="600" alt="Insights" src="https://github.com/user-attachments/assets/125d53ba-648e-4656-9f5e-399ae7222cfe" />
+
 
 ### 🔔 Smart Notifications
 Stay informed without effort.
@@ -48,7 +63,10 @@ Stay informed without effort.
 ### 1. Setting Up Your Profile
 When you first open the app, head to the **Profile** section to select your preferred **Currency**. This will ensure all your financial data is displayed in a way that makes sense to you.
 
-![Profile Screenshot](https://via.placeholder.com/300x600?text=User+Profile)
+<img width="200" height="600" alt="Settings" src="https://github.com/user-attachments/assets/ff02e4e2-cb0f-4d74-b422-b5810d319001" />
+<img width="200" height="600" alt="Currency" src="https://github.com/user-attachments/assets/c44c7d23-5338-4a3c-b089-64004561abde" />
+
+
 
 ### 2. Logging Your First Transaction
 - Tap the **"+" (Add)** button on the Transaction screen.
