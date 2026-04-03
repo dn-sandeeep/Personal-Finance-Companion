@@ -1,14 +1,26 @@
 package com.sandeep.personalfinancecompanion.presentation.goal
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import android.graphics.Color.parseColor
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
@@ -17,35 +29,59 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
-import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Goal
+import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import java.util.Calendar
 import java.util.Locale
 
@@ -70,8 +106,8 @@ fun GoalScreen(
         GoalTypePickerDialog(
             currency = currency,
             onDismiss = { showAddGoalDialog = false },
-            onGoalSelected = { title, target, icon, color ->
-                viewModel.createNewGoal(title, target, icon, color)
+            onGoalSelected = { title, target, icon, color, date ->
+                viewModel.createNewGoal(title, target, icon, color, date)
                 showAddGoalDialog = false
             }
         )
@@ -123,7 +159,8 @@ fun GoalScreen(
             GoalDetailBottomSheet(
                 goal = selectedGoal!!,
                 currency = currency,
-                onAddMoneyClick = { showAddSavingsDialog = it }
+                onAddMoneyClick = { showAddSavingsDialog = it },
+                onEditDate = { goalId, date -> viewModel.updateGoalTargetDate(goalId, date) }
             )
         }
     }
@@ -134,7 +171,7 @@ fun GoalScreen(
             .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
-        
+
         // Content Padding
         Column(
             modifier = Modifier
@@ -142,7 +179,7 @@ fun GoalScreen(
                 .padding(horizontal = 10.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "Active Goals",
                 style = MaterialTheme.typography.headlineMedium,
@@ -156,54 +193,62 @@ fun GoalScreen(
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             PrimaryObjectiveCard(currency = currency)
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             NoSpendChallengeCard(
                 streakData = noSpendStreak,
                 currency = currency,
                 onClick = { showNoSpendCalendar = true }
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             goals.forEach { goal ->
                 SmallGoalCard(
                     icon = getIconForName(goal.iconName),
-                    iconBgColor = Color(android.graphics.Color.parseColor(goal.colorHex)).copy(alpha = 0.2f),
-                    iconTintColor = Color(android.graphics.Color.parseColor(goal.colorHex)),
+                    iconBgColor = Color(parseColor(goal.colorHex)).copy(alpha = 0.2f),
+                    iconTintColor = Color(parseColor(goal.colorHex)),
                     title = goal.title,
                     progress = goal.progress,
-                    progressColor = Color(android.graphics.Color.parseColor(goal.colorHex)),
+                    isOverdue = goal.isOverdue,
+                    daysRemaining = goal.daysRemaining,
+                    progressColor = Color(parseColor(goal.colorHex)),
                     trackColor = colorScheme.outlineVariant,
                     onClick = { selectedGoal = goal }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             CreateNewGoalButton(onClick = { showAddGoalDialog = true })
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             SavingVelocityCard()
-            
+
             Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalTypePickerDialog(
     currency: Currency,
     onDismiss: () -> Unit,
-    onGoalSelected: (String, Double, String, String) -> Unit
+    onGoalSelected: (String, Double, String, String, Long?) -> Unit
 ) {
+    var selectedGoalIndex by remember { mutableStateOf<Int?>(null) }
+    var selectedDate by remember { mutableStateOf<Long?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
     val predefinedGoals = listOf(
         Triple("New Car", 25000.0, "DirectionsCar"),
         Triple("Dream Home", 500000.0, "Home"),
@@ -213,19 +258,43 @@ fun GoalTypePickerDialog(
     )
     val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0")
 
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedDate = datePickerState.selectedDateMillis
+                    showDatePicker = false
+                }) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select a Goal") },
+        title = { Text("Select Goal Type") },
         text = {
             Column {
                 predefinedGoals.forEachIndexed { index, (title, target, icon) ->
                     val color = colors[index % colors.size]
-                    TextButton(
-                        onClick = { onGoalSelected(title, target, icon, color) },
-                        modifier = Modifier.fillMaxWidth()
+                    val isSelected = selectedGoalIndex == index
+                    
+                    Surface(
+                        onClick = { selectedGoalIndex = index },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                        border = if (isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -234,20 +303,67 @@ fun GoalTypePickerDialog(
                                 tint = Color(android.graphics.Color.parseColor(color))
                             )
                             Spacer(modifier = Modifier.width(16.dp))
-                            Text(title)
+                            Text(
+                                text = title,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
                             Spacer(modifier = Modifier.weight(1f))
-                            Text(CurrencyFormatter.formatAmount(target, currency), style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                text = CurrencyFormatter.formatAmount(target, currency),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TextButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (selectedDate == null) "Add Target Date (Optional)"
+                            else "Target: ${
+                                java.text.SimpleDateFormat(
+                                    "MMM dd, yyyy",
+                                    Locale.getDefault()
+                                ).format(java.util.Date(selectedDate!!))
+                            }"
+                        )
                     }
                 }
             }
         },
         confirmButton = {
+            Button(
+                onClick = {
+                    selectedGoalIndex?.let { index ->
+                        val (title, target, icon) = predefinedGoals[index]
+                        val color = colors[index % colors.size]
+                        onGoalSelected(title, target, icon, color, selectedDate)
+                    }
+                },
+                enabled = selectedGoalIndex != null
+            ) {
+                Text("Confirm Goal")
+            }
+        },
+        dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         },
-        containerColor = MaterialTheme.colorScheme.primaryContainer
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }
 
@@ -286,7 +402,10 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                 // Pill
                 Box(
                     modifier = Modifier
-                        .background(colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                        .background(
+                            colorScheme.primary.copy(alpha = 0.1f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
@@ -297,7 +416,7 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                         letterSpacing = 1.sp
                     )
                 }
-                
+
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "65%",
@@ -313,9 +432,9 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "Save ${CurrencyFormatter.formatAmount(2000.0, currency)} for a\nnew laptop",
                 style = MaterialTheme.typography.titleLarge,
@@ -323,9 +442,9 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                 color = colorScheme.onPrimaryContainer,
                 lineHeight = 28.sp
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             LinearProgressIndicator(
                 progress = { 0.65f },
                 modifier = Modifier
@@ -335,9 +454,9 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                 color = colorScheme.primary,
                 trackColor = colorScheme.surfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -357,7 +476,7 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                         color = colorScheme.onSurface
                     )
                 }
-                
+
                 // Divider
                 Box(
                     modifier = Modifier
@@ -365,7 +484,7 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                         .width(1.dp)
                         .background(colorScheme.outlineVariant)
                 )
-                
+
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Target",
@@ -392,7 +511,7 @@ private fun NoSpendChallengeCard(
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    
+
     val cardBackground = if (streakData.hasSpentToday) {
         Brush.linearGradient(
             colors = listOf(Color(0xFF424242), Color(0xFF212121))
@@ -434,7 +553,10 @@ private fun NoSpendChallengeCard(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .background(statusColor.copy(alpha = 0.15f), RoundedCornerShape(14.dp)),
+                                .background(
+                                    statusColor.copy(alpha = 0.15f),
+                                    RoundedCornerShape(14.dp)
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -444,18 +566,18 @@ private fun NoSpendChallengeCard(
                                 modifier = Modifier.size(26.dp)
                             )
                         }
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         Text(
                             text = "No Spend Challenge",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = statusColor
                         )
-                        
+
                         Spacer(modifier = Modifier.height(4.dp))
-                        
+
                         Text(
                             text = streakData.message,
                             fontSize = 13.sp,
@@ -470,7 +592,12 @@ private fun NoSpendChallengeCard(
                         modifier = Modifier.size(80.dp)
                     ) {
                         CircularProgressIndicator(
-                            progress = { (streakData.currentStreak.toFloat() / streakData.targetDays.toFloat()).coerceIn(0f, 1f) },
+                            progress = {
+                                (streakData.currentStreak.toFloat() / streakData.targetDays.toFloat()).coerceIn(
+                                    0f,
+                                    1f
+                                )
+                            },
                             modifier = Modifier.size(70.dp),
                             color = statusColor,
                             strokeWidth = 6.dp,
@@ -493,9 +620,9 @@ private fun NoSpendChallengeCard(
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 // Mini Stats
                 Row(
                     modifier = Modifier
@@ -516,10 +643,13 @@ private fun NoSpendChallengeCard(
                             .width(1.dp),
                         color = statusColor.copy(alpha = 0.1f)
                     )
-                    
+
                     NoSpendMiniStat(
                         label = "POTENTIAL SAVINGS",
-                        value = CurrencyFormatter.formatAmount(streakData.potentialSavings, currency),
+                        value = CurrencyFormatter.formatAmount(
+                            streakData.potentialSavings,
+                            currency
+                        ),
                         color = statusColor
                     )
                 }
@@ -558,7 +688,7 @@ fun NoSpendTargetDialog(
     onConfirm: (Int) -> Unit
 ) {
     val options = listOf(7, 14, 21, 30, 60, 90)
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Set Challenge Target") },
@@ -577,7 +707,10 @@ fun NoSpendTargetDialog(
                             onClick = { onConfirm(days) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = "$days Days Challenge", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = "$days Days Challenge",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
@@ -595,7 +728,7 @@ fun NoSpendCalendarBottomSheet(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val calendar = Calendar.getInstance()
-    
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -607,16 +740,16 @@ fun NoSpendCalendarBottomSheet(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
         )
-        
+
         Text(
             text = "Track your discipline over the last 30 days.",
             style = MaterialTheme.typography.bodyMedium,
             color = colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // Grid of 30 days
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             val rows = 5
@@ -638,7 +771,7 @@ fun NoSpendCalendarBottomSheet(
                         val dayIndex = r * cols + c
                         val dayTimestamp = today - (dayIndex * oneDayMillis)
                         val isNoSpend = streak.noSpendDays.contains(dayTimestamp)
-                        
+
                         Box(
                             modifier = Modifier
                                 .padding(6.dp)
@@ -663,7 +796,9 @@ fun NoSpendCalendarBottomSheet(
                                     modifier = Modifier.size(20.dp)
                                 )
                             } else {
-                                val dayOfMonth = Calendar.getInstance().apply { timeInMillis = dayTimestamp }.get(Calendar.DAY_OF_MONTH)
+                                val dayOfMonth =
+                                    Calendar.getInstance().apply { timeInMillis = dayTimestamp }
+                                        .get(Calendar.DAY_OF_MONTH)
                                 Text(
                                     text = "$dayOfMonth",
                                     fontSize = 12.sp,
@@ -675,16 +810,19 @@ fun NoSpendCalendarBottomSheet(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         Button(
             onClick = onTargetClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.secondaryContainer, contentColor = colorScheme.onSecondaryContainer)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorScheme.secondaryContainer,
+                contentColor = colorScheme.onSecondaryContainer
+            )
         ) {
             Icon(Icons.Default.TrendingUp, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
@@ -700,6 +838,8 @@ private fun SmallGoalCard(
     iconTintColor: Color,
     title: String,
     progress: Float,
+    isOverdue: Boolean,
+    daysRemaining: Int?,
     progressColor: Color,
     trackColor: Color,
     onClick: () -> Unit
@@ -732,35 +872,50 @@ private fun SmallGoalCard(
                         modifier = Modifier.size(18.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.width(10.dp))
-                
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface
-                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.onSurface
+                    )
+                    if (isOverdue) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    Color(0xFFFF5252).copy(alpha = 0.1f),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 4.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "OVERDUE",
+                                color = Color(0xFFFF5252),
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
-            
+
             Spacer(modifier = Modifier.height(10.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-//                    Text(
-//                        text = "Progress",
-//                        fontSize = 13.sp,
-//                        color = colorScheme.onSurfaceVariant
-//                    )
                     Text(
-                        text = "${(progress * 100).toInt()}%",
-                        fontSize = 14.sp,
+                        text = if (isOverdue) "Past Deadline" else if (daysRemaining != null) "$daysRemaining days left" else "${(progress * 100).toInt()}%",
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
+                        color = if (isOverdue) Color(0xFFFF5252) else colorScheme.onSurface
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
@@ -856,9 +1011,9 @@ private fun SavingVelocityCard() {
                     letterSpacing = 1.sp
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "On track to reach your\nlaptop goal 2 weeks\nearly.",
                 style = MaterialTheme.typography.titleMedium,
@@ -867,18 +1022,18 @@ private fun SavingVelocityCard() {
                 fontSize = 18.sp,
                 lineHeight = 24.sp
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Text(
                 text = "Your reduced spending in 'Dining'\nover the last 7 days has\naccelerated your progress by 12%.",
                 fontSize = 13.sp,
                 color = colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             // Bar Chart stub
             Row(
                 modifier = Modifier
@@ -897,20 +1052,24 @@ private fun SavingVelocityCard() {
                     colorScheme.primary.copy(alpha = 0.8f),
                     colorScheme.primary
                 )
-                
+
                 heights.forEachIndexed { index, fraction ->
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(fraction)
                             .padding(horizontal = 4.dp)
-                            .background(colors[index], RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                            .background(
+                                colors[index],
+                                RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                            )
                     )
                 }
             }
         }
     }
 }
+
 @Composable
 fun AddSavingsDialog(
     goalTitle: String,
@@ -954,14 +1113,21 @@ fun AddSavingsDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalDetailBottomSheet(
     goal: Goal,
     currency: Currency,
-    onAddMoneyClick: (Goal) -> Unit
+    onAddMoneyClick: (Goal) -> Unit,
+    onEditDate: (String, Long?) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val timeFormatter = remember { java.text.SimpleDateFormat("MMM dd, yyyy • hh:mm a", java.util.Locale.getDefault()) }
+    val timeFormatter = remember {
+        java.text.SimpleDateFormat(
+            "MMM dd, yyyy • hh:mm a",
+            java.util.Locale.getDefault()
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -1041,68 +1207,139 @@ fun GoalDetailBottomSheet(
                     trackColor = colorScheme.outlineVariant
                 )
             }
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Savings History",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (goal.contributions.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No savings recorded yet.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colorScheme.onSurfaceVariant
+            // Deadline Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorScheme.surfaceVariant.copy(
+                        alpha = 0.2f
+                    )
                 )
-            }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                goal.contributions.reversed().forEach { contribution ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                var showDatePicker by remember { mutableStateOf(false) }
+                val datePickerState =
+                    rememberDatePickerState(initialSelectedDateMillis = goal.targetDate)
+
+                if (showDatePicker) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                onEditDate(goal.id, datePickerState.selectedDateMillis)
+                                showDatePicker = false
+                            }) { Text("Update") }
+                        }
                     ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.TrendingUp,
+                            contentDescription = null,
+                            tint = if (goal.isOverdue) Color(0xFFFF5252) else colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Deposit",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colorScheme.onSurface
-                            )
-                            Text(
-                                text = timeFormatter.format(java.util.Date(contribution.date)),
+                                text = "Target Deadline",
                                 fontSize = 11.sp,
                                 color = colorScheme.onSurfaceVariant
                             )
+                            Text(
+                                text = if (goal.targetDate != null)
+                                    java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                                        .format(java.util.Date(goal.targetDate))
+                                else "Not set",
+                                fontWeight = FontWeight.Bold,
+                                color = if (goal.isOverdue) Color(0xFFFF5252) else colorScheme.onSurface
+                            )
                         }
-                        Text(
-                            text = "+${CurrencyFormatter.formatAmount(contribution.amount, currency)}",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4CAF50)
-                        )
+                    }
+                    TextButton(onClick = { showDatePicker = true }) {
+                        Text("Edit Date")
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Savings History",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (goal.contributions.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No savings recorded yet.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    goal.contributions.reversed().forEach { contribution ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Deposit",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colorScheme.onSurface
+                                )
+                                Text(
+                                    text = timeFormatter.format(java.util.Date(contribution.date)),
+                                    fontSize = 11.sp,
+                                    color = colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Text(
+                                text = "+${
+                                    CurrencyFormatter.formatAmount(
+                                        contribution.amount,
+                                        currency
+                                    )
+                                }",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF4CAF50)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
         }
-        
-        Spacer(modifier = Modifier.height(48.dp))
     }
 }

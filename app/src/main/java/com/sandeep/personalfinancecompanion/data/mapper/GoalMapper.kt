@@ -32,7 +32,8 @@ fun GoalWithContributions.toDomainModel(): Goal {
         savedAmount = goal.savedAmount,
         iconName = goal.iconName,
         colorHex = goal.colorHex,
-        contributions = contributions.map { it.toDomainModel() }
+        contributions = contributions.map { it.toDomainModel() },
+        targetDate = goal.targetDate
     )
 }
 
@@ -43,6 +44,7 @@ fun Goal.toEntity(): GoalEntity {
         targetAmount = targetAmount,
         savedAmount = savedAmount,
         iconName = iconName,
-        colorHex = colorHex
+        colorHex = colorHex,
+        targetDate = targetDate
     )
 }

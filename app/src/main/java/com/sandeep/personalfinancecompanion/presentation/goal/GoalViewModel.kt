@@ -32,7 +32,7 @@ class GoalViewModel @Inject constructor(
     val noSpendStreak: StateFlow<NoSpendStreak> = getNoSpendStreakUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoSpendStreak(0, "Calculating...", true))
     
-    fun createNewGoal(title: String, targetAmount: Double, iconName: String, colorHex: String) {
+    fun createNewGoal(title: String, targetAmount: Double, iconName: String, colorHex: String, targetDate: Long? = null) {
         viewModelScope.launch {
             val newGoal = Goal(
                 id = UUID.randomUUID().toString(),
@@ -41,9 +41,16 @@ class GoalViewModel @Inject constructor(
                 savedAmount = 0.0,
                 iconName = iconName,
                 colorHex = colorHex,
-                contributions = emptyList()
+                contributions = emptyList(),
+                targetDate = targetDate
             )
             repository.insertGoal(newGoal)
+        }
+    }
+
+    fun updateGoalTargetDate(goalId: String, targetDate: Long?) {
+        viewModelScope.launch {
+            repository.updateGoalTargetDate(goalId, targetDate)
         }
     }
 

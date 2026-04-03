@@ -8,5 +8,6 @@ interface GoalRepository {
     fun getAllGoals(): Flow<List<Goal>>
     suspend fun insertGoal(goal: Goal)
     suspend fun addContribution(goalId: String, amount: Double)
+    suspend fun updateGoalTargetDate(goalId: String, targetDate: Long?)
     suspend fun deleteGoal(id: String)
 }
