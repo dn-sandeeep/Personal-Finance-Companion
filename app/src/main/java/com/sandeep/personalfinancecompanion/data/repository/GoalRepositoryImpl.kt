@@ -50,6 +50,17 @@ class GoalRepositoryImpl(
         }
     }
 
+    override suspend fun updateGoalSettings(goalId: String, targetAmount: Double, targetDate: Long?) {
+        val goalWithContributions = dao.getGoalWithContributionsById(goalId)
+        if (goalWithContributions != null) {
+            val updatedGoal = goalWithContributions.goal.copy(
+                targetAmount = targetAmount,
+                targetDate = targetDate
+            )
+            dao.updateGoal(updatedGoal)
+        }
+    }
+
     override suspend fun deleteGoal(id: String) {
         dao.deleteGoal(id)
     }
