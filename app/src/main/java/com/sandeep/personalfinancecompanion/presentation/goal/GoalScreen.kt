@@ -83,6 +83,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Goal
 import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import java.util.Calendar
 import java.util.Locale
@@ -153,8 +154,8 @@ fun GoalScreen(
                         showDeleteConfirm = null
                         selectedGoal = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252))
-                ) { Text("Delete", color = Color.White) }
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
+                ) { Text("Delete", color = colorScheme.onError) }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = null }) { Text("Cancel") }
@@ -553,20 +554,18 @@ private fun NoSpendChallengeCard(
 
     val cardBackground = if (streakData.hasSpentToday) {
         Brush.linearGradient(
-            colors = listOf(Color(0xFF424242), Color(0xFF212121))
+            colors = listOf(colorScheme.surface, colorScheme.surfaceVariant)
         )
     } else {
         Brush.linearGradient(
-            colors = listOf(colorScheme.secondary, colorScheme.secondary.copy(alpha = 0.8f))
+            colors = listOf(colorScheme.primaryContainer, colorScheme.surfaceVariant)
         )
     }
 
     val statusColor = if (streakData.hasSpentToday) {
-        Color(0xFFE57373)
-    } else if (streakData.isCompleted) {
-        Color(0xFFFFD700) // Gold for completion
+        colorScheme.error
     } else {
-        colorScheme.onSecondary
+        colorScheme.primary
     }
 
     Card(
@@ -926,14 +925,14 @@ private fun SmallGoalCard(
                         Box(
                             modifier = Modifier
                                 .background(
-                                    Color(0xFFFF5252).copy(alpha = 0.1f),
+                                    colorScheme.error.copy(alpha = 0.1f),
                                     RoundedCornerShape(4.dp)
                                 )
                                 .padding(horizontal = 4.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "OVERDUE",
-                                color = Color(0xFFFF5252),
+                                color = colorScheme.error,
                                 fontSize = 8.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -954,7 +953,7 @@ private fun SmallGoalCard(
                         text = if (isOverdue) "Past Deadline" else if (daysRemaining != null) "$daysRemaining days left" else "${(progress * 100).toInt()}%",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isOverdue) Color(0xFFFF5252) else colorScheme.onSurface
+                        color = if (isOverdue) colorScheme.error else colorScheme.onSurface
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
@@ -1185,31 +1184,31 @@ fun GoalDetailBottomSheet(
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
             )
-            IconButton(onClick = { onAddMoneyClick(goal) }) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add Money",
-                    tint = colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            IconButton(onClick = { onEditClick(goal) }) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit Goal",
-                    tint = colorScheme.onSurfaceVariant
-                )
-            }
-            
-            IconButton(onClick = { onDeleteClick(goal) }) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Goal",
-                    tint = Color(0xFFFF5252)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { onAddMoneyClick(goal) }) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Add Money",
+                        tint = colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                IconButton(onClick = { onEditClick(goal) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Goal",
+                        tint = colorScheme.onSurfaceVariant
+                    )
+                }
+
+                IconButton(onClick = { onDeleteClick(goal) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Goal",
+                        tint = colorScheme.error
+                    )
+                }
             }
         }
 
@@ -1265,76 +1264,120 @@ fun GoalDetailBottomSheet(
                     trackColor = colorScheme.outlineVariant
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-            // Deadline Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorScheme.surfaceVariant.copy(
-                        alpha = 0.2f
-                    )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Deadline Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = colorScheme.surfaceVariant.copy(
+                    alpha = 0.2f
                 )
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                var showDatePicker by remember { mutableStateOf(false) }
-                val datePickerState =
-                    rememberDatePickerState(initialSelectedDateMillis = goal.targetDate)
-
-                if (showDatePicker) {
-                    DatePickerDialog(
-                        onDismissRequest = { showDatePicker = false },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                onEditDate(goal.id, datePickerState.selectedDateMillis)
-                                showDatePicker = false
-                            }) { Text("Update") }
-                        }
-                    ) {
-                        DatePicker(state = datePickerState)
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.TrendingUp,
-                            contentDescription = null,
-                            tint = if (goal.isOverdue) Color(0xFFFF5252) else colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.TrendingUp,
+                        contentDescription = null,
+                        tint = if (goal.isOverdue) colorScheme.error else colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Target Deadline",
+                            fontSize = 11.sp,
+                            color = colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "Target Deadline",
-                                fontSize = 11.sp,
-                                color = colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = if (goal.targetDate != null)
-                                    java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                                        .format(java.util.Date(goal.targetDate))
-                                else "Not set",
-                                fontWeight = FontWeight.Bold,
-                                color = if (goal.isOverdue) Color(0xFFFF5252) else colorScheme.onSurface
-                            )
-                        }
-                    }
-                    TextButton(onClick = { /* Removed legacy button */ }) {
-                        // Empty spacer or remove button entirely
+                        Text(
+                            text = if (goal.targetDate != null)
+                                java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                                    .format(java.util.Date(goal.targetDate))
+                            else "Not set",
+                            fontWeight = FontWeight.Bold,
+                            color = if (goal.isOverdue) colorScheme.error else colorScheme.onSurface
+                        )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-// ... rest of details code
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Savings History",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (goal.contributions.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No savings recorded yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                goal.contributions.reversed().forEach { contribution ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = "Deposit",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colorScheme.onSurface
+                            )
+                            Text(
+                                text = timeFormatter.format(java.util.Date(contribution.date)),
+                                fontSize = 11.sp,
+                                color = colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = "+${
+                                CurrencyFormatter.formatAmount(
+                                    contribution.amount,
+                                    currency
+                                )
+                            }",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = IncomeGreen
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(48.dp))
     }
 }
 
@@ -1379,17 +1422,19 @@ fun EditGoalDialog(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = targetAmount,
-                    onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) targetAmount = it },
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() || char == '.' }) targetAmount = it
+                    },
                     label = { Text("Target Amount") },
                     modifier = Modifier.fillMaxWidth(),
                     prefix = { Text(currency.symbol) }
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 TextButton(
                     onClick = { showDatePicker = true },
                     modifier = Modifier.fillMaxWidth()
@@ -1430,71 +1475,3 @@ fun EditGoalDialog(
         }
     )
 }
-
-//            Text(
-//                text = "Savings History",
-//                style = MaterialTheme.typography.titleMedium,
-//                fontWeight = FontWeight.Bold,
-//                color = colorScheme.onSurface
-//            )
-//
-//            Spacer(modifier = Modifier.height(12.dp))
-//
-//            if (goal.contributions.isEmpty()) {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 32.dp),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Text(
-//                        text = "No savings recorded yet.",
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = colorScheme.onSurfaceVariant
-//                    )
-//                }
-//            } else {
-//                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-//                    goal.contributions.reversed().forEach { contribution ->
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .clip(RoundedCornerShape(12.dp))
-//                                .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
-//                                .padding(12.dp),
-//                            verticalAlignment = Alignment.CenterVertically,
-//                            horizontalArrangement = Arrangement.SpaceBetween
-//                        ) {
-//                            Column {
-//                                Text(
-//                                    text = "Deposit",
-//                                    fontSize = 14.sp,
-//                                    fontWeight = FontWeight.SemiBold,
-//                                    color = colorScheme.onSurface
-//                                )
-//                                Text(
-//                                    text = timeFormatter.format(java.util.Date(contribution.date)),
-//                                    fontSize = 11.sp,
-//                                    color = colorScheme.onSurfaceVariant
-//                                )
-//                            }
-//                            Text(
-//                                text = "+${
-//                                    CurrencyFormatter.formatAmount(
-//                                        contribution.amount,
-//                                        currency
-//                                    )
-//                                }",
-//                                style = MaterialTheme.typography.titleSmall,
-//                                fontWeight = FontWeight.Bold,
-//                                color = Color(0xFF4CAF50)
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(48.dp))
-//        }
-//    }
-//}
