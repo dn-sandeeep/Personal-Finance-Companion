@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -99,6 +101,8 @@ fun GoalScreen(
     var showAddSavingsDialog by remember { mutableStateOf<Goal?>(null) }
     var showNoSpendCalendar by remember { mutableStateOf(false) }
     var showTargetDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf<Goal?>(null) }
+    var showEditGoalDialog by remember { mutableStateOf<Goal?>(null) }
 
     val sheetState = rememberModalBottomSheetState()
 
@@ -137,6 +141,40 @@ fun GoalScreen(
         )
     }
 
+    if (showDeleteConfirm != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = null },
+            title = { Text("Delete Goal?") },
+            text = { Text("Are you sure you want to delete '${showDeleteConfirm?.title}'? This will also remove all savings history for this goal.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteConfirm?.let { viewModel.deleteGoal(it.id) }
+                        showDeleteConfirm = null
+                        selectedGoal = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252))
+                ) { Text("Delete", color = Color.White) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = null }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showEditGoalDialog != null) {
+        EditGoalDialog(
+            goal = showEditGoalDialog!!,
+            currency = currency,
+            onDismiss = { showEditGoalDialog = null },
+            onConfirm = { amount, date ->
+                viewModel.updateGoalSettings(showEditGoalDialog!!.id, amount, date)
+                showEditGoalDialog = null
+                selectedGoal = null
+            }
+        )
+    }
+
     if (showNoSpendCalendar) {
         ModalBottomSheet(
             onDismissRequest = { showNoSpendCalendar = false },
@@ -160,7 +198,8 @@ fun GoalScreen(
                 goal = selectedGoal!!,
                 currency = currency,
                 onAddMoneyClick = { showAddSavingsDialog = it },
-                onEditDate = { goalId, date -> viewModel.updateGoalTargetDate(goalId, date) }
+                onEditClick = { showEditGoalDialog = it },
+                onDeleteClick = { showDeleteConfirm = it }
             )
         }
     }
@@ -1119,7 +1158,8 @@ fun GoalDetailBottomSheet(
     goal: Goal,
     currency: Currency,
     onAddMoneyClick: (Goal) -> Unit,
-    onEditDate: (String, Long?) -> Unit
+    onEditClick: (Goal) -> Unit,
+    onDeleteClick: (Goal) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val timeFormatter = remember {
@@ -1151,6 +1191,24 @@ fun GoalDetailBottomSheet(
                     contentDescription = "Add Money",
                     tint = colorScheme.primary,
                     modifier = Modifier.size(32.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            IconButton(onClick = { onEditClick(goal) }) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Goal",
+                    tint = colorScheme.onSurfaceVariant
+                )
+            }
+            
+            IconButton(onClick = { onDeleteClick(goal) }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete Goal",
+                    tint = Color(0xFFFF5252)
                 )
             }
         }
@@ -1268,78 +1326,175 @@ fun GoalDetailBottomSheet(
                             )
                         }
                     }
-                    TextButton(onClick = { showDatePicker = true }) {
-                        Text("Edit Date")
+                    TextButton(onClick = { /* Removed legacy button */ }) {
+                        // Empty spacer or remove button entirely
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Savings History",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (goal.contributions.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No savings recorded yet.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    goal.contributions.reversed().forEach { contribution ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Deposit",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = colorScheme.onSurface
-                                )
-                                Text(
-                                    text = timeFormatter.format(java.util.Date(contribution.date)),
-                                    fontSize = 11.sp,
-                                    color = colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Text(
-                                text = "+${
-                                    CurrencyFormatter.formatAmount(
-                                        contribution.amount,
-                                        currency
-                                    )
-                                }",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF4CAF50)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
+// ... rest of details code
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditGoalDialog(
+    goal: Goal,
+    currency: Currency,
+    onDismiss: () -> Unit,
+    onConfirm: (Double, Long?) -> Unit
+) {
+    var targetAmount by remember { mutableStateOf(goal.targetAmount.toString()) }
+    var selectedDate by remember { mutableStateOf(goal.targetDate) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = goal.targetDate)
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedDate = datePickerState.selectedDateMillis
+                    showDatePicker = false
+                }) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Goal") },
+        text = {
+            Column {
+                Text(
+                    text = goal.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = targetAmount,
+                    onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) targetAmount = it },
+                    label = { Text("Target Amount") },
+                    modifier = Modifier.fillMaxWidth(),
+                    prefix = { Text(currency.symbol) }
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                TextButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (selectedDate == null) "Set Target Date (Optional)"
+                            else "Target: ${
+                                java.text.SimpleDateFormat(
+                                    "MMM dd, yyyy",
+                                    Locale.getDefault()
+                                ).format(java.util.Date(selectedDate!!))
+                            }"
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val amount = targetAmount.toDoubleOrNull() ?: goal.targetAmount
+                    onConfirm(amount, selectedDate)
+                }
+            ) {
+                Text("Save Changes")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+//            Text(
+//                text = "Savings History",
+//                style = MaterialTheme.typography.titleMedium,
+//                fontWeight = FontWeight.Bold,
+//                color = colorScheme.onSurface
+//            )
+//
+//            Spacer(modifier = Modifier.height(12.dp))
+//
+//            if (goal.contributions.isEmpty()) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(vertical = 32.dp),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Text(
+//                        text = "No savings recorded yet.",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = colorScheme.onSurfaceVariant
+//                    )
+//                }
+//            } else {
+//                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+//                    goal.contributions.reversed().forEach { contribution ->
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .clip(RoundedCornerShape(12.dp))
+//                                .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
+//                                .padding(12.dp),
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.SpaceBetween
+//                        ) {
+//                            Column {
+//                                Text(
+//                                    text = "Deposit",
+//                                    fontSize = 14.sp,
+//                                    fontWeight = FontWeight.SemiBold,
+//                                    color = colorScheme.onSurface
+//                                )
+//                                Text(
+//                                    text = timeFormatter.format(java.util.Date(contribution.date)),
+//                                    fontSize = 11.sp,
+//                                    color = colorScheme.onSurfaceVariant
+//                                )
+//                            }
+//                            Text(
+//                                text = "+${
+//                                    CurrencyFormatter.formatAmount(
+//                                        contribution.amount,
+//                                        currency
+//                                    )
+//                                }",
+//                                style = MaterialTheme.typography.titleSmall,
+//                                fontWeight = FontWeight.Bold,
+//                                color = Color(0xFF4CAF50)
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//
+//            Spacer(modifier = Modifier.height(48.dp))
+//        }
+//    }
+//}

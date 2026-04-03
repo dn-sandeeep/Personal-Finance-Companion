@@ -48,9 +48,15 @@ class GoalViewModel @Inject constructor(
         }
     }
 
-    fun updateGoalTargetDate(goalId: String, targetDate: Long?) {
+    fun updateGoalSettings(goalId: String, targetAmount: Double, targetDate: Long?) {
         viewModelScope.launch {
-            repository.updateGoalTargetDate(goalId, targetDate)
+            repository.updateGoalSettings(goalId, targetAmount, targetDate)
+        }
+    }
+
+    fun deleteGoal(goalId: String) {
+        viewModelScope.launch {
+            repository.deleteGoal(goalId)
         }
     }
 
