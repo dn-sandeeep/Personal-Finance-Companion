@@ -112,16 +112,8 @@ This project follows the **Modern Android Development (MAD)** standards and **Cl
    ```
 2. Open the project in **Android Studio (Ladybug or newer)**.
 3. Sync Project with Gradle Files.
-4. Run the app on an Emulator or Physical Device (API 26+).
+4. Run the app on an Emulator or Physical Device (API 24+).
 
 ---
 
-## 🤝 Contributing
-Contributions are welcome! If you have suggestions or find bugs, feel free to open an issue or submit a pull request.
-
----
-
-## 📝 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Developed with ❤️ by Sandeep.
+Developed by Sandeep.
