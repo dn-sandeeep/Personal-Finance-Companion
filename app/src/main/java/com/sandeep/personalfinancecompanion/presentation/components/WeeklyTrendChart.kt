@@ -144,7 +144,7 @@ fun WeeklyTrendChart(
                 ) {
                     val barCount = entries.size
                     val totalWidth = size.width
-                    val barWidth = totalWidth / (barCount * 1f)
+                    val barWidth = totalWidth / (barCount * 1.2f)
                     val gap = (totalWidth - (barWidth * barCount)) / (barCount + 1)
 
                     // Draw Y-axis line

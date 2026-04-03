@@ -246,7 +246,8 @@ fun GoalTypePickerDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.primaryContainer
     )
 }
 

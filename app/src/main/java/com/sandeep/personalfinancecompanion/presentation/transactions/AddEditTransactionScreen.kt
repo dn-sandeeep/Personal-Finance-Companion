@@ -210,7 +210,9 @@ fun AddEditTransactionScreen(
             )
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(14.dp)
             ) {
                 categories.forEach { category ->
                     DropdownMenuItem(
