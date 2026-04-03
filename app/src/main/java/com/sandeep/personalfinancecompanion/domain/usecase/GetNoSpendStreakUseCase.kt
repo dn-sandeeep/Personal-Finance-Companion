@@ -3,6 +3,7 @@ package com.sandeep.personalfinancecompanion.domain.usecase
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
+import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -25,41 +26,96 @@ class GetNoSpendStreakUseCase @Inject constructor(
     operator fun invoke(): Flow<NoSpendStreak> {
         return combine(
             repository.getAllTransactions(),
-            preferencesRepository.noSpendTargetDaysFlow
-        ) { transactions, targetDays ->
-            val nonEssentialSpendDates = transactions
+            preferencesRepository.noSpendTargetFlow
+        ) { transactions, target ->
+            val nonEssentialTransactions = transactions
                 .filter { it.type == TransactionType.EXPENSE }
                 .filter { it.category in NON_ESSENTIAL_CATEGORIES }
+
+            val nonEssentialSpendDates = nonEssentialTransactions
                 .map { getStartOfDay(it.date) }
                 .toSet()
 
             val today = getStartOfDay(System.currentTimeMillis())
-            var currentDay = today
-            var streak = 0
             val oneDayMillis = 24 * 60 * 60 * 1000L
 
-            // Check if user spent money TODAY
-            if (today in nonEssentialSpendDates) {
-                return@combine NoSpendStreak(0, targetDays, "Spent today! Restart tomorrow.")
+            // 1. Calculate Current Streak
+            var currentStreak = 0
+            val hasSpentToday = today in nonEssentialSpendDates
+            
+            if (!hasSpentToday) {
+                var checkDay = today - oneDayMillis
+                while (checkDay !in nonEssentialSpendDates && currentStreak < 365) {
+                    currentStreak++
+                    checkDay -= oneDayMillis
+                }
             }
 
-            // Count backwards from yesterday
-            currentDay -= oneDayMillis
-            while (currentDay !in nonEssentialSpendDates && streak < 365) {
-                streak++
-                currentDay -= oneDayMillis
+            // 2. Calculate Best Streak
+            var bestStreak = currentStreak
+            if (nonEssentialSpendDates.isNotEmpty()) {
+                val sortedDates = nonEssentialSpendDates.sortedDescending()
+                var tempStreak = 0
+                var lastDate: Long? = null
+                
+                // This is a bit complex for a simple loop, let's simplify:
+                // Find the longest gap between non-essential spend dates
+                val allDates = transactions.map { getStartOfDay(it.date) }.distinct().sorted()
+                if (allDates.isNotEmpty()) {
+                    var currentMax = 0
+                    var runningStreak = 0
+                    var datePtr = allDates.first()
+                    val lastPossibleDate = if (hasSpentToday) today - oneDayMillis else today
+                    
+                    while (datePtr <= lastPossibleDate) {
+                        if (datePtr !in nonEssentialSpendDates) {
+                            runningStreak++
+                        } else {
+                            currentMax = maxOf(currentMax, runningStreak)
+                            runningStreak = 0
+                        }
+                        datePtr += oneDayMillis
+                    }
+                    bestStreak = maxOf(currentMax, runningStreak, currentStreak)
+                }
+            }
+
+            // 3. Potential Savings (Estimate)
+            // Avg non-essential spend per day when spending occurs
+            val totalNonEssentialAmount = nonEssentialTransactions.sumOf { it.amount }
+            val totalDaysWithNonEssentialSpend = nonEssentialSpendDates.size.toDouble()
+            val avgSpendPerDay = if (totalDaysWithNonEssentialSpend > 0) {
+                totalNonEssentialAmount / totalDaysWithNonEssentialSpend
+            } else 500.0 // Default fallback
+
+            val potentialSavings = currentStreak * avgSpendPerDay
+
+            // 4. Calendar Days (Last 30 days)
+            val noSpendDaysList = mutableListOf<Long>()
+            for (i in 0 until 30) {
+                val day = today - (i * oneDayMillis)
+                if (day !in nonEssentialSpendDates) {
+                    noSpendDaysList.add(day)
+                }
             }
 
             NoSpendStreak(
-                currentStreak = streak,
-                targetDays = targetDays,
+                currentStreak = currentStreak,
                 message = when {
-                    streak == 0 -> "Start your journey today!"
-                    streak >= targetDays -> "Challenge Completed! 🏆"
-                    streak < 3 -> "Great start! Keep it up."
-                    streak < 7 -> "You're on fire! 🔥"
+                    hasSpentToday -> "Spent today! Restart tomorrow."
+                    currentStreak == 0 -> "Start your journey today!"
+                    currentStreak < 3 -> "Great start! Keep it up."
+                    currentStreak < 7 -> "You're on fire! 🔥"
+                    currentStreak >= target -> "Challenge Completed! 🏆"
                     else -> "Financial Legend! 🏆"
-                }
+                },
+                isHealthy = !hasSpentToday,
+                targetDays = target,
+                bestStreak = bestStreak,
+                potentialSavings = potentialSavings,
+                isCompleted = currentStreak >= target,
+                hasSpentToday = hasSpentToday,
+                noSpendDays = noSpendDaysList
             )
         }
     }

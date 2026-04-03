@@ -59,9 +59,9 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             preferences[PreferencesKeys.GOAL_REMINDERS_ENABLED] ?: true
         }
 
-    override val noSpendTargetDaysFlow: Flow<Int> = dataStore.data
+    override val noSpendTargetFlow: Flow<Int> = dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.NO_SPEND_TARGET] ?: 7
+            preferences[PreferencesKeys.NO_SPEND_TARGET] ?: 30
         }
 
     override suspend fun updateBudgetLimit(limit: Double) {
@@ -100,7 +100,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateNoSpendTargetDays(days: Int) {
+    override suspend fun updateNoSpendTarget(days: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.NO_SPEND_TARGET] = days
         }

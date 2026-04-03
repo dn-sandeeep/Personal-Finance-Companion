@@ -38,10 +38,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Goal
-import com.sandeep.personalfinancecompanion.domain.model.GoalContribution
-import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +61,8 @@ fun GoalScreen(
     var showAddGoalDialog by remember { mutableStateOf(false) }
     var selectedGoal by remember { mutableStateOf<Goal?>(null) }
     var showAddSavingsDialog by remember { mutableStateOf<Goal?>(null) }
+    var showNoSpendCalendar by remember { mutableStateOf(false) }
+    var showTargetDialog by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState()
 
@@ -80,6 +88,30 @@ fun GoalScreen(
                 selectedGoal = null // Close sheet too
             }
         )
+    }
+
+    if (showTargetDialog) {
+        NoSpendTargetDialog(
+            currentWeight = noSpendStreak.targetDays,
+            onDismiss = { showTargetDialog = false },
+            onConfirm = { days ->
+                viewModel.setNoSpendTarget(days)
+                showTargetDialog = false
+            }
+        )
+    }
+
+    if (showNoSpendCalendar) {
+        ModalBottomSheet(
+            onDismissRequest = { showNoSpendCalendar = false },
+            sheetState = sheetState,
+            containerColor = colorScheme.surface
+        ) {
+            NoSpendCalendarBottomSheet(
+                streak = noSpendStreak,
+                onTargetClick = { showTargetDialog = true }
+            )
+        }
     }
 
     if (selectedGoal != null) {
@@ -132,8 +164,9 @@ fun GoalScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             NoSpendChallengeCard(
-                streak = noSpendStreak.currentStreak,
-                message = noSpendStreak.message
+                streakData = noSpendStreak,
+                currency = currency,
+                onClick = { showNoSpendCalendar = true }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -353,72 +386,308 @@ private fun PrimaryObjectiveCard(currency: Currency) {
 
 @Composable
 private fun NoSpendChallengeCard(
-    streak: Int,
-    message: String
+    streakData: NoSpendStreak,
+    currency: Currency,
+    onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    
+    val cardBackground = if (streakData.hasSpentToday) {
+        Brush.linearGradient(
+            colors = listOf(Color(0xFF424242), Color(0xFF212121))
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(colorScheme.secondary, colorScheme.secondary.copy(alpha = 0.8f))
+        )
+    }
+
+    val statusColor = if (streakData.hasSpentToday) {
+        Color(0xFFE57373)
+    } else if (streakData.isCompleted) {
+        Color(0xFFFFD700) // Gold for completion
+    } else {
+        colorScheme.onSecondary
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.secondary),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .background(cardBackground)
                 .padding(24.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(colorScheme.onSecondary.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.LocalFireDepartment,
-                    contentDescription = "Fire",
-                    tint = colorScheme.onSecondary,
-                    modifier = Modifier.size(24.dp)
-                )
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .background(statusColor.copy(alpha = 0.15f), RoundedCornerShape(14.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (streakData.hasSpentToday) Icons.Default.Close else Icons.Default.LocalFireDepartment,
+                                contentDescription = null,
+                                tint = statusColor,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Text(
+                            text = "No Spend Challenge",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = statusColor
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        Text(
+                            text = streakData.message,
+                            fontSize = 13.sp,
+                            color = statusColor.copy(alpha = 0.7f),
+                            lineHeight = 18.sp
+                        )
+                    }
+
+                    // Circular Progress
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(80.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { (streakData.currentStreak.toFloat() / streakData.targetDays.toFloat()).coerceIn(0f, 1f) },
+                            modifier = Modifier.size(70.dp),
+                            color = statusColor,
+                            strokeWidth = 6.dp,
+                            trackColor = statusColor.copy(alpha = 0.1f),
+                            strokeCap = StrokeCap.Round
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "${streakData.currentStreak}",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Black,
+                                color = statusColor
+                            )
+                            Text(
+                                text = "/${streakData.targetDays}",
+                                fontSize = 10.sp,
+                                color = statusColor.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Mini Stats
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(statusColor.copy(alpha = 0.05f))
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    NoSpendMiniStat(
+                        label = "BEST STREAK",
+                        value = "${streakData.bestStreak}d",
+                        color = statusColor
+                    )
+                    Divider(
+                        modifier = Modifier
+                            .height(24.dp)
+                            .width(1.dp),
+                        color = statusColor.copy(alpha = 0.1f)
+                    )
+                    
+                    NoSpendMiniStat(
+                        label = "POTENTIAL SAVINGS",
+                        value = CurrencyFormatter.formatAmount(streakData.potentialSavings, currency),
+                        color = statusColor
+                    )
+                }
             }
-            
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            Text(
-                text = "No Spend Challenge",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSecondary
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = message,
-                fontSize = 12.sp,
-                color = colorScheme.onSecondary.copy(alpha = 0.8f),
-                lineHeight = 18.sp
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = "$streak-day",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = colorScheme.onSecondary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "STREAK!",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSecondary,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.padding(bottom = 6.dp)
-                )
+        }
+    }
+}
+
+@Composable
+private fun NoSpendMiniStat(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column {
+        Text(
+            text = label,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            color = color.copy(alpha = 0.6f),
+            letterSpacing = 0.5.sp
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = color
+        )
+    }
+}
+
+@Composable
+fun NoSpendTargetDialog(
+    currentWeight: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    val options = listOf(7, 14, 21, 30, 60, 90)
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Set Challenge Target") },
+        text = {
+            Column {
+                options.forEach { days ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onConfirm(days) }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = days == currentWeight,
+                            onClick = { onConfirm(days) }
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = "$days Days Challenge", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
             }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+fun NoSpendCalendarBottomSheet(
+    streak: NoSpendStreak,
+    onTargetClick: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val calendar = Calendar.getInstance()
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 40.dp)
+    ) {
+        Text(
+            text = "No Spend Calendar",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+        )
+        
+        Text(
+            text = "Track your discipline over the last 30 days.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Grid of 30 days
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            val rows = 5
+            val cols = 6
+            val oneDayMillis = 24 * 60 * 60 * 1000L
+            val today = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+
+            for (r in 0 until rows) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    for (c in 0 until cols) {
+                        val dayIndex = r * cols + c
+                        val dayTimestamp = today - (dayIndex * oneDayMillis)
+                        val isNoSpend = streak.noSpendDays.contains(dayTimestamp)
+                        
+                        Box(
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isNoSpend) colorScheme.primary.copy(alpha = 0.1f)
+                                    else colorScheme.surfaceVariant
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (dayIndex == 0) colorScheme.primary else Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isNoSpend) {
+                                Icon(
+                                    imageVector = Icons.Default.LocalFireDepartment,
+                                    contentDescription = null,
+                                    tint = colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            } else {
+                                val dayOfMonth = Calendar.getInstance().apply { timeInMillis = dayTimestamp }.get(Calendar.DAY_OF_MONTH)
+                                Text(
+                                    text = "$dayOfMonth",
+                                    fontSize = 12.sp,
+                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Button(
+            onClick = onTargetClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.secondaryContainer, contentColor = colorScheme.onSecondaryContainer)
+        ) {
+            Icon(Icons.Default.TrendingUp, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Adjust Challenge Target")
         }
     }
 }

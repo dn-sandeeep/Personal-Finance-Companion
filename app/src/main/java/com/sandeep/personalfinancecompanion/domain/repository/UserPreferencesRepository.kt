@@ -10,6 +10,7 @@ interface UserPreferencesRepository {
     val reminderTimeFlow: Flow<String>
     val budgetAlertsEnabledFlow: Flow<Boolean>
     val goalRemindersEnabledFlow: Flow<Boolean>
+    val noSpendTargetFlow: Flow<Int>
 
     suspend fun updateBudgetLimit(limit: Double)
     suspend fun updateCurrency(currency: Currency)
@@ -17,4 +18,5 @@ interface UserPreferencesRepository {
     suspend fun updateReminderTime(time: String)
     suspend fun updateBudgetAlertsEnabled(enabled: Boolean)
     suspend fun updateGoalRemindersEnabled(enabled: Boolean)
+    suspend fun updateNoSpendTarget(days: Int)
 }

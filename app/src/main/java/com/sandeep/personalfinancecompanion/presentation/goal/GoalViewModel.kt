@@ -55,7 +55,7 @@ class GoalViewModel @Inject constructor(
 
     fun setNoSpendTarget(days: Int) {
         viewModelScope.launch {
-            preferencesRepository.updateNoSpendTargetDays(days)
+            preferencesRepository.updateNoSpendTarget(days)
         }
     }
 }
