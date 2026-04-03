@@ -508,6 +508,8 @@ private fun HomeContent(
                 BudgetRing(
                     spent = state.totalExpense,
                     limit = state.budgetLimit,
+                    currency = state.selectedCurrency,
+                    targetAmount = state.goalTargetAmount,
                     size = 140.dp,
                     strokeWidth = 12.dp
                 )

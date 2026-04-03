@@ -40,7 +40,8 @@ sealed interface HomeUiState {
         val selectedDayTransactions: List<Transaction>? = null,
         val selectedDayLabel: String? = null,
         val selectedCategoryTransactions: List<Transaction>? = null,
-        val selectedCategoryLabel: String? = null
+        val selectedCategoryLabel: String? = null,
+        val goalTargetAmount: Double = 0.0
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -50,7 +51,8 @@ class HomeViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val calculateBalanceUseCase: CalculateBalanceUseCase,
     private val repository: TransactionRepository,
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val goalRepository: com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -120,6 +122,17 @@ class HomeViewModel @Inject constructor(
                         }
                         .sortedByDescending { it.amount }
 
+                    // We will fetch the first goal target amount or sum of goals.
+                    launch {
+                        goalRepository.getAllGoals().collect { goals ->
+                            val targetAmountSum = goals.sumOf { it.targetAmount }
+                            val currentState = _uiState.value
+                            if (currentState is HomeUiState.Success) {
+                                _uiState.value = currentState.copy(goalTargetAmount = targetAmountSum)
+                            }
+                        }
+                    }
+
                     _uiState.value = HomeUiState.Success(
                         balance = balance,
                         recentTransactions = transactions.take(5),
@@ -127,7 +140,8 @@ class HomeViewModel @Inject constructor(
                         totalExpense = balance.totalExpense,
                         selectedCurrency = currentCurrency,
                         weeklyTrend = weeklyTrend,
-                        categoryExpenses = categoryStatsList
+                        categoryExpenses = categoryStatsList,
+                        goalTargetAmount = 0.0 // It will be updated by the goalCollector below
                     )
                 }
             } catch (e: Exception) {

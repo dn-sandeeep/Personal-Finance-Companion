@@ -22,14 +22,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.ui.theme.BudgetCaution
 import com.sandeep.personalfinancecompanion.ui.theme.BudgetDanger
 import com.sandeep.personalfinancecompanion.ui.theme.BudgetSafe
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter.formatAmount
 
 @Composable
 fun BudgetRing(
     spent: Double,
     limit: Double,
+    currency: Currency,
+    targetAmount: Double,
     modifier: Modifier = Modifier,
     size: Dp = 180.dp,
     strokeWidth: Dp = 14.dp
@@ -89,13 +93,14 @@ fun BudgetRing(
         // Center text
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "₹${String.format("%,.0f", remaining)}",
+                text = formatAmount(remaining, currency),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = ringColor
             )
             Text(
-                text = "left of ₹${String.format("%,.0f", limit)}",
+                //text = "left of ₹${String.format("%,.0f", limit)}",
+                text = "left of ${formatAmount(limit, currency)}",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
