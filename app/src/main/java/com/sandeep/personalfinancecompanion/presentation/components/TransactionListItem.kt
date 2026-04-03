@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
+import com.sandeep.personalfinancecompanion.ui.theme.ExpenseRed
+import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 
 @Composable
 fun TransactionListItem(
@@ -39,7 +41,6 @@ fun TransactionListItem(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val isIncome = transaction.type == TransactionType.INCOME
-    val amountPrefix = if (isIncome) "+" else "-"
     
     // Assigning specific badge colors based on category
     val badgeColor = when (transaction.category) {
@@ -49,11 +50,11 @@ fun TransactionListItem(
         else -> colorScheme.surfaceVariant
     }
 
-    val amountColor = if (isIncome) colorScheme.primary else colorScheme.onSurface
+    //val amountColor = if (isIncome) colorScheme.primary else colorScheme.onSurface
 
     // Derive Status logic based on type/category for visual matching
-    val statusText = if (isIncome) "CLEARED" else "PENDING"
-    val statusColor = if (isIncome) colorScheme.primary else colorScheme.onSurfaceVariant
+    val statusText = if (isIncome) "EARNED" else "SPEND"
+    val statusColor = if (isIncome) IncomeGreen else ExpenseRed
 
     // Title mapping (Fallback to Category if Notes are empty)
     val title = if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
@@ -68,7 +69,7 @@ fun TransactionListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icon Badge (Rounded Rectangle)
@@ -117,24 +118,24 @@ fun TransactionListItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "${if (isIncome) "+" else "-"}${CurrencyFormatter.formatAmount(transaction.amount, currency)}",
+                    text = CurrencyFormatter.formatAmount(transaction.amount, currency),
                     style = MaterialTheme.typography.titleLarge,
-                    color = amountColor,
+                    color = if (isIncome) IncomeGreen else ExpenseRed,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                if (transaction.category == Category.FOOD && !isIncome) {
-                    Box(
-                        modifier = Modifier
-                            .width(30.dp)
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(colorScheme.secondary)
-                    )
-                } else {
+//                if (transaction.category == Category.FOOD && !isIncome) {
+//                    Box(
+//                        modifier = Modifier
+//                            .width(30.dp)
+//                            .height(4.dp)
+//                            .clip(RoundedCornerShape(2.dp))
+//                            .background(colorScheme.secondary)
+//                    )
+//                } else {
                     Text(
                         text = statusText,
                         style = MaterialTheme.typography.labelSmall,
@@ -143,7 +144,7 @@ fun TransactionListItem(
                         letterSpacing = 0.5.sp,
                         fontWeight = FontWeight.SemiBold
                     )
-                }
+                //}
             }
         }
     }
