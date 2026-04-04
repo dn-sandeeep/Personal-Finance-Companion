@@ -454,6 +454,8 @@ private fun HomeContent(
 
                 WeeklyTrendChart(
                     entries = state.weeklyTrend,
+                    budgetLimit = state.budgetLimit,
+                    currency = state.selectedCurrency,
                     onBarClick = { entry ->
                         onDaySelected(entry.dayOfWeek)
                     }
