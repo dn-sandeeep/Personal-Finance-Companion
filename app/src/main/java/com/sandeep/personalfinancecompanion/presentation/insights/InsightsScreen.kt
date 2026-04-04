@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,11 +53,22 @@ fun InsightsScreen(
         }
 
         state.error != null -> {
-            EmptyState(
-                emoji = "⚠️",
-                title = "Error loading insights",
-                subtitle = state.error ?: "Please try again"
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "🏥", style = MaterialTheme.typography.displayLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = state.error ?: "Analytics failed to load",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colorScheme.error,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         state.categoryBreakdown.isEmpty() -> {

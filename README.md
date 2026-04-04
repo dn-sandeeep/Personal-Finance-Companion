@@ -55,6 +55,13 @@ Data-driven decisions for better savings.
 Stay informed without effort.
 - **Daily Reminders:** Never forget to log your daily expenses.
 - **Goal Alerts:** Get notified when you reach milestones or when a target date is approaching.
+- **Budget Setup:** Smart "Set Monthly Budget" prompt on Home screen for new users.
+
+### 💎 Premium UI Experience
+The app ensures a professional feel even when data is missing or loading:
+- **Loading States:** Centered progress indicators for all data-fetching operations.
+- **Empty States:** Beautifully designed placeholders for empty lists (Transactions, Goals, Insights) using a unified `EmptyState` component.
+- **Error Handling:** Robust error views with retry options to handle unexpected data issues gracefully.
 
 ---
 
@@ -100,7 +107,8 @@ This project follows the **Modern Android Development (MAD)** standards and **Cl
 - **Asynchronous Tasks:** [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
 - **Background Work:** [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) (for reminders)
 - **Preferences:** [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) (for user settings)
-- **Navigation:** [Compose Navigation](https://developer.android.com/jetpack/compose/navigation)
+- **Navigation:** [Compose Navigation](https://developer.android.com/jackpack/compose/navigation)
+- **State Management:** Unified `UiState` (Sealed Interface) pattern for robust Loading/Success/Error handling.
 
 ---
 

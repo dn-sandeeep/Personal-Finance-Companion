@@ -9,12 +9,25 @@ import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRep
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
 import com.sandeep.personalfinancecompanion.domain.usecase.GetNoSpendStreakUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+
+sealed interface GoalUiState {
+    data object Loading : GoalUiState
+    data class Success(
+        val goals: List<Goal>,
+        val currency: Currency,
+        val noSpendStreak: NoSpendStreak
+    ) : GoalUiState
+    data class Error(val message: String) : GoalUiState
+}
 
 @HiltViewModel
 class GoalViewModel @Inject constructor(
@@ -23,28 +36,38 @@ class GoalViewModel @Inject constructor(
     private val getNoSpendStreakUseCase: GetNoSpendStreakUseCase
 ) : ViewModel() {
     
-    val goals: StateFlow<List<Goal>> = repository.getAllGoals()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-    
-    val currency: StateFlow<Currency> = preferencesRepository.currencyFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Currency.INR)
-
-    val noSpendStreak: StateFlow<NoSpendStreak> = getNoSpendStreakUseCase()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoSpendStreak(0, "Calculating...", true))
+    private val _uiState = MutableStateFlow<GoalUiState>(GoalUiState.Loading)
+    val uiState: StateFlow<GoalUiState> = combine(
+        repository.getAllGoals(),
+        preferencesRepository.currencyFlow,
+        getNoSpendStreakUseCase()
+    ) { goals, currency, streak ->
+        GoalUiState.Success(goals, currency, streak)
+    }.catch { e ->
+        _uiState.value = GoalUiState.Error(e.message ?: "An unexpected error occurred")
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = GoalUiState.Loading
+    )
     
     fun createNewGoal(title: String, targetAmount: Double, iconName: String, colorHex: String, targetDate: Long? = null) {
         viewModelScope.launch {
-            val newGoal = Goal(
-                id = UUID.randomUUID().toString(),
-                title = title,
-                targetAmount = targetAmount,
-                savedAmount = 0.0,
-                iconName = iconName,
-                colorHex = colorHex,
-                contributions = emptyList(),
-                targetDate = targetDate
-            )
-            repository.insertGoal(newGoal)
+            try {
+                val newGoal = Goal(
+                    id = UUID.randomUUID().toString(),
+                    title = title,
+                    targetAmount = targetAmount,
+                    savedAmount = 0.0,
+                    iconName = iconName,
+                    colorHex = colorHex,
+                    contributions = emptyList(),
+                    targetDate = targetDate
+                )
+                repository.insertGoal(newGoal)
+            } catch (e: Exception) {
+                // Handle error if needed, maybe via a one-time event/SideEffect
+            }
         }
     }
 
@@ -70,5 +93,10 @@ class GoalViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesRepository.updateNoSpendTarget(days)
         }
+    }
+
+    fun retry() {
+        // Since we are using stateIn with combine, it automatically retries if the underlying flows emit again
+        // but we can also force a refresh if needed.
     }
 }

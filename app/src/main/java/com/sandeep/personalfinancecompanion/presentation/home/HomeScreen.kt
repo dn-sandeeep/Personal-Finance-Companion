@@ -67,6 +67,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.style.TextAlign
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.presentation.components.TransactionListItem
 import kotlinx.coroutines.launch
@@ -507,16 +508,46 @@ private fun HomeContent(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                BudgetRing(
-                    spent = state.totalExpense,
-                    limit = state.budgetLimit,
-                    currency = state.selectedCurrency,
-                    targetAmount = state.goalTargetAmount,
-                    size = 140.dp,
-                    strokeWidth = 12.dp
-                )
+                if (state.budgetLimit == 0.0) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "No budget set yet 💸",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Set a monthly limit to track your spending discipline.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { showBudgetDialog = true },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Set Monthly Budget")
+                        }
+                    }
+                } else {
+                    BudgetRing(
+                        spent = state.totalExpense,
+                        limit = state.budgetLimit,
+                        currency = state.selectedCurrency,
+                        targetAmount = state.goalTargetAmount,
+                        size = 140.dp,
+                        strokeWidth = 12.dp
+                    )
+                }
 
-               Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
             }
         }

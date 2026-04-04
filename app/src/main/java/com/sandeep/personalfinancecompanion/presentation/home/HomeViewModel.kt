@@ -59,7 +59,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private var allTransactions: List<Transaction> = emptyList()
-    private var currentBudgetLimit: Double = 50000.0
+    private var currentBudgetLimit: Double = 0.0
     private var currentCurrency: Currency = Currency.INR
 
     init {

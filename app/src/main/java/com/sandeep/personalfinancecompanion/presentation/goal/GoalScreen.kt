@@ -61,7 +61,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,9 +79,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Goal
 import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import java.util.Calendar
@@ -94,9 +95,63 @@ fun GoalScreen(
     viewModel: GoalViewModel = hiltViewModel()
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val goals by viewModel.goals.collectAsState()
-    val currency by viewModel.currency.collectAsState()
-    val noSpendStreak by viewModel.noSpendStreak.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    when (val state = uiState) {
+        is GoalUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = colorScheme.primary)
+            }
+        }
+
+        is GoalUiState.Error -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "❌", style = MaterialTheme.typography.displayLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = state.message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { viewModel.retry() },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
+                    Text("Retry")
+                }
+            }
+        }
+
+        is GoalUiState.Success -> {
+            GoalContent(
+                goals = state.goals,
+                currency = state.currency,
+                noSpendStreak = state.noSpendStreak,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GoalContent(
+    goals: List<Goal>,
+    currency: Currency,
+    noSpendStreak: NoSpendStreak,
+    viewModel: GoalViewModel
+) {
+    val colorScheme = MaterialTheme.colorScheme
     var showAddGoalDialog by remember { mutableStateOf(false) }
     var selectedGoal by remember { mutableStateOf<Goal?>(null) }
     var showAddSavingsDialog by remember { mutableStateOf<Goal?>(null) }
@@ -248,20 +303,28 @@ fun GoalScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            goals.forEach { goal ->
-                SmallGoalCard(
-                    icon = getIconForName(goal.iconName),
-                    iconBgColor = Color(parseColor(goal.colorHex)).copy(alpha = 0.2f),
-                    iconTintColor = Color(parseColor(goal.colorHex)),
-                    title = goal.title,
-                    progress = goal.progress,
-                    isOverdue = goal.isOverdue,
-                    daysRemaining = goal.daysRemaining,
-                    progressColor = Color(parseColor(goal.colorHex)),
-                    trackColor = colorScheme.outlineVariant,
-                    onClick = { selectedGoal = goal }
+            if (goals.isEmpty()) {
+                EmptyState(
+                    emoji = "🎯",
+                    title = "No active goals",
+                    subtitle = "Set your first financial milestone today!"
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+            } else {
+                goals.forEach { goal ->
+                    SmallGoalCard(
+                        icon = getIconForName(goal.iconName),
+                        iconBgColor = Color(parseColor(goal.colorHex)).copy(alpha = 0.2f),
+                        iconTintColor = Color(parseColor(goal.colorHex)),
+                        title = goal.title,
+                        progress = goal.progress,
+                        isOverdue = goal.isOverdue,
+                        daysRemaining = goal.daysRemaining,
+                        progressColor = Color(parseColor(goal.colorHex)),
+                        trackColor = colorScheme.outlineVariant,
+                        onClick = { selectedGoal = goal }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
 
             Spacer(modifier = Modifier.height(4.dp))

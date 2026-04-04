@@ -31,7 +31,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override val budgetLimitFlow: Flow<Double> = dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.BUDGET_LIMIT] ?: 50000.0
+            preferences[PreferencesKeys.BUDGET_LIMIT] ?: 0.0
         }
 
     override val currencyFlow: Flow<Currency> = dataStore.data
