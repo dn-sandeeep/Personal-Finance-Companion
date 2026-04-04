@@ -64,4 +64,9 @@ class GoalRepositoryImpl(
     override suspend fun deleteGoal(id: String) {
         dao.deleteGoal(id)
     }
+
+    override suspend fun convertAllGoalsAndContributions(factor: Double) {
+        dao.convertAllGoals(factor)
+        dao.convertAllContributions(factor)
+    }
 }

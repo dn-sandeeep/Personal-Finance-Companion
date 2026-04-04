@@ -25,4 +25,7 @@ interface TransactionDao {
     
     @Query("DELETE FROM transactions WHERE id = :id")
     fun deleteTransaction(id: String)
+
+    @Query("UPDATE transactions SET amount = amount * :factor")
+    suspend fun convertAllTransactions(factor: Double)
 }

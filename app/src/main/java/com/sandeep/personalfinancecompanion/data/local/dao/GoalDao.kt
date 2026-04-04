@@ -37,4 +37,10 @@ interface GoalDao {
 
     @Query("DELETE FROM goal_contributions WHERE id = :contributionId")
     suspend fun deleteContribution(contributionId: String)
+
+    @Query("UPDATE goals SET targetAmount = targetAmount * :factor, savedAmount = savedAmount * :factor")
+    suspend fun convertAllGoals(factor: Double)
+
+    @Query("UPDATE goal_contributions SET amount = amount * :factor")
+    suspend fun convertAllContributions(factor: Double)
 }

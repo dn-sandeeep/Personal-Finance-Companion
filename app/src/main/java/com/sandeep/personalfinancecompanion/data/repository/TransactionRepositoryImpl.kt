@@ -46,4 +46,10 @@ class TransactionRepositoryImpl @Inject constructor(
             dao.deleteTransaction(id)
         }
     }
+
+    override suspend fun convertAllTransactions(factor: Double) {
+        withContext(Dispatchers.IO) {
+            dao.convertAllTransactions(factor)
+        }
+    }
 }

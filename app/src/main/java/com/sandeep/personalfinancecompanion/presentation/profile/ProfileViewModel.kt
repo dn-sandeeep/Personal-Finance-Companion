@@ -23,7 +23,8 @@ data class ProfileState(
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val changeCurrencyUseCase: com.sandeep.personalfinancecompanion.domain.usecase.ChangeCurrencyUseCase
 ) : ViewModel() {
 
     val state: StateFlow<ProfileState> = combine(
@@ -73,7 +74,7 @@ class ProfileViewModel @Inject constructor(
 
     fun updateCurrency(currency: Currency) {
         viewModelScope.launch {
-            preferencesRepository.updateCurrency(currency)
+            changeCurrencyUseCase(currency)
         }
     }
 }

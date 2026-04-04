@@ -11,4 +11,5 @@ interface GoalRepository {
     suspend fun updateGoalTargetDate(goalId: String, targetDate: Long?)
     suspend fun updateGoalSettings(goalId: String, targetAmount: Double, targetDate: Long?)
     suspend fun deleteGoal(id: String)
+    suspend fun convertAllGoalsAndContributions(factor: Double)
 }
