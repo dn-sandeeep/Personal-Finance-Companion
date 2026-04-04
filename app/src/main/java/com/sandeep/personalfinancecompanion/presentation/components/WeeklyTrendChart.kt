@@ -46,6 +46,7 @@ fun WeeklyTrendChart(
     entries: List<BarEntry>,
     modifier: Modifier = Modifier,
     onBarClick: (BarEntry) -> Unit = {},
+    budgetLimit: Double = 50000.0, // Default for calculation
     barColor: Color = Color(0xFF0D6B58),
     barColorLight: Color = Color(0xFFB2DFDB),
     highlightColor: Color = Color(0xFF0D6B58)
@@ -54,6 +55,11 @@ fun WeeklyTrendChart(
 
     val maxEntryValue = entries.maxOfOrNull { it.value } ?: 0f
     
+    // Dynamic Thresholds Based on Daily Budget (Monthly Budget / 30)
+    val dailyBudget = (budgetLimit / 30.0).toFloat()
+    val safeThreshold = dailyBudget * 0.5f  // 50% of daily budget
+    val cautionThreshold = dailyBudget      // 100% of daily budget
+
     // Calculate a "nice" max value for the chart scale
     val maxValue = when {
         maxEntryValue <= 0f -> 1000f
@@ -134,10 +140,10 @@ fun WeeklyTrendChart(
                                 val gap = (totalWidth - (barWidth * barCount)) / (barCount + 1)
 
                                 entries.forEachIndexed { index, entry ->
-                                    val x = gap + index * (barWidth + gap)
-                                    if (offset.x >= x && offset.x <= x + barWidth) {
-                                        onBarClick(entry)
-                                    }
+                                     val x = gap + index * (barWidth + gap)
+                                     if (offset.x >= x && offset.x <= x + barWidth) {
+                                         onBarClick(entry)
+                                     }
                                 }
                             }
                         }
@@ -171,12 +177,11 @@ fun WeeklyTrendChart(
                         val barHeight = (entry.value / maxValue) * size.height * animProgress
                         val x = gap + index * (barWidth + gap)
 
-                        // Dynamic Color Logic based on value thresholds
-                        // Using Budget colors from Color.kt: Safe (Green), Caution (Orange), Danger (Red)
+                        // Dynamic Color Logic based on budget-derived thresholds
                         val dynamicBarColor = when {
                             entry.value == 0f -> Color.LightGray.copy(alpha = 0.3f)
-                            entry.value < 500f -> BudgetSafe
-                            entry.value < 1500f -> BudgetCaution
+                            entry.value < safeThreshold -> BudgetSafe
+                            entry.value < cautionThreshold -> BudgetCaution
                             else -> BudgetDanger
                         }
 
