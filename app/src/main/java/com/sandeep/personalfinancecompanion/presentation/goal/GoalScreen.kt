@@ -342,7 +342,7 @@ fun GoalTypePickerDialog(
                             Icon(
                                 imageVector = getIconForName(icon),
                                 contentDescription = null,
-                                tint = Color(android.graphics.Color.parseColor(color))
+                                tint = Color(parseColor(color))
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
