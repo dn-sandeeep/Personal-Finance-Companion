@@ -14,11 +14,7 @@ Stay on top of your finances! Download the latest APK and start managing your mo
 
 Experience the Personal Finance Companion in action. This video showcases the seamless transaction logging, goal tracking, and dynamic insights.
 
-<!-- Replace the URL below with your actual demo video link after uploading to GitHub -->
-> [!TIP]
-> Upload your screen recording to a GitHub issue or pull request, then copy the generated link here!
-
-https://github.com/user-attachments/assets/placeholder-video-link
+https://youtu.be/kAHhZ94PF88
 
 ---
 
@@ -144,4 +140,4 @@ This project follows the **Modern Android Development (MAD)** standards and **Cl
 
 ---
 
-Developed by Sandeep.
+Developed with ❤️ by Sandeep.
