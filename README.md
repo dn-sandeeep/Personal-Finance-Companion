@@ -2,6 +2,14 @@
 
 Personal Finance Companion is a modern, intuitive, and feature-rich Android application designed to help users take full control of their financial life. Built with the latest Android technologies, it provides a seamless experience for tracking transactions, managing budgets, setting financial goals, and gaining deep insights into spending habits.
 
+## 📲 Download
+
+Stay on top of your finances! Download the latest APK and start managing your money like a pro.
+
+[![Download APK](https://img.shields.io/badge/Download-APK-2E7D32?style=for-the-badge&logo=android&logoColor=white)](https://github.com/dn-sandeeep/Personal-Finance-Companion/releases/latest)
+
+---
+
 ## ✨ Key Features
 
 ### 🏠 Dashboard (Home)
@@ -116,20 +124,12 @@ This project follows the **Modern Android Development (MAD)** standards and **Cl
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Sandeep/PersonalFinanceCompanion.git
+   git clone https://github.com/dn-sandeeep/Personal-Finance-Companion.git
    ```
 2. Open the project in **Android Studio (Ladybug or newer)**.
 3. Sync Project with Gradle Files.
-4. Run the app on an Emulator or Physical Device (API 26+).
+4. Run the app on an Emulator or Physical Device (API 24+).
 
 ---
 
-## 🤝 Contributing
-Contributions are welcome! If you have suggestions or find bugs, feel free to open an issue or submit a pull request.
-
----
-
-## 📝 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Developed with ❤️ by Sandeep.
+Developed by Sandeep.
