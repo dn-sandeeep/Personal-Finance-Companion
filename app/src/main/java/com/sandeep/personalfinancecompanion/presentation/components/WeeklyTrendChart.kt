@@ -46,7 +46,8 @@ fun WeeklyTrendChart(
     entries: List<BarEntry>,
     modifier: Modifier = Modifier,
     onBarClick: (BarEntry) -> Unit = {},
-    budgetLimit: Double = 50000.0, // Default for calculation
+    budgetLimit: Double = 50000.0,
+    currency: com.sandeep.personalfinancecompanion.domain.model.Currency = com.sandeep.personalfinancecompanion.domain.model.Currency.INR,
     barColor: Color = Color(0xFF0D6B58),
     barColorLight: Color = Color(0xFFB2DFDB),
     highlightColor: Color = Color(0xFF0D6B58)
@@ -55,6 +56,13 @@ fun WeeklyTrendChart(
 
     val maxEntryValue = entries.maxOfOrNull { it.value } ?: 0f
     
+    // Dynamic Scale: Default max is ₹1000 converted to current currency
+    val minDefaultMax = com.sandeep.personalfinancecompanion.domain.model.Currency.convert(
+        1000.0, 
+        com.sandeep.personalfinancecompanion.domain.model.Currency.INR, 
+        currency
+    ).toFloat()
+
     // Dynamic Thresholds Based on Daily Budget (Monthly Budget / 30)
     val dailyBudget = (budgetLimit / 30.0).toFloat()
     val safeThreshold = dailyBudget * 0.5f  // 50% of daily budget
@@ -62,10 +70,10 @@ fun WeeklyTrendChart(
 
     // Calculate a "nice" max value for the chart scale
     val maxValue = when {
-        maxEntryValue <= 0f -> 1000f
-        maxEntryValue <= 1000f -> 1000f
-        maxEntryValue <= 5000f -> 5000f
-        maxEntryValue <= 10000f -> 10000f
+        maxEntryValue <= 0f -> minDefaultMax
+        maxEntryValue <= minDefaultMax -> minDefaultMax
+        maxEntryValue <= minDefaultMax * 5 -> minDefaultMax * 5
+        maxEntryValue <= minDefaultMax * 10 -> minDefaultMax * 10
         else -> {
             val magnitude = Math.pow(10.0, Math.floor(Math.log10(maxEntryValue.toDouble()))).toFloat()
             (Math.ceil((maxEntryValue / magnitude).toDouble()) * magnitude).toFloat()
@@ -90,7 +98,7 @@ fun WeeklyTrendChart(
         animTarget = 1f
     }
 
-    val labelWidth = 45.dp
+    val labelWidth = 55.dp // Increased width for symbol
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -108,14 +116,14 @@ fun WeeklyTrendChart(
             ) {
                 yAxisLabels.forEach { label ->
                     Text(
-                        text = formatLabel(label),
+                        text = formatLabel(label, currency),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 }
                 Text(
-                    text = "0",
+                    text = "${currency.symbol}0",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     modifier = Modifier.padding(end = 8.dp)
@@ -230,10 +238,14 @@ fun WeeklyTrendChart(
     }
 }
 
-private fun formatLabel(value: Int): String {
+private fun formatLabel(
+    value: Int, 
+    currency: com.sandeep.personalfinancecompanion.domain.model.Currency
+): String {
+    val symbol = currency.symbol
     return when {
-        value >= 1000000 -> "${value / 1000000}M"
-        value >= 1000 -> "${value / 1000}K"
-        else -> value.toString()
+        value >= 1000000 -> "$symbol${value / 1000000}M"
+        value >= 1000 -> "$symbol${value / 1000}K"
+        else -> "$symbol$value"
     }
 }
