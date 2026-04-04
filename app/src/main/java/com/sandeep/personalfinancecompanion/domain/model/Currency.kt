@@ -8,13 +8,13 @@ enum class Currency(
     val rateInINR: Double 
 ) {
     INR("INR", "₹", "Indian Rupee", "🇮🇳", 1.0),
-    USD("USD", "$", "US Dollar", "🇺🇸", 83.0),
-    EUR("EUR", "€", "Euro", "🇪🇺", 90.0),
-    GBP("GBP", "£", "British Pound", "🇬🇧", 105.0),
+    USD("USD", "$", "US Dollar", "🇺🇸", 91.0),
+    EUR("EUR", "€", "Euro", "🇪🇺", 105.0),
+    GBP("GBP", "£", "British Pound", "🇬🇧", 120.0),
     JPY("JPY", "¥", "Japanese Yen", "🇯🇵", 0.55),
-    AUD("AUD", "A$", "Australian Dollar", "🇦🇺", 54.0),
+    AUD("AUD", "A$", "Australian Dollar", "🇦🇺", 60.0),
     CAD("CAD", "C$", "Canadian Dollar", "🇨🇦", 61.0),
-    CHF("CHF", "Fr", "Swiss Franc", "🇨🇭", 92.0),
+    CHF("CHF", "Fr", "Swiss Franc", "🇨🇭", 110.0),
     CNY("CNY", "¥", "Chinese Yuan", "🇨🇳", 11.5),
     AED("AED", "د.إ", "UAE Dirham", "🇦🇪", 22.6);
 

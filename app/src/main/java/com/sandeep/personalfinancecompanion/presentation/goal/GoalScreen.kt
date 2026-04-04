@@ -289,13 +289,15 @@ fun GoalTypePickerDialog(
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
-    val predefinedGoals = listOf(
-        Triple("New Car", 25000.0, "DirectionsCar"),
-        Triple("Dream Home", 500000.0, "Home"),
-        Triple("New Phone", 1000.0, "Smartphone"),
-        Triple("Education", 15000.0, "School"),
-        Triple("Retirement", 1000000.0, "TrendingUp")
-    )
+    val predefinedGoals = remember(currency) {
+        listOf(
+            Triple("New Car", Currency.convert(25000.0, Currency.USD, currency), "DirectionsCar"),
+            Triple("Dream Home", Currency.convert(500000.0, Currency.USD, currency), "Home"),
+            Triple("New Phone", Currency.convert(1000.0, Currency.USD, currency), "Smartphone"),
+            Triple("Education", Currency.convert(15000.0, Currency.USD, currency), "School"),
+            Triple("Retirement", Currency.convert(1000000.0, Currency.USD, currency), "TrendingUp")
+        )
+    }
     val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0")
 
     if (showDatePicker) {
@@ -423,6 +425,11 @@ fun getIconForName(name: String): ImageVector {
 @Composable
 private fun PrimaryObjectiveCard(currency: Currency) {
     val colorScheme = MaterialTheme.colorScheme
+    
+    // Scale placeholder values from USD base for realism
+    val targetAmount = remember(currency) { Currency.convert(2000.0, Currency.USD, currency) }
+    val savedAmount = remember(currency) { Currency.convert(1300.0, Currency.USD, currency) }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -476,7 +483,7 @@ private fun PrimaryObjectiveCard(currency: Currency) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Save ${CurrencyFormatter.formatAmount(2000.0, currency)} for a\nnew laptop",
+                text = "Save ${CurrencyFormatter.formatAmount(targetAmount, currency)} for a\nnew laptop",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onPrimaryContainer,
@@ -510,7 +517,7 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = CurrencyFormatter.formatAmount(1300.0, currency),
+                        text = CurrencyFormatter.formatAmount(savedAmount, currency),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
@@ -533,7 +540,7 @@ private fun PrimaryObjectiveCard(currency: Currency) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = CurrencyFormatter.formatAmount(2000.0, currency),
+                        text = CurrencyFormatter.formatAmount(targetAmount, currency),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface

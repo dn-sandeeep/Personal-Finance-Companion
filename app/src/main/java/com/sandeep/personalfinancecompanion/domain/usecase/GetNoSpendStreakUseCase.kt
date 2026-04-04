@@ -26,8 +26,9 @@ class GetNoSpendStreakUseCase @Inject constructor(
     operator fun invoke(): Flow<NoSpendStreak> {
         return combine(
             repository.getAllTransactions(),
-            preferencesRepository.noSpendTargetFlow
-        ) { transactions, target ->
+            preferencesRepository.noSpendTargetFlow,
+            preferencesRepository.currencyFlow
+        ) { transactions, target, currency ->
             val nonEssentialTransactions = transactions
                 .filter { it.type == TransactionType.EXPENSE }
                 .filter { it.category in NON_ESSENTIAL_CATEGORIES }
@@ -55,11 +56,7 @@ class GetNoSpendStreakUseCase @Inject constructor(
             var bestStreak = currentStreak
             if (nonEssentialSpendDates.isNotEmpty()) {
                 val sortedDates = nonEssentialSpendDates.sortedDescending()
-                var tempStreak = 0
-                var lastDate: Long? = null
                 
-                // This is a bit complex for a simple loop, let's simplify:
-                // Find the longest gap between non-essential spend dates
                 val allDates = transactions.map { getStartOfDay(it.date) }.distinct().sorted()
                 if (allDates.isNotEmpty()) {
                     var currentMax = 0
@@ -86,7 +83,15 @@ class GetNoSpendStreakUseCase @Inject constructor(
             val totalDaysWithNonEssentialSpend = nonEssentialSpendDates.size.toDouble()
             val avgSpendPerDay = if (totalDaysWithNonEssentialSpend > 0) {
                 totalNonEssentialAmount / totalDaysWithNonEssentialSpend
-            } else 500.0 // Default fallback
+            } else {
+                // Treated as INR 500 fallback and converted
+                val fallbackInINR = 500.0
+                com.sandeep.personalfinancecompanion.domain.model.Currency.convert(
+                    fallbackInINR,
+                    com.sandeep.personalfinancecompanion.domain.model.Currency.INR,
+                    currency
+                )
+            }
 
             val potentialSavings = currentStreak * avgSpendPerDay
 
