@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface GoalDao {
 
     @Transaction
-    @Query("SELECT * FROM goals")
+    @Query("SELECT * FROM goals ORDER BY (CASE WHEN priority = 0 THEN 999 ELSE priority END) ASC, title ASC")
     fun getAllGoals(): Flow<List<GoalWithContributions>>
 
     @Transaction
@@ -30,6 +30,33 @@ interface GoalDao {
     suspend fun addContributionAndUpdateGoal(contribution: GoalContributionEntity, updatedGoal: GoalEntity) {
         insertContribution(contribution)
         updateGoal(updatedGoal)
+    }
+
+    @Query("UPDATE goals SET priority = :priority WHERE id = :id")
+    suspend fun updateGoalPriority(id: String, priority: Int)
+
+    @Query("UPDATE goals SET priority = 0 WHERE priority = 3")
+    suspend fun clearTertiary()
+
+    @Query("UPDATE goals SET priority = 3 WHERE priority = 2")
+    suspend fun shiftSecondaryToTertiary()
+
+    @Query("UPDATE goals SET priority = 2 WHERE priority = 1")
+    suspend fun shiftPrimaryToSecondary()
+
+    @Transaction
+    suspend fun updatePriorityAndShift(goalId: String, newPriority: Int) {
+        if (newPriority == 1) {
+            clearTertiary()
+            shiftSecondaryToTertiary()
+            shiftPrimaryToSecondary()
+        } else if (newPriority == 2) {
+            clearTertiary()
+            shiftSecondaryToTertiary()
+        } else if (newPriority == 3) {
+            clearTertiary()
+        }
+        updateGoalPriority(goalId, newPriority)
     }
 
     @Query("DELETE FROM goals WHERE id = :id")

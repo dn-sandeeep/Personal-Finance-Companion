@@ -8,7 +8,8 @@ data class Goal(
     val iconName: String,
     val colorHex: String,
     val contributions: List<GoalContribution>,
-    val targetDate: Long? = null
+    val targetDate: Long? = null,
+    val priority: Int = 0
 ) {
     val progress: Float
         get() = if (targetAmount > 0) (savedAmount / targetAmount).toFloat().coerceIn(0f, 1f) else 0f

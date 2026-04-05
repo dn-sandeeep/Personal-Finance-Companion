@@ -10,6 +10,7 @@ interface GoalRepository {
     suspend fun addContribution(goalId: String, amount: Double)
     suspend fun updateGoalTargetDate(goalId: String, targetDate: Long?)
     suspend fun updateGoalSettings(goalId: String, targetAmount: Double, targetDate: Long?)
+    suspend fun updateGoalPriority(goalId: String, newPriority: Int)
     suspend fun deleteGoal(id: String)
     suspend fun convertAllGoalsAndContributions(factor: Double)
 }

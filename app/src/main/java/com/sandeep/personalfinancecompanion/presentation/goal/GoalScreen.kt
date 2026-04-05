@@ -255,7 +255,11 @@ fun GoalContent(
                 currency = currency,
                 onAddMoneyClick = { showAddSavingsDialog = it },
                 onEditClick = { showEditGoalDialog = it },
-                onDeleteClick = { showDeleteConfirm = it }
+                onDeleteClick = { showDeleteConfirm = it },
+                onPriorityChange = { goalId, priority ->
+                    viewModel.updateGoalPriority(goalId, priority)
+                    selectedGoal = null // Close sheet after priority change to refresh state
+                }
             )
         }
     }
@@ -291,7 +295,12 @@ fun GoalContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            PrimaryObjectiveCard(currency = currency)
+            val primaryGoal = goals.find { it.priority == 1 }
+            PrimaryObjectiveCard(
+                goal = primaryGoal,
+                currency = currency,
+                onSetPrimaryClick = { showAddGoalDialog = true }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -319,6 +328,7 @@ fun GoalContent(
                         progress = goal.progress,
                         isOverdue = goal.isOverdue,
                         daysRemaining = goal.daysRemaining,
+                        priority = goal.priority,
                         progressColor = Color(parseColor(goal.colorHex)),
                         trackColor = colorScheme.outlineVariant,
                         onClick = { selectedGoal = goal }
@@ -486,128 +496,173 @@ fun getIconForName(name: String): ImageVector {
 }
 
 @Composable
-private fun PrimaryObjectiveCard(currency: Currency) {
+private fun PrimaryObjectiveCard(
+    goal: Goal?,
+    currency: Currency,
+    onSetPrimaryClick: () -> Unit = {}
+) {
     val colorScheme = MaterialTheme.colorScheme
     
-    // Scale placeholder values from USD base for realism
-    val targetAmount = remember(currency) { Currency.convert(2000.0, Currency.USD, currency) }
-    val savedAmount = remember(currency) { Currency.convert(1300.0, Currency.USD, currency) }
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
+    if (goal == null) {
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
+                .clickable { onSetPrimaryClick() },
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer.copy(alpha = 0.5f)),
+            border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.2f))
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Pill
-                Box(
-                    modifier = Modifier
-                        .background(
-                            colorScheme.primary.copy(alpha = 0.1f),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "PRIMARY OBJECTIVE",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary,
-                        letterSpacing = 1.sp
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "65%",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = colorScheme.primary
-                    )
-                    Text(
-                        text = "Complete",
-                        fontSize = 11.sp,
-                        color = colorScheme.primary,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Save ${CurrencyFormatter.formatAmount(targetAmount, currency)} for a\nnew laptop",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onPrimaryContainer,
-                lineHeight = 28.sp
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            LinearProgressIndicator(
-                progress = { 0.65f },
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(5.dp)),
-                color = colorScheme.primary,
-                trackColor = colorScheme.surfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column {
-                    Text(
-                        text = "Saved",
-                        fontSize = 12.sp,
-                        color = colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = CurrencyFormatter.formatAmount(savedAmount, currency),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
-                    )
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "No Primary Objective Set",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Ready for a new target? Set a primary objective to focus your progress.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onSetPrimaryClick,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
+                    Text("Set Primary Objective", fontSize = 12.sp)
+                }
+            }
+        }
+    } else {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                colorScheme.primary.copy(alpha = 0.1f),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "PRIMARY OBJECTIVE",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            letterSpacing = 1.sp
+                        )
+                    }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "${(goal.progress * 100).toInt()}%",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colorScheme.primary
+                        )
+                        Text(
+                            text = "Complete",
+                            fontSize = 11.sp,
+                            color = colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
 
-                // Divider
-                Box(
-                    modifier = Modifier
-                        .height(30.dp)
-                        .width(1.dp)
-                        .background(colorScheme.outlineVariant)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = goal.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onPrimaryContainer,
+                    lineHeight = 28.sp
                 )
 
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "Target",
-                        fontSize = 12.sp,
-                        color = colorScheme.onSurfaceVariant
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LinearProgressIndicator(
+                    progress = { goal.progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(5.dp)),
+                    color = colorScheme.primary,
+                    trackColor = colorScheme.surfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Saved",
+                            fontSize = 12.sp,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = CurrencyFormatter.formatAmount(goal.savedAmount, currency),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onSurface
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .height(30.dp)
+                            .width(1.dp)
+                            .background(colorScheme.outlineVariant)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = CurrencyFormatter.formatAmount(targetAmount, currency),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
-                    )
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "Target",
+                            fontSize = 12.sp,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = CurrencyFormatter.formatAmount(goal.targetAmount, currency),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
@@ -948,6 +1003,7 @@ private fun SmallGoalCard(
     progress: Float,
     isOverdue: Boolean,
     daysRemaining: Int?,
+    priority: Int,
     progressColor: Color,
     trackColor: Color,
     onClick: () -> Unit
@@ -957,8 +1013,8 @@ private fun SmallGoalCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant.copy(alpha = 0.2f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -966,32 +1022,66 @@ private fun SmallGoalCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(30.dp)
-                        .background(iconBgColor, CircleShape),
+                        .size(40.dp)
+                        .background(iconBgColor, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = iconTintColor,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorScheme.onSurface
-                    )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = title,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onSurface
+                        )
+                        
+                        if (priority > 0) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            val priorityLabel = when(priority) {
+                                1 -> "PRIMARY"
+                                2 -> "SECONDARY"
+                                3 -> "TERTIARY"
+                                else -> ""
+                            }
+                            val priorityColor = when(priority) {
+                                1 -> colorScheme.primary
+                                2 -> colorScheme.secondary
+                                3 -> colorScheme.tertiary
+                                else -> colorScheme.outline
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .background(priorityColor.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = priorityLabel,
+                                    color = priorityColor,
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
                     if (isOverdue) {
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                         Box(
                             modifier = Modifier
                                 .background(
@@ -1228,7 +1318,8 @@ fun GoalDetailBottomSheet(
     currency: Currency,
     onAddMoneyClick: (Goal) -> Unit,
     onEditClick: (Goal) -> Unit,
-    onDeleteClick: (Goal) -> Unit
+    onDeleteClick: (Goal) -> Unit,
+    onPriorityChange: (String, Int) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val timeFormatter = remember {
@@ -1376,6 +1467,52 @@ fun GoalDetailBottomSheet(
                             else "Not set",
                             fontWeight = FontWeight.Bold,
                             color = if (goal.isOverdue) colorScheme.error else colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Assign Priority",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val priorities = listOf(
+                Triple(1, "Primary", colorScheme.primary),
+                Triple(2, "Secondary", colorScheme.secondary),
+                Triple(3, "Tertiary", colorScheme.tertiary),
+                Triple(0, "None", colorScheme.outline)
+            )
+
+            priorities.forEach { (rank, label, color) ->
+                val isSelected = goal.priority == rank
+                Surface(
+                    onClick = { onPriorityChange(goal.id, rank) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isSelected) color.copy(alpha = 0.15f) else colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, if (isSelected) color else colorScheme.outlineVariant.copy(alpha = 0.5f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = label,
+                            fontSize = 11.sp,
+                            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                            color = if (isSelected) color else colorScheme.onSurfaceVariant
                         )
                     }
                 }

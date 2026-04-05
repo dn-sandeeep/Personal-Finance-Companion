@@ -61,6 +61,10 @@ class GoalRepositoryImpl(
         }
     }
 
+    override suspend fun updateGoalPriority(goalId: String, newPriority: Int) {
+        dao.updatePriorityAndShift(goalId, newPriority)
+    }
+
     override suspend fun deleteGoal(id: String) {
         dao.deleteGoal(id)
     }

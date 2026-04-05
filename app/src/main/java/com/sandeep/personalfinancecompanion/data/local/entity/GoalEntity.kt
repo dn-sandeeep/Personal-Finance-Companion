@@ -12,5 +12,6 @@ data class GoalEntity(
     val savedAmount: Double,
     val iconName: String,
     val colorHex: String,
-    val targetDate: Long? = null
+    val targetDate: Long? = null,
+    val priority: Int = 0
 )

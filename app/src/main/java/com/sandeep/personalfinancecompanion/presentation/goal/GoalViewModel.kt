@@ -77,6 +77,12 @@ class GoalViewModel @Inject constructor(
         }
     }
 
+    fun updateGoalPriority(goalId: String, newPriority: Int) {
+        viewModelScope.launch {
+            repository.updateGoalPriority(goalId, newPriority)
+        }
+    }
+
     fun deleteGoal(goalId: String) {
         viewModelScope.launch {
             repository.deleteGoal(goalId)
