@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +39,12 @@ import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.BeachAccess
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -228,8 +235,8 @@ fun GoalContent(
             goal = showEditGoalDialog!!,
             currency = currency,
             onDismiss = { showEditGoalDialog = null },
-            onConfirm = { amount, date ->
-                viewModel.updateGoalSettings(showEditGoalDialog!!.id, amount, date)
+            onConfirm = { title, amount, icon, color, date ->
+                viewModel.updateGoalDetails(showEditGoalDialog!!.id, title, amount, icon, color, date)
                 showEditGoalDialog = null
                 selectedGoal = null
             }
@@ -336,7 +343,8 @@ fun GoalContent(
                         priority = goal.priority,
                         progressColor = Color(parseColor(goal.colorHex)),
                         trackColor = colorScheme.outlineVariant,
-                        onClick = { selectedGoal = goal }
+                        onClick = { selectedGoal = goal },
+                        onEditClick = { showEditGoalDialog = goal }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -362,10 +370,17 @@ fun GoalTypePickerDialog(
     onDismiss: () -> Unit,
     onGoalSelected: (String, Double, String, String, Long?) -> Unit
 ) {
+    var isCustomMode by remember { mutableStateOf(false) }
     var selectedGoalIndex by remember { mutableStateOf<Int?>(null) }
     var selectedDate by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    // Custom Goal States
+    var customTitle by remember { mutableStateOf("") }
+    var customAmount by remember { mutableStateOf("") }
+    var customIcon by remember { mutableStateOf("Star") }
+    var customColor by remember { mutableStateOf("#4CAF50") }
 
     val predefinedGoals = remember(currency) {
         listOf(
@@ -376,7 +391,8 @@ fun GoalTypePickerDialog(
             Triple("Retirement", Currency.convert(1000000.0, Currency.USD, currency), "TrendingUp")
         )
     }
-    val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0")
+    val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#E91E63", "#00BCD4", "#607D8B")
+    val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fastfood", "MedicalServices", "FitnessCenter")
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -397,44 +413,160 @@ fun GoalTypePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Goal Type") },
+        title = { Text(if (isCustomMode) "Create Custom Goal" else "Select Goal Type") },
         text = {
-            Column {
-                predefinedGoals.forEachIndexed { index, (title, target, icon) ->
-                    val color = colors[index % colors.size]
-                    val isSelected = selectedGoalIndex == index
-                    
-                    Surface(
-                        onClick = { selectedGoalIndex = index },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                        border = if (isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (!isCustomMode) {
+                    predefinedGoals.forEachIndexed { index, (title, target, icon) ->
+                        val color = colors[index % colors.size]
+                        val isSelected = selectedGoalIndex == index
+                        
+                        Surface(
+                            onClick = { selectedGoalIndex = index },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                            border = if (isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = getIconForName(icon),
+                                    contentDescription = null,
+                                    tint = Color(parseColor(color))
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = title,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = CurrencyFormatter.formatAmount(target, currency),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TextButton(
+                        onClick = { isCustomMode = true },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Icon(
-                                imageVector = getIconForName(icon),
-                                contentDescription = null,
-                                tint = Color(parseColor(color))
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = title,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                text = CurrencyFormatter.formatAmount(target, currency),
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Create Your Own Goal")
                         }
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                } else {
+                    // Custom Mode Form
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = customTitle,
+                            onValueChange = { customTitle = it },
+                            label = { Text("Goal Name") },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("e.g. Wedding, Europe Trip") }
+                        )
+
+                        OutlinedTextField(
+                            value = customAmount,
+                            onValueChange = { input ->
+                                val clean = input.replace(",", "").filter { it.isDigit() || it == '.' }
+                                if (clean.isEmpty()) {
+                                    customAmount = ""
+                                } else {
+                                    try {
+                                        val parts = clean.split(".")
+                                        val integerPart = parts[0].toLongOrNull() ?: 0L
+                                        val formatted = java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(integerPart)
+                                        customAmount = when {
+                                            parts.size > 1 -> "$formatted.${parts[1].take(2)}"
+                                            clean.endsWith(".") -> "$formatted."
+                                            else -> formatted
+                                        }
+                                    } catch (e: Exception) {
+                                        customAmount = clean
+                                    }
+                                }
+                            },
+                            label = { Text("Target Amount") },
+                            modifier = Modifier.fillMaxWidth(),
+                            prefix = { Text(currency.symbol) },
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                            )
+                        )
+
+                        Text(text = "Choose Icon", style = MaterialTheme.typography.bodySmall)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            icons.forEach { icon ->
+                                val isSelected = customIcon == icon
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
+                                        .border(
+                                            1.dp,
+                                            if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                        .clickable { customIcon = icon },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = getIconForName(icon),
+                                        contentDescription = null,
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        Text(text = "Choose Color", style = MaterialTheme.typography.bodySmall)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            colors.forEach { color ->
+                                val isSelected = customColor == color
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(parseColor(color)))
+                                        .border(
+                                            2.dp,
+                                            if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                            CircleShape
+                                        )
+                                        .clickable { customColor = color }
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -467,20 +599,35 @@ fun GoalTypePickerDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    selectedGoalIndex?.let { index ->
-                        val (title, target, icon) = predefinedGoals[index]
-                        val color = colors[index % colors.size]
-                        onGoalSelected(title, target, icon, color, selectedDate)
+                    if (isCustomMode) {
+                        onGoalSelected(
+                            customTitle,
+                            customAmount.replace(",", "").toDoubleOrNull() ?: 0.0,
+                            customIcon,
+                            customColor,
+                            selectedDate
+                        )
+                    } else {
+                        selectedGoalIndex?.let { index ->
+                            val (title, target, icon) = predefinedGoals[index]
+                            val color = colors[index % colors.size]
+                            onGoalSelected(title, target, icon, color, selectedDate)
+                        }
                     }
                 },
-                enabled = selectedGoalIndex != null
+                enabled = if (isCustomMode) customTitle.isNotBlank() && customAmount.isNotBlank() else selectedGoalIndex != null
             ) {
-                Text("Confirm Goal")
+                Text(if (isCustomMode) "Create Goal" else "Confirm Goal")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+            TextButton(
+                onClick = {
+                    if (isCustomMode) isCustomMode = false
+                    else onDismiss()
+                }
+            ) {
+                Text(if (isCustomMode) "Back" else "Cancel")
             }
         },
         containerColor = MaterialTheme.colorScheme.surface
@@ -496,6 +643,12 @@ fun getIconForName(name: String): ImageVector {
         "Smartphone" -> Icons.Default.Smartphone
         "School" -> Icons.Default.School
         "TrendingUp" -> Icons.Default.TrendingUp
+        "BeachAccess" -> Icons.Default.BeachAccess
+        "Celebration" -> Icons.Default.Celebration
+        "Devices" -> Icons.Default.Devices
+        "Fastfood" -> Icons.Default.Fastfood
+        "MedicalServices" -> Icons.Default.MedicalServices
+        "FitnessCenter" -> Icons.Default.FitnessCenter
         else -> Icons.Default.Star
     }
 }
@@ -1011,7 +1164,8 @@ private fun SmallGoalCard(
     priority: Int,
     progressColor: Color,
     trackColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onEditClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Card(
@@ -1103,6 +1257,18 @@ private fun SmallGoalCard(
                             )
                         }
                     }
+                }
+
+                IconButton(
+                    onClick = onEditClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
@@ -1673,12 +1839,26 @@ fun EditGoalDialog(
     goal: Goal,
     currency: Currency,
     onDismiss: () -> Unit,
-    onConfirm: (Double, Long?) -> Unit
+    onConfirm: (String, Double, String, String, Long?) -> Unit
 ) {
-    var targetAmount by remember { mutableStateOf(goal.targetAmount.toString()) }
+    var title by remember { mutableStateOf(goal.title) }
+    var targetAmount by remember {
+        val initial = goal.targetAmount
+        val formatted = try {
+            java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(initial.toLong())
+        } catch (e: Exception) {
+            initial.toString()
+        }
+        mutableStateOf(formatted)
+    }
+    var iconName by remember { mutableStateOf(goal.iconName) }
+    var colorHex by remember { mutableStateOf(goal.colorHex) }
     var selectedDate by remember { mutableStateOf(goal.targetDate) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = goal.targetDate)
+
+    val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fastfood", "MedicalServices", "FitnessCenter")
+    val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#E91E63", "#00BCD4", "#607D8B")
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -1699,27 +1879,135 @@ fun EditGoalDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Goal") },
+        title = { Text("Edit Goal Details") },
         text = {
-            Column {
-                Text(
-                    text = goal.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Goal Name") },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = targetAmount,
-                    onValueChange = {
-                        if (it.all { char -> char.isDigit() || char == '.' }) targetAmount = it
+                    onValueChange = { input ->
+                        val clean = input.replace(",", "").filter { it.isDigit() || it == '.' }
+                        if (clean.isEmpty()) {
+                            targetAmount = ""
+                        } else {
+                            try {
+                                val parts = clean.split(".")
+                                val integerPart = parts[0].toLongOrNull() ?: 0L
+                                val formatted = java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(integerPart)
+                                targetAmount = when {
+                                    parts.size > 1 -> "$formatted.${parts[1].take(2)}"
+                                    clean.endsWith(".") -> "$formatted."
+                                    else -> formatted
+                                }
+                            } catch (e: Exception) {
+                                targetAmount = clean
+                            }
+                        }
                     },
                     label = { Text("Target Amount") },
                     modifier = Modifier.fillMaxWidth(),
-                    prefix = { Text(currency.symbol) }
+                    prefix = { Text(currency.symbol) },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                    )
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = "Choose Icon", style = MaterialTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    icons.chunked(4).forEach { chunk ->
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            chunk.forEach { icon ->
+                                val isSelected = iconName == icon
+                                IconButton(
+                                    onClick = { iconName = icon },
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .border(
+                                            if (isSelected) 2.dp else 0.dp,
+                                            if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = getIconForName(icon),
+                                        contentDescription = null,
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Re-doing the layout for icons as the nested column logic above is a bit weird for a Row.
+                // Let's use a FlowRow or similar, but for simplicity just a scrollable Row.
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    icons.forEach { icon ->
+                        val isSelected = iconName == icon
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
+                                .border(
+                                    1.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable { iconName = icon },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = getIconForName(icon),
+                                contentDescription = null,
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Text(text = "Choose Color", style = MaterialTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    colors.forEach { color ->
+                        val isSelected = colorHex == color
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color(parseColor(color)))
+                                .border(
+                                    2.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                    CircleShape
+                                )
+                                .clickable { colorHex = color }
+                        )
+                    }
+                }
 
                 TextButton(
                     onClick = { showDatePicker = true },
@@ -1747,9 +2035,10 @@ fun EditGoalDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val amount = targetAmount.toDoubleOrNull() ?: goal.targetAmount
-                    onConfirm(amount, selectedDate)
-                }
+                    val amount = targetAmount.replace(",", "").toDoubleOrNull() ?: goal.targetAmount
+                    onConfirm(title, amount, iconName, colorHex, selectedDate)
+                },
+                enabled = title.isNotBlank()
             ) {
                 Text("Save Changes")
             }
@@ -1758,6 +2047,7 @@ fun EditGoalDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }

@@ -85,6 +85,19 @@ class GoalViewModel @Inject constructor(
         }
     }
 
+    fun updateGoalDetails(
+        goalId: String,
+        title: String,
+        targetAmount: Double,
+        iconName: String,
+        colorHex: String,
+        targetDate: Long?
+    ) {
+        viewModelScope.launch {
+            repository.updateGoalDetails(goalId, title, targetAmount, iconName, colorHex, targetDate)
+        }
+    }
+
     fun updateGoalPriority(goalId: String, newPriority: Int) {
         viewModelScope.launch {
             repository.updateGoalPriority(goalId, newPriority)

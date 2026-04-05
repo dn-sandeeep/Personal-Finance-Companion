@@ -65,6 +65,31 @@ class GoalRepositoryImpl(
         dao.updatePriorityAndShift(goalId, newPriority)
     }
 
+    override suspend fun updateGoal(goal: Goal) {
+        dao.updateGoal(goal.toEntity())
+    }
+
+    override suspend fun updateGoalDetails(
+        goalId: String,
+        title: String,
+        targetAmount: Double,
+        iconName: String,
+        colorHex: String,
+        targetDate: Long?
+    ) {
+        val goalWithContributions = dao.getGoalWithContributionsById(goalId)
+        if (goalWithContributions != null) {
+            val updatedGoal = goalWithContributions.goal.copy(
+                title = title,
+                targetAmount = targetAmount,
+                iconName = iconName,
+                colorHex = colorHex,
+                targetDate = targetDate
+            )
+            dao.updateGoal(updatedGoal)
+        }
+    }
+
     override suspend fun deleteGoal(id: String) {
         dao.deleteGoal(id)
     }
