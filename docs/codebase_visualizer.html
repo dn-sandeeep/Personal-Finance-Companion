@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Dashboard | Personal Finance Companion</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark-dimmed.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/kotlin.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #0d1117;
+            --sidebar: #161b22;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.3);
+            --text: #c9d1d9;
+            --text-dim: #8b949e;
+            --border: #30363d;
+            --card: #21262d;
+            --highlight: #f0f6fc;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { padding: 0.75rem 1.5rem; background: var(--sidebar); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        h1 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        
+        .nav-controls { display: flex; gap: 10px; }
+        .btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 500; transition: all 0.2s; }
+        .btn:hover { border-color: var(--accent); background: rgba(255,255,255,0.05); }
+        .btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+        .app-layout { display: flex; flex: 1; overflow: hidden; }
+
+        /* Left Side: Navigation */
+        .sidebar { width: 350px; background: var(--sidebar); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+        
+        .tree-view, .concept-view { padding: 1rem; flex: 1; }
+        
+        .concept-group { margin-bottom: 1.5rem; }
+        .concept-header { font-size: 0.7rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        
+        .item { display: flex; align-items: center; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; margin-bottom: 2px; }
+        .item:hover { background: rgba(255, 255, 255, 0.05); }
+        .item.active { background: var(--accent-glow); color: #fff; font-weight: 500; border-left: 3px solid var(--accent); }
+        
+        /* Right Side: Content */
+        .content { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; position: relative; }
+        
+        .intro-box { background: rgba(16, 185, 129, 0.05); border: 1px solid var(--accent); padding: 1.5rem; border-radius: 12px; }
+        .intro-box h2 { margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #fff; }
+        .intro-box p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--text); }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+        .card-title { font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+        
+        .tag { font-size: 0.65rem; background: var(--border); padding: 2px 8px; border-radius: 4px; color: var(--text-dim); }
+
+        pre { margin: 0; padding: 1rem; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.6; overflow: auto; border-radius: 8px; background: #010409 !important; border: 1px solid var(--border); }
+        
+        /* Tour Styling */
+        .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .tour-card { background: var(--sidebar); border: 2px solid var(--accent); padding: 2rem; border-radius: 16px; max-width: 500px; box-shadow: 0 0 50px rgba(16, 185, 129, 0.2); text-align: center; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PERSONAL FINANCE COMPANION <span class="tag">LEARNING DASHBOARD</span></h1>
+        <div class="nav-controls">
+            <button class="btn active" onclick="switchView('concepts')">Concept Mode</button>
+            <button class="btn" onclick="switchView('files')">File View</button>
+            <button class="btn" style="background: var(--accent); color: var(--bg)" onclick="startTour()">Start Guided Tour</button>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <div class="sidebar">
+            <div id="navigation-root"></div>
+        </div>
+
+        <div class="content" id="main-content">
+            <!-- Welcome View -->
+            <div class="intro-box">
+                <h2>Welcome to the Learning Journey</h2>
+                <p>Select a <strong>Concept</strong> or <strong>File</strong> from the sidebar to understand how this project is built using modern Android standards like Hilt, Room, and Jetpack Compose.</p>
+            </div>
+            
+            <div id="file-detail" style="display: none;">
+                <div class="card">
+                    <div class="card-title" id="detail-name">File Name</div>
+                    <div id="detail-explanation" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--text);"></div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 8px;">ANNOTATED CODE PREVIEW</div>
+                    <pre><code class="language-kotlin" id="detail-code"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Overlay -->
+    <div class="tour-overlay" id="tour-overlay">
+        <div class="tour-card">
+            <h2 id="tour-title" style="color: var(--accent);">Guided Tour</h2>
+            <p id="tour-text" style="font-size: 1rem; margin-bottom: 2rem;"></p>
+            <div style="display: flex; justify-content: space-between;">
+                <button class="btn" onclick="endTour()">Skip</button>
+                <button class="btn active" id="tour-next-btn">Next Step</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="codebase_data.js"></script>
+    <script>
+        let currentView = 'concepts';
+        let allFiles = [];
+
+        // Flatten data for easier access
+        function traverse(node) {
+            if (node.type === 'file') allFiles.push(node);
+            if (node.children) node.children.forEach(traverse);
+        }
+        traverse(codebase_data);
+
+        const navRoot = document.getElementById('navigation-root');
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderNavigation();
+        }
+
+        function renderNavigation() {
+            navRoot.innerHTML = '';
+            if (currentView === 'concepts') {
+                const concepts = {};
+                allFiles.forEach(f => {
+                    if (f.concept) {
+                        if (!concepts[f.concept]) concepts[f.concept] = [];
+                        concepts[f.concept].push(f);
+                    }
+                });
+
+                Object.keys(concepts).forEach(cName => {
+                    const group = document.createElement('div');
+                    group.className = 'concept-group';
+                    group.innerHTML = `<div class="concept-header"><span>${cName}</span> <span class="tag">${concepts[cName].length} files</span></div>`;
+                    
+                    concepts[cName].forEach(file => {
+                        const item = document.createElement('div');
+                        item.className = 'item';
+                        item.innerHTML = `<span>⚡</span> ${file.name}`;
+                        item.onclick = () => selectFile(file);
+                        group.appendChild(item);
+                    });
+                    navRoot.appendChild(group);
+                });
+            } else {
+                // Simplified Tree
+                const tree = document.createElement('div');
+                tree.className = 'tree-view';
+                allFiles.sort((a,b) => a.name.localeCompare(b.name)).forEach(file => {
+                    const item = document.createElement('div');
+                    item.className = 'item';
+                    item.innerHTML = `<span>⬡</span> ${file.name}`;
+                    item.onclick = () => selectFile(file);
+                    tree.appendChild(item);
+                });
+                navRoot.appendChild(tree);
+            }
+        }
+
+        function selectFile(file) {
+            document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById('file-detail').style.display = 'block';
+            document.getElementById('detail-name').innerText = file.name;
+            document.getElementById('detail-explanation').innerText = file.explanation || "This file follows the standard project architecture.";
+            
+            const codeEl = document.getElementById('detail-code');
+            codeEl.innerText = file.snippet || "// No code available.";
+            
+            hljs.highlightElement(codeEl);
+            document.getElementById('file-detail').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Guided Tour ---
+        const tourSteps = [
+            { title: "Dependency Injection", file: "AppModule.kt", text: "We start with DI. Hilt provides dependencies like the Database and Context to the entire app globally." },
+            { title: "Local Persistence", file: "GoalDao.kt", text: "This is where Room lives. We define SQL queries as Kotlin functions to save your finance data." },
+            { title: "Business Logic", file: "CalculateBalanceUseCase.kt", text: "Clean Architecture: This UseCase handles the specific logic of calculating your total balance." },
+            { title: "The Brain (ViewModel)", file: "HomeViewModel.kt", text: "The ViewModel connects the data to the UI using StateFlow. It survives screen rotations!" },
+            { title: "The UI (Compose)", file: "HomeScreen.kt", text: "Finally, the UI. Everything here is built with UI components that automatically update when StateFlow changes." }
+        ];
+        let currentTourStep = 0;
+
+        function startTour() {
+            currentTourStep = 0;
+            document.getElementById('tour-overlay').style.display = 'flex';
+            showTourStep();
+        }
+
+        function showTourStep() {
+            const step = tourSteps[currentTourStep];
+            document.getElementById('tour-title').innerText = step.title;
+            document.getElementById('tour-text').innerText = step.text;
+            
+            const targetFile = allFiles.find(f => f.name === step.file);
+            if (targetFile) selectFile(targetFile);
+
+            document.getElementById('tour-next-btn').onclick = () => {
+                currentTourStep++;
+                if (currentTourStep < tourSteps.length) showTourStep();
+                else endTour();
+            };
+        }
+
+        function endTour() {
+            document.getElementById('tour-overlay').style.display = 'none';
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        renderNavigation();
+    </script>
+</body>
+</html>

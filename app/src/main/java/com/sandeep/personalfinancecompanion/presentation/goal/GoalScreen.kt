@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Security
@@ -83,6 +84,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Goal
 import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.domain.model.SavingVelocity
+import com.sandeep.personalfinancecompanion.domain.model.VelocityStatus
 import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
@@ -137,6 +140,7 @@ fun GoalScreen(
                 goals = state.goals,
                 currency = state.currency,
                 noSpendStreak = state.noSpendStreak,
+                savingVelocity = state.savingVelocity,
                 viewModel = viewModel
             )
         }
@@ -149,6 +153,7 @@ fun GoalContent(
     goals: List<Goal>,
     currency: Currency,
     noSpendStreak: NoSpendStreak,
+    savingVelocity: SavingVelocity,
     viewModel: GoalViewModel
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -343,9 +348,9 @@ fun GoalContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SavingVelocityCard()
+            SavingVelocityCard(velocity = savingVelocity)
 
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -1178,10 +1183,17 @@ private fun CreateNewGoalButton(onClick: () -> Unit) {
         }
     }
 }
-
 @Composable
-private fun SavingVelocityCard() {
+private fun SavingVelocityCard(velocity: SavingVelocity) {
+    if (velocity.status == VelocityStatus.EMPTY) return
+
     val colorScheme = MaterialTheme.colorScheme
+    var showInfoDialog by remember { mutableStateOf(false) }
+
+    if (showInfoDialog) {
+        SavingVelocityInfoDialog(onDismiss = { showInfoDialog = false })
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -1193,72 +1205,111 @@ private fun SavingVelocityCard() {
                 .fillMaxWidth()
                 .padding(24.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.ShowChart,
-                    contentDescription = null,
-                    tint = colorScheme.primary,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "SAVING VELOCITY",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary,
-                    letterSpacing = 1.sp
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.ShowChart,
+                        contentDescription = null,
+                        tint = colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "SAVING VELOCITY",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary,
+                        letterSpacing = 1.sp
+                    )
+                }
+
+                IconButton(
+                    onClick = { showInfoDialog = true },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Help",
+                        tint = colorScheme.outline,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "On track to reach your\nlaptop goal 2 weeks\nearly.",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface,
-                fontSize = 18.sp,
-                lineHeight = 24.sp
-            )
+            when (velocity.status) {
+                VelocityStatus.ANALYZING -> {
+                    Text(
+                        text = "Analyzing your saving cycle...",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Keep saving! We'll have your velocity stats ready in about 3 days.",
+                        fontSize = 13.sp,
+                        color = colorScheme.onSurfaceVariant,
+                        lineHeight = 20.sp
+                    )
+                }
+                else -> {
+                    val statusText = when (velocity.status) {
+                        VelocityStatus.AHEAD -> "Ahead of schedule"
+                        VelocityStatus.BEHIND -> "Behind schedule"
+                        else -> "On track"
+                    }
+                    val diffText = if (velocity.diffWeeks != 0) {
+                        " ${Math.abs(velocity.diffWeeks)} weeks ${if (velocity.diffWeeks > 0) "early" else "late"}"
+                    } else ""
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "$statusText to reach your\n${velocity.primaryGoalTitle} goal$diffText.",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface,
+                        fontSize = 18.sp,
+                        lineHeight = 24.sp
+                    )
 
-            Text(
-                text = "Your reduced spending in 'Dining'\nover the last 7 days has\naccelerated your progress by 12%.",
-                fontSize = 13.sp,
-                color = colorScheme.onSurfaceVariant,
-                lineHeight = 20.sp
-            )
+                    velocity.acceleratorCategory?.let { category ->
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Your reduced spending in '${category.displayName}'\nover the last 14 days has\naccelerated your progress.",
+                            fontSize = 13.sp,
+                            color = colorScheme.onSurfaceVariant,
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Bar Chart stub
+            // Bar Chart
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .background(colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                    .background(colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                val heights = listOf(0.4f, 0.5f, 0.35f, 0.7f, 1.0f)
-                val colors = listOf(
-                    colorScheme.primary.copy(alpha = 0.4f),
-                    colorScheme.primary.copy(alpha = 0.5f),
-                    colorScheme.primary.copy(alpha = 0.6f),
-                    colorScheme.primary.copy(alpha = 0.8f),
-                    colorScheme.primary
-                )
-
-                heights.forEachIndexed { index, fraction ->
+                velocity.recentDailies.forEachIndexed { index, fraction ->
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxHeight(fraction)
+                            .fillMaxHeight(fraction.coerceIn(0.1f, 1f))
                             .padding(horizontal = 4.dp)
                             .background(
-                                colors[index],
+                                colorScheme.primary.copy(alpha = 0.2f + (0.2f * index)),
                                 RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
                             )
                     )
@@ -1266,6 +1317,34 @@ private fun SavingVelocityCard() {
             }
         }
     }
+}
+
+@Composable
+fun SavingVelocityInfoDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+        title = { Text("How Velocity Works") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column {
+                    Text("Goal Selection", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("We analyze your highest priority goal, or the one with the closest deadline.", fontSize = 13.sp)
+                }
+                Column {
+                    Text("Bonus Filter", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("One-off large saves (>300% of average) are excluded from pace predictions to keep your estimates realistic.", fontSize = 13.sp)
+                }
+                Column {
+                    Text("Accelerators", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("We look for categories where you're spending less than usual and showing you how that helps your savings.", fontSize = 13.sp)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Got it") }
+        }
+    )
 }
 
 @Composable

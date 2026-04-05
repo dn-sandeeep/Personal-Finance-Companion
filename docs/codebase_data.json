@@ -1,0 +1,901 @@
+{
+    "name": "PersonalFinanceCompanion",
+    "type": "root",
+    "children": [
+        {
+            "name": "personalfinancecompanion",
+            "type": "directory",
+            "children": [
+                {
+                    "name": "app",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "src",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "main",
+                                    "type": "directory",
+                                    "children": [
+                                        {
+                                            "name": "java",
+                                            "type": "directory",
+                                            "children": [
+                                                {
+                                                    "name": "com",
+                                                    "type": "directory",
+                                                    "children": [
+                                                        {
+                                                            "name": "sandeep",
+                                                            "type": "directory",
+                                                            "children": [
+                                                                {
+                                                                    "name": "personalfinancecompanion",
+                                                                    "type": "directory",
+                                                                    "children": [
+                                                                        {
+                                                                            "name": "domain",
+                                                                            "type": "directory",
+                                                                            "children": [
+                                                                                {
+                                                                                    "name": "model",
+                                                                                    "type": "directory",
+                                                                                    "children": [],
+                                                                                    "layer": "Domain"
+                                                                                }
+                                                                            ],
+                                                                            "layer": "Other"
+                                                                        }
+                                                                    ],
+                                                                    "layer": "Other"
+                                                                }
+                                                            ],
+                                                            "layer": "Other"
+                                                        }
+                                                    ],
+                                                    "layer": "Other"
+                                                }
+                                            ],
+                                            "layer": "Other"
+                                        }
+                                    ],
+                                    "layer": "Other"
+                                }
+                            ],
+                            "layer": "Other"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "data",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "local",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "AppDatabase.kt",
+                                    "type": "file",
+                                    "size": 800,
+                                    "layer": "Data",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "dao",
+                                    "type": "directory",
+                                    "children": [
+                                        {
+                                            "name": "GoalDao.kt",
+                                            "type": "file",
+                                            "size": 1685,
+                                            "layer": "Data",
+                                            "extension": ".kt"
+                                        },
+                                        {
+                                            "name": "TransactionDao.kt",
+                                            "type": "file",
+                                            "size": 1044,
+                                            "layer": "Data",
+                                            "extension": ".kt"
+                                        }
+                                    ],
+                                    "layer": "Data"
+                                },
+                                {
+                                    "name": "entity",
+                                    "type": "directory",
+                                    "children": [
+                                        {
+                                            "name": "GoalContributionEntity.kt",
+                                            "type": "file",
+                                            "size": 556,
+                                            "layer": "Data",
+                                            "extension": ".kt"
+                                        },
+                                        {
+                                            "name": "GoalEntity.kt",
+                                            "type": "file",
+                                            "size": 398,
+                                            "layer": "Data",
+                                            "extension": ".kt"
+                                        },
+                                        {
+                                            "name": "GoalWithContributions.kt",
+                                            "type": "file",
+                                            "size": 344,
+                                            "layer": "Data",
+                                            "extension": ".kt"
+                                        },
+                                        {
+                                            "name": "TransactionEntity.kt",
+                                            "type": "file",
+                                            "size": 358,
+                                            "layer": "Data",
+                                            "extension": ".kt"
+                                        }
+                                    ],
+                                    "layer": "Data"
+                                }
+                            ],
+                            "layer": "Data"
+                        },
+                        {
+                            "name": "mapper",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "GoalMapper.kt",
+                                    "type": "file",
+                                    "size": 1603,
+                                    "layer": "Data",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionMapper.kt",
+                                    "type": "file",
+                                    "size": 1088,
+                                    "layer": "Data",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Data"
+                        },
+                        {
+                            "name": "repository",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "GoalRepositoryImpl.kt",
+                                    "type": "file",
+                                    "size": 2735,
+                                    "layer": "Data",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionRepositoryImpl.kt",
+                                    "type": "file",
+                                    "size": 1860,
+                                    "layer": "Data",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "UserPreferencesRepositoryImpl.kt",
+                                    "type": "file",
+                                    "size": 4140,
+                                    "layer": "Data",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Data"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "di",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "AppModule.kt",
+                            "type": "file",
+                            "size": 2699,
+                            "layer": "DI",
+                            "extension": ".kt"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "domain",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "model",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "Category.kt",
+                                    "type": "file",
+                                    "size": 809,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "Currency.kt",
+                                    "type": "file",
+                                    "size": 1173,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "Goal.kt",
+                                    "type": "file",
+                                    "size": 798,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "GoalContribution.kt",
+                                    "type": "file",
+                                    "size": 188,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "NoSpendStreak.kt",
+                                    "type": "file",
+                                    "size": 411,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "Transaction.kt",
+                                    "type": "file",
+                                    "size": 258,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionType.kt",
+                                    "type": "file",
+                                    "size": 114,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Domain"
+                        },
+                        {
+                            "name": "repository",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "GoalRepository.kt",
+                                    "type": "file",
+                                    "size": 691,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionRepository.kt",
+                                    "type": "file",
+                                    "size": 552,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "UserPreferencesRepository.kt",
+                                    "type": "file",
+                                    "size": 902,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Domain"
+                        },
+                        {
+                            "name": "usecase",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "CalculateBalanceUseCase.kt",
+                                    "type": "file",
+                                    "size": 930,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "ChangeCurrencyUseCase.kt",
+                                    "type": "file",
+                                    "size": 1444,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "GetNoSpendStreakUseCase.kt",
+                                    "type": "file",
+                                    "size": 5860,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "GetTransactionsUseCase.kt",
+                                    "type": "file",
+                                    "size": 490,
+                                    "layer": "Domain",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Domain"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "FinanceApplication.kt",
+                    "type": "file",
+                    "size": 561,
+                    "layer": "Other",
+                    "extension": ".kt"
+                },
+                {
+                    "name": "MainActivity.kt",
+                    "type": "file",
+                    "size": 9479,
+                    "layer": "Other",
+                    "extension": ".kt"
+                },
+                {
+                    "name": "MainViewModel.kt",
+                    "type": "file",
+                    "size": 1568,
+                    "layer": "Other",
+                    "extension": ".kt"
+                },
+                {
+                    "name": "presentation",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "components",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "BudgetRing.kt",
+                                    "type": "file",
+                                    "size": 4135,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "EmptyState.kt",
+                                    "type": "file",
+                                    "size": 1708,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "PieChart.kt",
+                                    "type": "file",
+                                    "size": 5353,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "SummaryCard.kt",
+                                    "type": "file",
+                                    "size": 1948,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionListItem.kt",
+                                    "type": "file",
+                                    "size": 5737,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "WeeklyTrendChart.kt",
+                                    "type": "file",
+                                    "size": 10322,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        },
+                        {
+                            "name": "goal",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "GoalScreen.kt",
+                                    "type": "file",
+                                    "size": 59566,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "GoalViewModel.kt",
+                                    "type": "file",
+                                    "size": 3808,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        },
+                        {
+                            "name": "home",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "HomeScreen.kt",
+                                    "type": "file",
+                                    "size": 34157,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "HomeViewModel.kt",
+                                    "type": "file",
+                                    "size": 11730,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        },
+                        {
+                            "name": "insights",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "InsightsScreen.kt",
+                                    "type": "file",
+                                    "size": 8698,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "InsightsViewModel.kt",
+                                    "type": "file",
+                                    "size": 4307,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        },
+                        {
+                            "name": "navigation",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "AppNavigation.kt",
+                                    "type": "file",
+                                    "size": 7814,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "Screen.kt",
+                                    "type": "file",
+                                    "size": 2168,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        },
+                        {
+                            "name": "profile",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "components",
+                                    "type": "directory",
+                                    "children": [
+                                        {
+                                            "name": "CurrencySelectionDialog.kt",
+                                            "type": "file",
+                                            "size": 5238,
+                                            "layer": "Presentation",
+                                            "extension": ".kt"
+                                        }
+                                    ],
+                                    "layer": "Presentation"
+                                },
+                                {
+                                    "name": "ProfileScreen.kt",
+                                    "type": "file",
+                                    "size": 13439,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "ProfileViewModel.kt",
+                                    "type": "file",
+                                    "size": 2758,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        },
+                        {
+                            "name": "transactions",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "AddEditTransactionScreen.kt",
+                                    "type": "file",
+                                    "size": 11182,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionListScreen.kt",
+                                    "type": "file",
+                                    "size": 16600,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "TransactionViewModel.kt",
+                                    "type": "file",
+                                    "size": 6267,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "ui",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "theme",
+                            "type": "directory",
+                            "children": [
+                                {
+                                    "name": "Color.kt",
+                                    "type": "file",
+                                    "size": 1563,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "Theme.kt",
+                                    "type": "file",
+                                    "size": 2675,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                },
+                                {
+                                    "name": "Type.kt",
+                                    "type": "file",
+                                    "size": 2741,
+                                    "layer": "Presentation",
+                                    "extension": ".kt"
+                                }
+                            ],
+                            "layer": "Presentation"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "util",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "CurrencyFormatter.kt",
+                            "type": "file",
+                            "size": 1917,
+                            "layer": "Other",
+                            "extension": ".kt"
+                        },
+                        {
+                            "name": "NotificationHelper.kt",
+                            "type": "file",
+                            "size": 5518,
+                            "layer": "Other",
+                            "extension": ".kt"
+                        },
+                        {
+                            "name": "WorkManagerScheduler.kt",
+                            "type": "file",
+                            "size": 2032,
+                            "layer": "Other",
+                            "extension": ".kt"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "worker",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "DailyReminderWorker.kt",
+                            "type": "file",
+                            "size": 671,
+                            "layer": "Worker",
+                            "extension": ".kt"
+                        },
+                        {
+                            "name": "GoalReminderWorker.kt",
+                            "type": "file",
+                            "size": 1672,
+                            "layer": "Worker",
+                            "extension": ".kt"
+                        }
+                    ],
+                    "layer": "Other"
+                }
+            ],
+            "layer": "Other"
+        },
+        {
+            "name": "res",
+            "type": "directory",
+            "children": [
+                {
+                    "name": "drawable",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "app_logo_finmate.png",
+                            "type": "file",
+                            "size": 586634,
+                            "layer": "Other",
+                            "extension": ".png"
+                        },
+                        {
+                            "name": "app_logo_finmate_red.png",
+                            "type": "file",
+                            "size": 504176,
+                            "layer": "Other",
+                            "extension": ".png"
+                        },
+                        {
+                            "name": "ic_launcher_background.xml",
+                            "type": "file",
+                            "size": 4941,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        },
+                        {
+                            "name": "ic_launcher_foreground.xml",
+                            "type": "file",
+                            "size": 1702,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "mipmap-anydpi-v26",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "ic_launcher.xml",
+                            "type": "file",
+                            "size": 341,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        },
+                        {
+                            "name": "ic_launcher_round.xml",
+                            "type": "file",
+                            "size": 341,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "mipmap-hdpi",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "ic_launcher.webp",
+                            "type": "file",
+                            "size": 4704,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_foreground.webp",
+                            "type": "file",
+                            "size": 18344,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_round.webp",
+                            "type": "file",
+                            "size": 6042,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "mipmap-mdpi",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "ic_launcher.webp",
+                            "type": "file",
+                            "size": 2626,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_foreground.webp",
+                            "type": "file",
+                            "size": 8788,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_round.webp",
+                            "type": "file",
+                            "size": 3414,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "mipmap-xhdpi",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "ic_launcher.webp",
+                            "type": "file",
+                            "size": 7338,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_foreground.webp",
+                            "type": "file",
+                            "size": 32164,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_round.webp",
+                            "type": "file",
+                            "size": 9734,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "mipmap-xxhdpi",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "ic_launcher.webp",
+                            "type": "file",
+                            "size": 14082,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_foreground.webp",
+                            "type": "file",
+                            "size": 74344,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_round.webp",
+                            "type": "file",
+                            "size": 18090,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "mipmap-xxxhdpi",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "ic_launcher.webp",
+                            "type": "file",
+                            "size": 23270,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_foreground.webp",
+                            "type": "file",
+                            "size": 134746,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        },
+                        {
+                            "name": "ic_launcher_round.webp",
+                            "type": "file",
+                            "size": 28656,
+                            "layer": "Other",
+                            "extension": ".webp"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "values",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "colors.xml",
+                            "type": "file",
+                            "size": 378,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        },
+                        {
+                            "name": "strings.xml",
+                            "type": "file",
+                            "size": 72,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        },
+                        {
+                            "name": "themes.xml",
+                            "type": "file",
+                            "size": 165,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        }
+                    ],
+                    "layer": "Other"
+                },
+                {
+                    "name": "xml",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "name": "backup_rules.xml",
+                            "type": "file",
+                            "size": 478,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        },
+                        {
+                            "name": "data_extraction_rules.xml",
+                            "type": "file",
+                            "size": 551,
+                            "layer": "Other",
+                            "extension": ".xml"
+                        }
+                    ],
+                    "layer": "Other"
+                }
+            ],
+            "layer": "Other"
+        }
+    ]
+}

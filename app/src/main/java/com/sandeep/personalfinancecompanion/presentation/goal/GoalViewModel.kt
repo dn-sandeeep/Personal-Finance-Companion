@@ -8,7 +8,10 @@ import com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.sandeep.personalfinancecompanion.domain.model.NoSpendStreak
+import com.sandeep.personalfinancecompanion.domain.model.SavingVelocity
 import com.sandeep.personalfinancecompanion.domain.usecase.GetNoSpendStreakUseCase
+import com.sandeep.personalfinancecompanion.domain.usecase.GetSavingVelocityUseCase
+import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +27,8 @@ sealed interface GoalUiState {
     data class Success(
         val goals: List<Goal>,
         val currency: Currency,
-        val noSpendStreak: NoSpendStreak
+        val noSpendStreak: NoSpendStreak,
+        val savingVelocity: SavingVelocity
     ) : GoalUiState
     data class Error(val message: String) : GoalUiState
 }
@@ -33,16 +37,20 @@ sealed interface GoalUiState {
 class GoalViewModel @Inject constructor(
     private val repository: GoalRepository,
     private val preferencesRepository: UserPreferencesRepository,
-    private val getNoSpendStreakUseCase: GetNoSpendStreakUseCase
+    private val transactionRepository: TransactionRepository,
+    private val getNoSpendStreakUseCase: GetNoSpendStreakUseCase,
+    private val getSavingVelocityUseCase: GetSavingVelocityUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<GoalUiState>(GoalUiState.Loading)
     val uiState: StateFlow<GoalUiState> = combine(
         repository.getAllGoals(),
         preferencesRepository.currencyFlow,
+        transactionRepository.getAllTransactions(),
         getNoSpendStreakUseCase()
-    ) { goals, currency, streak ->
-        GoalUiState.Success(goals, currency, streak)
+    ) { goals, currency, transactions, streak ->
+        val velocity = getSavingVelocityUseCase(goals, transactions)
+        GoalUiState.Success(goals, currency, streak, velocity)
     }.catch { e ->
         _uiState.value = GoalUiState.Error(e.message ?: "An unexpected error occurred")
     }.stateIn(
