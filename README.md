@@ -14,7 +14,7 @@ Stay on top of your finances! Download the latest APK and start managing your mo
 
 Experience the Personal Finance Companion in action. This video showcases the seamless transaction logging, goal tracking, and dynamic insights.
 
-https://youtu.be/kAHhZ94PF88
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/kAHhZ94PF88)
 
 ---
 
