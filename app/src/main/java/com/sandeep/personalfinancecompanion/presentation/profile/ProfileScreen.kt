@@ -154,7 +154,8 @@ fun ProfileScreen(
                     title = "Export Data",
                     value = "CSV / PDF",
                     icon = Icons.Default.Download,
-                    onClick = { /* Export logic */ }
+                    onClick = { /* Export logic */ },
+                    isUnderDevelopment = true
                 )
             }
 
@@ -309,47 +310,72 @@ fun SettingsItem(
     title: String,
     value: String,
     icon: ImageVector,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    isUnderDevelopment: Boolean = false
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(enabled = !isUnderDevelopment, onClick = onClick)
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isUnderDevelopment) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurface
+                )
+                if (isUnderDevelopment) {
+                    Text(
+                        text = "UNDER DEVELOPMENT",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Red,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+            }
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = if (isUnderDevelopment) 0.5f else 1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Icon(
-                imageVector = icon,
+                imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(20.dp)
+                tint = MaterialTheme.colorScheme.outline.copy(alpha = if (isUnderDevelopment) 0.5f else 1f),
+                modifier = Modifier.size(16.dp)
             )
         }
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(16.dp)
-        )
+
+        if (isUnderDevelopment) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Red.copy(alpha = 0.05f))
+            )
+        }
     }
 }
