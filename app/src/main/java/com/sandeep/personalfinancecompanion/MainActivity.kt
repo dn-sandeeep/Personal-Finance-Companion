@@ -86,7 +86,7 @@ fun FinanceApp() {
         currentRoute == Screen.Goals.route -> "Goals"
         currentRoute == Screen.Insights.route -> "Insights"
         currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
-        else -> "Finance Companion"
+        else -> "Track Spend"
     }
 
     val canNavigateBack = currentRoute?.startsWith("add_transaction") == true

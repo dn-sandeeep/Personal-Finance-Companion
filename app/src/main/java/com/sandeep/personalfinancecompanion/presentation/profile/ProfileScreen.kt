@@ -5,6 +5,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -54,9 +55,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sandeep.personalfinancecompanion.R
 import com.sandeep.personalfinancecompanion.presentation.profile.components.CurrencySelectionDialog
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 
@@ -216,7 +219,7 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Personal Finance Companion v1.0",
+                    text = "Track Spend v1.0",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -254,11 +257,10 @@ fun ProfileHeader() {
                     .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(60.dp),
-                    tint = Color.White
+                Image(
+                    painter = painterResource(id = R.drawable.trackspend_logo),
+                    contentDescription = "App Logo",
+                    modifier = Modifier.size(80.dp)
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
