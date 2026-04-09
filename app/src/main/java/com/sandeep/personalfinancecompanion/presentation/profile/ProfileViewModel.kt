@@ -10,7 +10,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.sandeep.personalfinancecompanion.domain.usecase.ExportDataUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+
+sealed class ExportStatus {
+    object Idle : ExportStatus()
+    object Loading : ExportStatus()
+    data class Success(val data: String) : ExportStatus()
+    data class Error(val message: String) : ExportStatus()
+}
 
 data class ProfileState(
     val dailyReminderEnabled: Boolean = false,
@@ -18,14 +29,18 @@ data class ProfileState(
     val budgetAlertsEnabled: Boolean = true,
     val goalRemindersEnabled: Boolean = true,
     val selectedCurrency: Currency = Currency.INR,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val exportStatus: ExportStatus = ExportStatus.Idle
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository,
-    private val changeCurrencyUseCase: com.sandeep.personalfinancecompanion.domain.usecase.ChangeCurrencyUseCase
+    private val changeCurrencyUseCase: com.sandeep.personalfinancecompanion.domain.usecase.ChangeCurrencyUseCase,
+    private val exportDataUseCase: ExportDataUseCase
 ) : ViewModel() {
+
+    private val _exportStatus = MutableStateFlow<ExportStatus>(ExportStatus.Idle)
 
     val state: StateFlow<ProfileState> = combine(
         preferencesRepository.dailyReminderEnabledFlow,
@@ -42,6 +57,8 @@ class ProfileViewModel @Inject constructor(
             selectedCurrency = currency,
             isLoading = false
         )
+    }.combine(_exportStatus) { currentState, export ->
+        currentState.copy(exportStatus = export)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -76,5 +93,21 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             changeCurrencyUseCase(currency)
         }
+    }
+
+    fun exportData() {
+        viewModelScope.launch {
+            _exportStatus.value = ExportStatus.Loading
+            try {
+                val csvData = exportDataUseCase()
+                _exportStatus.value = ExportStatus.Success(csvData)
+            } catch (e: Exception) {
+                _exportStatus.value = ExportStatus.Error(e.message ?: "Unknown error occurred")
+            }
+        }
+    }
+
+    fun resetExportStatus() {
+        _exportStatus.value = ExportStatus.Idle
     }
 }

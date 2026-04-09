@@ -1,5 +1,10 @@
 # Personal Finance Companion 💰
 
+[![Kotlin](https://img.shields.io/badge/kotlin-1.9.24-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Compose](https://img.shields.io/badge/Compose-Multiplatform-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Clean Architecture](https://img.shields.io/badge/Architecture-Clean--MVVM-green)](docs/ARCHITECTURE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Personal Finance Companion is a modern, intuitive, and feature-rich Android application designed to help users take full control of their financial life. Built with the latest Android technologies, it provides a seamless experience for tracking transactions, managing budgets, setting financial goals, and gaining deep insights into spending habits.
 
 ## 📲 Download
@@ -37,11 +42,8 @@ Effortlessly record and categorize every penny.
 - **Delete Transaction:** Swipe left on the transaction that you need to delete.
 
 <img width="200" height="600" alt="Trandsaction history" src="https://github.com/user-attachments/assets/0b5a5dff-2892-4b7d-bca1-c1426ca96fda" />
-
 <img width="200" height="600" alt="add transaction" src="https://github.com/user-attachments/assets/25d5c1d3-409d-451c-9343-2c49547249d3" />
-
 <img width="200" height="600" alt="Edit trandsaction" src="https://github.com/user-attachments/assets/0a0c203f-2368-4f74-b313-97b47944eee8" />
-
 <img width="200" height="600" alt="Delete trandsaction" src="https://github.com/user-attachments/assets/08aaa065-0c79-4198-b307-046a5f067477" />
 
 
@@ -54,7 +56,6 @@ Save for what matters most.
 - **No Spend Challenge:** User can choose the days for the challenge to avoid non-essential spends (e.g., entertainment, food)
 
 <img width="200" height="600" alt="Goal" src="https://github.com/user-attachments/assets/1df24c88-40ab-45bf-8110-ce8ab30827fa" />
-
 <img width="200" height="600" alt="Goal-2" src="https://github.com/user-attachments/assets/c3ffd0fd-12d5-4020-a252-da86d90decdf" />
 
 
@@ -88,8 +89,6 @@ When you first open the app, head to the **Profile** section to select your pref
 
 <img width="200" height="600" alt="Settings" src="https://github.com/user-attachments/assets/ff02e4e2-cb0f-4d74-b422-b5810d319001" />
 <img width="200" height="600" alt="Currency" src="https://github.com/user-attachments/assets/c44c7d23-5338-4a3c-b089-64004561abde" />
-
-
 
 ### 2. Logging Your First Transaction
 - Tap the **"+" (Add)** button on the Transaction screen.
@@ -125,6 +124,18 @@ This project follows the **Modern Android Development (MAD)** standards and **Cl
 - **Preferences:** [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) (for user settings)
 - **Navigation:** [Compose Navigation](https://developer.android.com/jackpack/compose/navigation)
 - **State Management:** Unified `UiState` (Sealed Interface) pattern for robust Loading/Success/Error handling.
+
+---
+
+## 📖 Developer Documentation
+
+Deep dive into the technical details of the project:
+
+- [🏗 **Architecture Overview**](docs/ARCHITECTURE.md) - Clean Architecture, UDF, and DI details.
+- [🗄 **Database Schema**](docs/DATABASE_SCHEMA.md) - Entities, Relationships, and DataStore.
+- [📁 **Project Structure**](docs/PROJECT_STRUCTURE.md) - Package mapping and module roles.
+- [🤝 **Contributing Guidelines**](CONTRIBUTING.md) - Standards for coding and commits.
+- [🇮🇳 **Technical Guide (Hinglish)**](doc/TECHNICAL_GUIDE.md) - Quick conceptual guide.
 
 ---
 

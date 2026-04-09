@@ -2,6 +2,7 @@ package com.sandeep.personalfinancecompanion.presentation.profile
 
 import android.Manifest
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -40,6 +41,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -72,6 +75,43 @@ fun ProfileScreen(
     ) { isGranted ->
         if (isGranted) {
             viewModel.toggleDailyReminder(true)
+        }
+    }
+
+    val context = LocalContext.current
+    var csvDataToSave by remember { mutableStateOf<String?>(null) }
+
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            csvDataToSave?.let { data ->
+                try {
+                    context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                        outputStream.write(data.toByteArray())
+                    }
+                    Toast.makeText(context, "Data exported successfully!", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Failed to save file: ${e.message}", Toast.LENGTH_SHORT).show()
+                } finally {
+                    viewModel.resetExportStatus()
+                    csvDataToSave = null
+                }
+            }
+        } ?: viewModel.resetExportStatus()
+    }
+
+    LaunchedEffect(state.exportStatus) {
+        when (val status = state.exportStatus) {
+            is ExportStatus.Success -> {
+                csvDataToSave = status.data
+                createDocumentLauncher.launch("personal_finance_data.csv")
+            }
+            is ExportStatus.Error -> {
+                Toast.makeText(context, status.message, Toast.LENGTH_LONG).show()
+                viewModel.resetExportStatus()
+            }
+            else -> {}
         }
     }
 
@@ -152,10 +192,10 @@ fun ProfileScreen(
                 Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
                 SettingsItem(
                     title = "Export Data",
-                    value = "CSV / PDF",
+                    value = if (state.exportStatus is ExportStatus.Loading) "Exporting..." else "CSV / PDF",
                     icon = Icons.Default.Download,
-                    onClick = { /* Export logic */ },
-                    isUnderDevelopment = true
+                    onClick = { viewModel.exportData() },
+                    isUnderDevelopment = false
                 )
             }
 
