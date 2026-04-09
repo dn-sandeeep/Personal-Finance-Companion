@@ -124,6 +124,6 @@ class GoalViewModel @Inject constructor(
 
     fun retry() {
         // Since we are using stateIn with combine, it automatically retries if the underlying flows emit again
-        // but we can also force a refresh if needed.
+        // But we can also force a refresh if needed.
     }
 }

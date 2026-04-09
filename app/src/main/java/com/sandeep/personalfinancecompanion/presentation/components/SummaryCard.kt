@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryDark
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryMedium
 

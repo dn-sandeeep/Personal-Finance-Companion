@@ -392,7 +392,7 @@ fun GoalTypePickerDialog(
         )
     }
     val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#E91E63", "#00BCD4", "#607D8B")
-    val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fastfood", "MedicalServices", "FitnessCenter")
+    val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fast food", "MedicalServices", "FitnessCenter")
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -646,7 +646,7 @@ fun getIconForName(name: String): ImageVector {
         "BeachAccess" -> Icons.Default.BeachAccess
         "Celebration" -> Icons.Default.Celebration
         "Devices" -> Icons.Default.Devices
-        "Fastfood" -> Icons.Default.Fastfood
+        "Fast food" -> Icons.Default.Fastfood
         "MedicalServices" -> Icons.Default.MedicalServices
         "FitnessCenter" -> Icons.Default.FitnessCenter
         else -> Icons.Default.Star
@@ -1857,7 +1857,7 @@ fun EditGoalDialog(
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = goal.targetDate)
 
-    val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fastfood", "MedicalServices", "FitnessCenter")
+    val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fast food", "MedicalServices", "FitnessCenter")
     val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#E91E63", "#00BCD4", "#607D8B")
 
     if (showDatePicker) {

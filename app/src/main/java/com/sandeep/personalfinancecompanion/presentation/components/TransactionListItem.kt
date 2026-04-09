@@ -1,7 +1,5 @@
 package com.sandeep.personalfinancecompanion.presentation.components
 
-import com.sandeep.personalfinancecompanion.domain.model.Currency
-import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,16 +20,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.ui.theme.ExpenseRed
 import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 
 @Composable
 fun TransactionListItem(
