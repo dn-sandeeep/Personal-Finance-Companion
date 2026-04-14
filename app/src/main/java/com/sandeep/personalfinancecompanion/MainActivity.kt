@@ -85,6 +85,7 @@ fun FinanceApp() {
         currentRoute == Screen.Transactions.route -> "History"
         currentRoute == Screen.Goals.route -> "Goals"
         currentRoute == Screen.Insights.route -> "Insights"
+        currentRoute == Screen.Profile.route -> "Profile"
         currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
         else -> "Track Spend"
     }
