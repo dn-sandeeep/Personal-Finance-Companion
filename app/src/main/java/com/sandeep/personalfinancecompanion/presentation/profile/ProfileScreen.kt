@@ -204,17 +204,18 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
             
-            Button(
-                onClick = { /* Logout logic */ },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.error
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Logout Account", fontWeight = FontWeight.Bold)
-            }
+            // Temporarily hidden until Login is implemented
+            // Button(
+            //     onClick = { /* Logout logic */ },
+            //     modifier = Modifier.fillMaxWidth(),
+            //     colors = ButtonDefaults.buttonColors(
+            //         containerColor = MaterialTheme.colorScheme.errorContainer,
+            //         contentColor = MaterialTheme.colorScheme.error
+            //     ),
+            //     shape = RoundedCornerShape(12.dp)
+            // ) {
+            //     Text("Logout Account", fontWeight = FontWeight.Bold)
+            // }
             
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
