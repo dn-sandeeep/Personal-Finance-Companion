@@ -1,6 +1,6 @@
 package com.sandeep.personalfinancecompanion.appfunctions
 
-import androidx.appfunctions.AppFunction
+import androidx.appfunctions.service.AppFunction
 import androidx.appfunctions.AppFunctionContext
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
@@ -31,17 +31,23 @@ class FinanceAppFunctions @Inject constructor(
     suspend fun addExpense(
         context: AppFunctionContext,
         amount: Double,
-        category: Category,
-        notes: String = ""
+        category: String,
+        notes: String
     ): String {
+        val categoryEnum = try {
+            Category.valueOf(category.uppercase())
+        } catch (e: Exception) {
+            Category.OTHER
+        }
+
         val result = addTransactionUseCase(
             amount = amount,
-            category = category,
+            category = categoryEnum,
             type = TransactionType.EXPENSE,
             notes = notes
         )
         return if (result.isSuccess) {
-            "Successfully added expense of $amount in ${category.displayName}"
+            "Successfully added expense of $amount in ${categoryEnum.displayName}"
         } else {
             "Failed to add expense: ${result.exceptionOrNull()?.message}"
         }
@@ -59,17 +65,23 @@ class FinanceAppFunctions @Inject constructor(
     suspend fun addIncome(
         context: AppFunctionContext,
         amount: Double,
-        category: Category,
-        notes: String = ""
+        category: String,
+        notes: String
     ): String {
+        val categoryEnum = try {
+            Category.valueOf(category.uppercase())
+        } catch (e: Exception) {
+            Category.OTHER
+        }
+
         val result = addTransactionUseCase(
             amount = amount,
-            category = category,
+            category = categoryEnum,
             type = TransactionType.INCOME,
             notes = notes
         )
         return if (result.isSuccess) {
-            "Successfully added income of $amount in ${category.displayName}"
+            "Successfully added income of $amount in ${categoryEnum.displayName}"
         } else {
             "Failed to add income: ${result.exceptionOrNull()?.message}"
         }
