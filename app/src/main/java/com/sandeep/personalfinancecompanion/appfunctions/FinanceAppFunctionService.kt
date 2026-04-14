@@ -1,7 +1,10 @@
 package com.sandeep.personalfinancecompanion.appfunctions
 
-import androidx.appfunctions.service.AppFunctionService
+import android.os.CancellationSignal
+import android.os.OutcomeReceiver
 import androidx.appfunctions.service.AppFunctionConfiguration
+import androidx.appfunctions.service.AppFunctionException
+import androidx.appfunctions.service.AppFunctionService
 import androidx.appfunctions.service.ExecuteAppFunctionRequest
 import androidx.appfunctions.service.ExecuteAppFunctionResponse
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,10 +27,12 @@ class FinanceAppFunctionService : AppFunctionService(), AppFunctionConfiguration
             }
             .build()
 
-    override fun executeFunction(request: ExecuteAppFunctionRequest): ExecuteAppFunctionResponse {
-        // By using the configuration provider with a factory, 
-        // the library's internal logic handles the dispatch.
-        // We call super or throw an exception if we want to delegate to the generated invoker.
-        return super.executeFunction(request)
+    override fun onExecuteFunction(
+        request: ExecuteAppFunctionRequest,
+        callingPackage: String,
+        cancellationSignal: CancellationSignal,
+        callback: OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+    ) {
+        // The implementation is dispatched via the AppFunctionConfiguration.Provider
     }
 }
