@@ -18,6 +18,7 @@ material-icons = "1.7.5"
 datastorePreferences = "1.1.1"
 workRuntime = "2.9.1"
 ui = "1.10.6"
+appFunctions = "1.0.0-alpha08"
 
 [libraries]
 # Core
@@ -64,6 +65,9 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
+androidx-appfunctions = { group = "androidx.appfunctions", name = "appfunctions", version.ref = "appFunctions" }
+androidx-appfunctions-service = { group = "androidx.appfunctions", name = "appfunctions-service", version.ref = "appFunctions" }
+androidx-appfunctions-compiler = { group = "androidx.appfunctions", name = "appfunctions-compiler", version.ref = "appFunctions" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
