@@ -15,6 +15,9 @@ import com.sandeep.personalfinancecompanion.data.repository.UserPreferencesRepos
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
+import com.sandeep.personalfinancecompanion.domain.repository.SmartParserRepository
+import com.sandeep.personalfinancecompanion.data.repository.SmartParserRepositoryImpl
+import com.sandeep.personalfinancecompanion.domain.parser.SmartTransactionParser
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,5 +85,19 @@ object AppModule {
         dataStore: DataStore<Preferences>
     ): UserPreferencesRepository {
         return UserPreferencesRepositoryImpl(dataStore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSmartTransactionParser(): SmartTransactionParser {
+        return SmartTransactionParser()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSmartParserRepository(
+        parser: SmartTransactionParser
+    ): SmartParserRepository {
+        return SmartParserRepositoryImpl(parser)
     }
 }

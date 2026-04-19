@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 
+      This capability links Gemini's natural language understanding 
+      to our App Functions. By using standard intent names, 
+      we help Gemini map "Add an expense" to our specific code.
+    -->
+    
+    <capability android:name="actions.intent.CREATE_MONEY_TRANSFER">
+        <app-function android:name="com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addExpense">
+            <parameter android:name="amount" android:key="amount" />
+            <parameter android:name="category" android:key="category" />
+            <parameter android:name="notes" android:key="notes" />
+        </app-function>
+    </capability>
+
+    <capability android:name="actions.intent.GET_FINANCE_ACCOUNT">
+        <app-function android:name="com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addIncome">
+            <parameter android:name="amount" android:key="amount" />
+            <parameter android:name="category" android:key="category" />
+            <parameter android:name="notes" android:key="notes" />
+        </app-function>
+    </capability>
+
+    <!-- General fallback to make the app discoverable for "Recording" things -->
+    <capability android:name="actions.intent.CREATE_NOTE">
+        <app-function android:name="com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addExpense" />
+    </capability>
+</shortcuts>

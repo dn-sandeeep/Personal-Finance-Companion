@@ -6,26 +6,50 @@ import androidx.appfunctions.AppFunctionService
 import androidx.appfunctions.ExecuteAppFunctionRequest
 import androidx.appfunctions.ExecuteAppFunctionResponse
 import androidx.appfunctions.service.AppFunctionConfiguration
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+
 /**
  * Service that handles App Function requests from the Android System.
- * Hilt is used to inject the actual implementation class and provide it via a factory.
+ * We use a manual EntryPoint instead of @AndroidEntryPoint to ensure
+ * maximum compatibility with the system agent's lifecycle.
  */
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-@AndroidEntryPoint
 class FinanceAppFunctionService : AppFunctionService(), AppFunctionConfiguration.Provider {
 
-    @Inject
-    lateinit var financeAppFunctions: FinanceAppFunctions
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface FinanceAppFunctionsEntryPoint {
+        fun financeAppFunctions(): FinanceAppFunctions
+    }
+
+    private val financeAppFunctions: FinanceAppFunctions by lazy {
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext, 
+            FinanceAppFunctionsEntryPoint::class.java
+        )
+        entryPoint.financeAppFunctions()
+    }
+
+    init {
+        Log.d("AI_AGENT", "FinanceAppFunctionService initialized - Ready for Gemini connection")
+    }
 
     override val appFunctionConfiguration: AppFunctionConfiguration
-        get() = AppFunctionConfiguration.Builder()
-            .addEnclosingClassFactory(FinanceAppFunctions::class.java) {
-                financeAppFunctions
-            }
-            .build()
+        get() {
+            Log.d("AI_AGENT", "Providing AppFunctionConfiguration to the system")
+            return AppFunctionConfiguration.Builder()
+                .addEnclosingClassFactory(FinanceAppFunctions::class.java) {
+                    financeAppFunctions
+                }
+                .build()
+        }
 
     override suspend fun executeFunction(
         request: ExecuteAppFunctionRequest

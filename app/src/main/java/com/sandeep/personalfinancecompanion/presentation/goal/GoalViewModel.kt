@@ -12,6 +12,9 @@ import com.sandeep.personalfinancecompanion.domain.model.SavingVelocity
 import com.sandeep.personalfinancecompanion.domain.usecase.GetNoSpendStreakUseCase
 import com.sandeep.personalfinancecompanion.domain.usecase.GetSavingVelocityUseCase
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
+import com.sandeep.personalfinancecompanion.domain.usecase.AddTransactionUseCase
+import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +42,8 @@ class GoalViewModel @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository,
     private val transactionRepository: TransactionRepository,
     private val getNoSpendStreakUseCase: GetNoSpendStreakUseCase,
-    private val getSavingVelocityUseCase: GetSavingVelocityUseCase
+    private val getSavingVelocityUseCase: GetSavingVelocityUseCase,
+    private val addTransactionUseCase: AddTransactionUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<GoalUiState>(GoalUiState.Loading)
@@ -119,6 +123,12 @@ class GoalViewModel @Inject constructor(
     fun setNoSpendTarget(days: Int) {
         viewModelScope.launch {
             preferencesRepository.updateNoSpendTarget(days)
+        }
+    }
+
+    fun addTransaction(amount: Double, category: Category, type: TransactionType, notes: String) {
+        viewModelScope.launch {
+            addTransactionUseCase(amount, category, type, notes)
         }
     }
 

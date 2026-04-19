@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".FinanceApplication"
@@ -24,14 +26,23 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <service
             android:name=".appfunctions.FinanceAppFunctionService"
             android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="36">
+            <property
+                android:name="android.app.appfunctions"
+                android:resource="@xml/app_functions" />
             <intent-filter>
                 <action android:name="androidx.appfunctions.AppFunctionService" />
+                <action android:name="android.app.appfunctions.AppFunctionService" />
             </intent-filter>
         </service>
     </application>

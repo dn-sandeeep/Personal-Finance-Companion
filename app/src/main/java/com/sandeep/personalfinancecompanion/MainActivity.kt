@@ -4,18 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -39,22 +39,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.sandeep.personalfinancecompanion.appfunctions.AgentLifecycleManager
 import com.sandeep.personalfinancecompanion.presentation.navigation.AppNavigation
 import com.sandeep.personalfinancecompanion.presentation.navigation.Screen
 import com.sandeep.personalfinancecompanion.presentation.navigation.bottomNavItems
 import com.sandeep.personalfinancecompanion.ui.theme.PersonalFinanceCompanionTheme
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.activity.viewModels
-import androidx.navigation.compose.rememberNavController
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var agentLifecycleManager: AgentLifecycleManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +67,9 @@ class MainActivity : ComponentActivity() {
         mainViewModel
         enableEdgeToEdge()
         setContent {
+            // Register AI Agent capabilities for Android 16+ discovery
+            agentLifecycleManager.registerAgentCapabilities(this)
+            
             PersonalFinanceCompanionTheme {
                 FinanceApp()
             }

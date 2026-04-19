@@ -19,6 +19,8 @@ datastorePreferences = "1.1.1"
 workRuntime = "2.9.1"
 ui = "1.10.6"
 appFunctions = "1.0.0-alpha08"
+mlkitEntityExtraction = "16.0.0-beta6"
+generativeAi = "0.9.0"
 
 [libraries]
 # Core
@@ -68,6 +70,8 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 androidx-appfunctions = { group = "androidx.appfunctions", name = "appfunctions", version.ref = "appFunctions" }
 androidx-appfunctions-service = { group = "androidx.appfunctions", name = "appfunctions-service", version.ref = "appFunctions" }
 androidx-appfunctions-compiler = { group = "androidx.appfunctions", name = "appfunctions-compiler", version.ref = "appFunctions" }
+mlkit-entity-extraction = { group = "com.google.mlkit", name = "entity-extraction", version.ref = "mlkitEntityExtraction" }
+google-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeAi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
