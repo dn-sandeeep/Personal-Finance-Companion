@@ -18,9 +18,7 @@ import javax.inject.Singleton
 class AgentLifecycleManager @Inject constructor() {
 
     fun registerAgentCapabilities(context: Context) {
-        // We register a dynamic shortcut that describes the core capability.
-        // Even though App Functions are discovered automatically, having a shortcut
-        // with semantic labels helps Gemini map natural language intents more reliably.
+        android.util.Log.d("AI_AGENT", "Registering Agent Capabilities (Shortcuts)...")
         
         val addExpenseShortcut = ShortcutInfoCompat.Builder(context, "add_expense_shortcut")
             .setShortLabel("Add Expense")
@@ -29,10 +27,16 @@ class AgentLifecycleManager @Inject constructor() {
             .setIntent(Intent(Intent.ACTION_VIEW).setPackage(context.packageName))
             .setCategories(setOf(
                 "com.sandeep.personalfinancecompanion.category.FINANCE",
-                "android.intent.category.APP_FINANCE"
+                "android.intent.category.APP_FINANCE",
+                Intent.CATEGORY_DEFAULT
             ))
             .build()
 
-        ShortcutManagerCompat.addDynamicShortcuts(context, listOf(addExpenseShortcut))
+        try {
+            ShortcutManagerCompat.addDynamicShortcuts(context, listOf(addExpenseShortcut))
+            android.util.Log.d("AI_AGENT", "Shortcuts registered successfully!")
+        } catch (e: Exception) {
+            android.util.Log.e("AI_AGENT", "Failed to register shortcuts", e)
+        }
     }
 }
