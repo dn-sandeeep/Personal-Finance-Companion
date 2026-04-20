@@ -1,37 +1,103 @@
 package com.sandeep.personalfinancecompanion.appfunctions
 
+import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.appfunctions.AppFunctionContext
+import androidx.appfunctions.AppFunctionData
+import androidx.appfunctions.AppFunctionFunctionNotFoundException
 import androidx.appfunctions.AppFunctionService
 import androidx.appfunctions.ExecuteAppFunctionRequest
 import androidx.appfunctions.ExecuteAppFunctionResponse
 import androidx.appfunctions.service.AppFunctionConfiguration
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 /**
  * Service that handles App Function requests from the Android System.
- * Hilt is used to inject the actual implementation class and provide it via a factory.
  */
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-@AndroidEntryPoint
 class FinanceAppFunctionService : AppFunctionService(), AppFunctionConfiguration.Provider {
 
-    @Inject
-    lateinit var financeAppFunctions: FinanceAppFunctions
+    override fun onCreate() {
+        super.onCreate()
+        Log.d("AI_AGENT", "FinanceAppFunctionService.onCreate() - System is starting the service!")
+    }
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface FinanceAppFunctionsEntryPoint {
+        fun financeAppFunctions(): FinanceAppFunctions
+    }
+
+    private val financeAppFunctions: FinanceAppFunctions by lazy {
+        Log.d("AI_AGENT", "Initializing FinanceAppFunctions via Hilt EntryPoint")
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext, 
+            FinanceAppFunctionsEntryPoint::class.java
+        )
+        entryPoint.financeAppFunctions()
+    }
+
+    init {
+        Log.d("AI_AGENT", "FinanceAppFunctionService class instantiated")
+    }
 
     override val appFunctionConfiguration: AppFunctionConfiguration
-        get() = AppFunctionConfiguration.Builder()
-            .addEnclosingClassFactory(FinanceAppFunctions::class.java) {
-                financeAppFunctions
-            }
-            .build()
+        get() {
+            Log.d("AI_AGENT", "System requested AppFunctionConfiguration")
+            return AppFunctionConfiguration.Builder()
+                .addEnclosingClassFactory(FinanceAppFunctions::class.java) {
+                    financeAppFunctions
+                }
+                .build()
+        }
+
 
     override suspend fun executeFunction(
         request: ExecuteAppFunctionRequest
     ): ExecuteAppFunctionResponse {
-        // In 1.0.0-alpha08, the library delegates the execution to the generated code
-        // based on the AppFunctionConfiguration.Provider we implemented.
-        throw UnsupportedOperationException("Use compiler generated dispatch path")
+        val functionId = request.functionIdentifier
+        val parameters = request.functionParameters
+        
+        Log.d("AI_AGENT", "Dispatching App Function: $functionId")
+
+        val appFunctionContext = object : AppFunctionContext {
+            override val context: Context = applicationContext
+        }
+
+        return try {
+            val result: String = when (functionId) {
+                "com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addExpense" -> {
+                    val amount = parameters.getDouble("amount")
+                    val category = parameters.getString("category")
+                    val notes = parameters.getString("notes")
+                    financeAppFunctions.addExpense(appFunctionContext, amount, category, notes)
+                }
+                "com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addIncome" -> {
+                    val amount = parameters.getDouble("amount")
+                    val category = parameters.getString("category")
+                    val notes = parameters.getString("notes")
+                    financeAppFunctions.addIncome(appFunctionContext, amount, category, notes)
+                }
+                "com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#getBalance" -> {
+                    financeAppFunctions.getBalance(appFunctionContext)
+                }
+                else -> throw AppFunctionFunctionNotFoundException("Function not found: $functionId")
+            }
+
+            Log.d("AI_AGENT", "Function execution completed: $result")
+            
+            val responseWrapper = FinanceAppFunctionResponse(result)
+            val resultData = AppFunctionData.serialize(responseWrapper, FinanceAppFunctionResponse::class.java)
+            ExecuteAppFunctionResponse.Success(resultData)
+        } catch (e: Exception) {
+            Log.e("AI_AGENT", "Error in dispatching $functionId", e)
+            ExecuteAppFunctionResponse.Error(
+                AppFunctionFunctionNotFoundException(e.message ?: "Execution failed")
+            )
+        }
     }
 }

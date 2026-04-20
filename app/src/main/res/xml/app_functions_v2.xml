@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<appfunctions>
+    <appfunction>
+        <id>com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addExpense</id>
+        <enabledByDefault>true</enabledByDefault>
+        <description>Add a new expense transaction to the finance tracker. Requires amount and optional category/notes.</description>
+        <parameters>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>false</isNullable>
+                <type>4</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <isRequired>true</isRequired>
+            <name>amount</name>
+            <description>The amount of money spent.</description>
+        </parameters>
+        <parameters>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>true</isNullable>
+                <type>8</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <isRequired>false</isRequired>
+            <name>category</name>
+            <description>The category of the expense (e.g., Food, Transport).</description>
+        </parameters>
+        <parameters>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>true</isNullable>
+                <type>8</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <isRequired>false</isRequired>
+            <name>notes</name>
+            <description>Additional details about the expense.</description>
+        </parameters>
+        <response>
+            <id>unused</id>
+            <valueType>
+                <id>unused</id>
+                <isNullable>false</isNullable>
+                <type>8</type>
+            </valueType>
+        </response>
+        <functionId>com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addExpense</functionId>
+    </appfunction>
+
+    <appfunction>
+        <id>com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addIncome</id>
+        <enabledByDefault>true</enabledByDefault>
+        <description>Record a new income entry. Requires the amount received.</description>
+        <parameters>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>false</isNullable>
+                <type>4</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <isRequired>true</isRequired>
+            <name>amount</name>
+            <description>The amount of income received.</description>
+        </parameters>
+        <parameters>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>true</isNullable>
+                <type>8</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <isRequired>false</isRequired>
+            <name>category</name>
+            <description>Source of income.</description>
+        </parameters>
+        <parameters>
+            <dataTypeMetadata>
+                <id>unused</id>
+                <isNullable>true</isNullable>
+                <type>8</type>
+            </dataTypeMetadata>
+            <id>unused</id>
+            <isRequired>false</isRequired>
+            <name>notes</name>
+            <description>Optional notes for the income.</description>
+        </parameters>
+        <response>
+            <id>unused</id>
+            <valueType>
+                <id>unused</id>
+                <isNullable>false</isNullable>
+                <type>8</type>
+            </valueType>
+        </response>
+        <functionId>com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#addIncome</functionId>
+    </appfunction>
+
+    <appfunction>
+        <id>com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#getBalance</id>
+        <enabledByDefault>true</enabledByDefault>
+        <description>Get the current total balance and summary of income/expenses.</description>
+        <response>
+            <id>unused</id>
+            <valueType>
+                <id>unused</id>
+                <isNullable>false</isNullable>
+                <type>8</type>
+            </valueType>
+        </response>
+        <functionId>com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions#getBalance</functionId>
+    </appfunction>
+</appfunctions>

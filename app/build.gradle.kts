@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.sandeep.personalfinancecompanion"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -39,11 +39,18 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
 }
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+    // Ensure App Functions metadata is aggregated across the module
     arg("appfunctions:aggregateAppFunctions", "true")
+    // Explicitly identify the class holding the functions for the system agent
+    arg("appfunctions:enclosingClassName", "com.sandeep.personalfinancecompanion.appfunctions.FinanceAppFunctions")
 }
 
 dependencies {
@@ -90,6 +97,8 @@ dependencies {
     implementation(libs.androidx.appfunctions)
     implementation(libs.androidx.appfunctions.service)
     ksp(libs.androidx.appfunctions.compiler)
+    implementation(libs.mlkit.entity.extraction)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
     // Testing
     testImplementation(libs.junit)

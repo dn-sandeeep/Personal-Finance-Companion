@@ -98,6 +98,14 @@ import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import java.util.Calendar
 import java.util.Locale
+import com.sandeep.personalfinancecompanion.presentation.common.MagicEntryViewModel
+import com.sandeep.personalfinancecompanion.presentation.common.components.MagicEntryDialog
+import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.domain.model.TransactionType
+import com.sandeep.personalfinancecompanion.domain.usecase.AddTransactionUseCase
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Scaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,6 +179,9 @@ fun GoalContent(
     var showTargetDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf<Goal?>(null) }
     var showEditGoalDialog by remember { mutableStateOf<Goal?>(null) }
+    var showMagicAgent by remember { mutableStateOf(false) }
+
+    val magicViewModel: MagicEntryViewModel = hiltViewModel()
 
     val sheetState = rememberModalBottomSheetState()
 
@@ -275,13 +286,40 @@ fun GoalContent(
             )
         }
     }
+    if (showMagicAgent) {
+        MagicEntryDialog(
+            viewModel = magicViewModel,
+            onDismiss = { showMagicAgent = false },
+            onConfirm = { amount, categoryName, typeName, notes ->
+                viewModel.addTransaction(
+                    amount = amount,
+                    category = Category.valueOf(categoryName),
+                    type = TransactionType.valueOf(typeName),
+                    notes = notes
+                )
+            }
+        )
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.background)
-            .verticalScroll(rememberScrollState())
-    ) {
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showMagicAgent = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape
+            ) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = "Magic AI Agent")
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(colorScheme.background)
+                .verticalScroll(rememberScrollState())
+        ) {
 
         // Content Padding
         Column(
@@ -361,6 +399,7 @@ fun GoalContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
