@@ -427,10 +427,23 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                val isExpense = result.type == TransactionType.EXPENSE
+                
+                val typeColor = when (result.type) {
+                    TransactionType.EXPENSE -> Color(0xFFC62828)
+                    TransactionType.INCOME -> Color(0xFF2E7D32)
+                    TransactionType.LENT -> Color(0xFFE65100) // Orange
+                    TransactionType.BORROWED -> Color(0xFF4A148C) // Purple
+                }
+                val bgColor = when (result.type) {
+                    TransactionType.EXPENSE -> Color(0xFFFFEBEE)
+                    TransactionType.INCOME -> Color(0xFFE8F5E9)
+                    TransactionType.LENT -> Color(0xFFFFF3E0)
+                    TransactionType.BORROWED -> Color(0xFFF3E5F5)
+                }
+
                 Surface(
-                    color = if (isExpense) Color(0xFFFFEBEE) else Color(0xFFE8F5E9),
-                    contentColor = if (isExpense) Color(0xFFC62828) else Color(0xFF2E7D32),
+                    color = bgColor,
+                    contentColor = typeColor,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
@@ -438,6 +451,35 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            if (result.peerName != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Person",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = result.peerName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

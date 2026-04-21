@@ -6,5 +6,7 @@ data class Transaction(
     val type: TransactionType,
     val category: Category,
     val date: Long, // Unix timestamp in millis
-    val notes: String
+    val notes: String,
+    val peerName: String? = null,
+    val isSettled: Boolean = false
 )

@@ -11,5 +11,7 @@ data class TransactionEntity(
     val type: String,
     val category: String,
     val date: Long,
-    val notes: String
+    val notes: String,
+    val peerName: String?,
+    val isSettled: Boolean
 )

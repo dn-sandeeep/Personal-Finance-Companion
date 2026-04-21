@@ -14,7 +14,8 @@ class AddTransactionUseCase @Inject constructor(
         amount: Double,
         category: Category,
         type: TransactionType,
-        notes: String = ""
+        notes: String = "",
+        peerName: String? = null
     ): Result<Unit> {
         return try {
             if (amount <= 0) {
@@ -27,7 +28,9 @@ class AddTransactionUseCase @Inject constructor(
                 type = type,
                 category = category,
                 date = System.currentTimeMillis(),
-                notes = notes
+                notes = notes,
+                peerName = peerName,
+                isSettled = false
             )
             repository.addTransaction(transaction)
             Result.success(Unit)

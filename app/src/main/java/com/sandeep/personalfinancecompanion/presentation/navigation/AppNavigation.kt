@@ -77,7 +77,9 @@ fun AppNavigation(
                 },
                 onAddExpense = {
                     navController.navigate(Screen.AddTransaction.createRoute("EXPENSE"))
-                }
+                },
+                onNavigateToDebt = {
+                    navController.navigate(Screen.Debt.route)}
             )
         }
 
@@ -105,6 +107,14 @@ fun AppNavigation(
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Debt.route) {
+            val debtViewModel: com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementViewModel = hiltViewModel()
+            com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementScreen(
+                viewModel = debtViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

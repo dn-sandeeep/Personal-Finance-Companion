@@ -17,26 +17,30 @@ import org.json.JSONObject
 class GeminiDataSource(apiKey: String) {
 
     private val model = GenerativeModel(
-        modelName = "gemini-2.5-flash",
+        modelName = "gemini-2.0-flash",
         apiKey = apiKey,
         systemInstruction = content {
             text("""
                 You are a "Finance Data Extractor". Your job is to extract financial transactions from user text and return a JSON ARRAY of objects.
                 
                 RULES:
-                1. Always output a valid JSON ARRAY containing objects with: amount (Double), category (String), note (String), isExpense (Boolean).
-                2. Evaluate the transaction type (INCOME/EXPENSE) specifically for EACH detected amount based on its context.
-                3. Extract the Category intelligently (e.g., Petrol -> TRANSPORT, Lunch -> FOOD, Salary -> SALARY).
-                4. USE ONLY THESE CATEGORIES: FOOD, TRANSPORT, SHOPPING, ENTERTAINMENT, BILLS, HEALTH, EDUCATION, SALARY, INVESTMENT, GIFT, OTHER.
-                5. KEYWORDS for isExpense = false: "added", "income", "got", "received", "earned", "cashback", "refund", "salary", "bonus", "pagaar".
-                6. Do NOT include any other text in your response. Just the JSON ARRAY.
+                1. Always output a valid JSON ARRAY containing objects with: amount (Double), category (String), note (String), type (String), peer_name (String or null).
+                2. Transaction 'type' must be one of: INCOME, EXPENSE, BORROWED, LENT.
+                3. Evaluate the transaction 'type' specifically for EACH detected amount:
+                   - BORROWED: Use when user "took" money from someone or says "udhar liye".
+                   - LENT: Use when user "gave" money to someone or says "udhar diye".
+                   - INCOME/EXPENSE: Standard for other transactions.
+                4. Extract 'peer_name' if a person's name is mentioned (e.g., "Rahul", "Papa", "Sandeep").
+                5. Extract the Category intelligently (e.g., Petrol -> TRANSPORT, Lunch -> FOOD).
+                6. USE ONLY THESE CATEGORIES: FOOD, TRANSPORT, SHOPPING, ENTERTAINMENT, BILLS, HEALTH, EDUCATION, SALARY, INVESTMENT, GIFT, OTHER.
+                7. Do NOT include any other text in your response. Just the JSON ARRAY.
                 
                 EXAMPLES:
-                - Input: "20 petrol and 30 for food"
-                  Output: [{"amount": 20.0, "category": "TRANSPORT", "note": "Petrol", "isExpense": true}, {"amount": 30.0, "category": "FOOD", "note": "Food", "isExpense": true}]
+                - Input: "500 udhar diye Rahul ko petrol ke liye"
+                  Output: [{"amount": 500.0, "category": "TRANSPORT", "note": "Udhar", "type": "LENT", "peer_name": "Rahul"}]
                 
-                - Input: "Received 50000 salary and spent 1200 on Bijli bill"
-                  Output: [{"amount": 50000.0, "category": "SALARY", "note": "Salary", "isExpense": false}, {"amount": 1200.0, "category": "BILLS", "note": "Bijli bill", "isExpense": true}]
+                - Input: "Received 50000 salary and borrowed 2000 from Rohit"
+                  Output: [{"amount": 50000.0, "category": "SALARY", "note": "Salary", "type": "INCOME", "peer_name": null}, {"amount": 2000.0, "category": "OTHER", "note": "Borrowed", "type": "BORROWED", "peer_name": "Rohit"}]
             """.trimIndent())
         }
     )
@@ -94,11 +98,19 @@ class GeminiDataSource(apiKey: String) {
                 Category.OTHER
             }
 
+            val typeStr = json.getString("type").uppercase()
+            val type = try {
+                TransactionType.valueOf(typeStr)
+            } catch (e: Exception) {
+                TransactionType.EXPENSE
+            }
+
             VoiceAgentResult(
                 amount = json.getDouble("amount"),
                 category = category,
-                type = if (json.getBoolean("isExpense")) TransactionType.EXPENSE else TransactionType.INCOME,
+                type = type,
                 notes = json.getString("note"),
+                peerName = if (json.has("peer_name") && !json.isNull("peer_name")) json.getString("peer_name") else null,
                 confidence = 0.95f,
                 isReadyToSave = true
             )

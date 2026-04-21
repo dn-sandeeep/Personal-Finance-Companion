@@ -23,6 +23,12 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getUnsettledUdhaar(): Flow<List<Transaction>> {
+        return dao.getUnsettledUdhaar().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
     override suspend fun getTransactionById(id: String): Transaction? {
         return withContext(Dispatchers.IO) {
             dao.getTransactionById(id)?.toDomain()
@@ -50,6 +56,12 @@ class TransactionRepositoryImpl @Inject constructor(
     override suspend fun convertAllTransactions(factor: Double) {
         withContext(Dispatchers.IO) {
             dao.convertAllTransactions(factor)
+        }
+    }
+
+    override suspend fun updateSettlementStatus(id: String, isSettled: Boolean) {
+        withContext(Dispatchers.IO) {
+            dao.updateSettlementStatus(id, isSettled)
         }
     }
 }

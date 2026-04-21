@@ -12,6 +12,7 @@ data class VoiceAgentResult(
     val category: Category = Category.OTHER,
     val type: TransactionType = TransactionType.EXPENSE,
     val notes: String = "",
+    val peerName: String? = null,
     val confidence: Float = 1.0f,
     val isReadyToSave: Boolean = false
 )
