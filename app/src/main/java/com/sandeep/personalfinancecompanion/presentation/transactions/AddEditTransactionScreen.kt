@@ -63,7 +63,8 @@ fun AddEditTransactionScreen(
         mutableStateOf(
             when (initialType) {
                 TransactionType.INCOME -> Category.SALARY
-                TransactionType.BORROWED, TransactionType.LENT -> Category.UDHAAR
+                TransactionType.BORROWED, TransactionType.LENT, 
+                TransactionType.BORROWED_REPAYMENT, TransactionType.LENT_REPAYMENT -> Category.UDHAAR
                 else -> Category.FOOD
             }
         )

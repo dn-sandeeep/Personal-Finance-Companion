@@ -57,6 +57,8 @@ fun TransactionListItem(
         TransactionType.EXPENSE -> "SPENT" to ExpenseRed
         TransactionType.BORROWED -> "BORROWED" to Color(0xFF1976D2) // Professional Blue
         TransactionType.LENT -> "LENT" to Color(0xFFF57C00)     // Professional Orange
+        TransactionType.BORROWED_REPAYMENT -> "REPAID" to Color(0xFF1976D2)
+        TransactionType.LENT_REPAYMENT -> "RECOVERED" to Color(0xFFF57C00)
     }
 
     // Title mapping (Fallback to Category if Notes are empty)

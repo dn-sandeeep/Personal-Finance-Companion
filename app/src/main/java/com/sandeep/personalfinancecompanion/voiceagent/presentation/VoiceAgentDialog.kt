@@ -433,12 +433,16 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                     TransactionType.INCOME -> Color(0xFF2E7D32)
                     TransactionType.LENT -> Color(0xFFE65100) // Orange
                     TransactionType.BORROWED -> Color(0xFF4A148C) // Purple
+                    TransactionType.BORROWED_REPAYMENT -> Color(0xFF4A148C)
+                    TransactionType.LENT_REPAYMENT -> Color(0xFFE65100)
                 }
                 val bgColor = when (result.type) {
                     TransactionType.EXPENSE -> Color(0xFFFFEBEE)
                     TransactionType.INCOME -> Color(0xFFE8F5E9)
                     TransactionType.LENT -> Color(0xFFFFF3E0)
                     TransactionType.BORROWED -> Color(0xFFF3E5F5)
+                    TransactionType.BORROWED_REPAYMENT -> Color(0xFFF3E5F5)
+                    TransactionType.LENT_REPAYMENT -> Color(0xFFFFF3E0)
                 }
 
                 Surface(

@@ -29,10 +29,18 @@ class CalculateBalanceUseCase @Inject constructor() {
             .filter { it.type == TransactionType.LENT }
             .sumOf { it.amount }
 
+        val totalLentRepayments = transactions
+            .filter { it.type == TransactionType.LENT_REPAYMENT }
+            .sumOf { it.amount }
+
+        val totalBorrowedRepayments = transactions
+            .filter { it.type == TransactionType.BORROWED_REPAYMENT }
+            .sumOf { it.amount }
+
         return BalanceSummary(
             totalIncome = totalIncome,
             totalExpense = totalExpense,
-            currentBalance = (totalIncome + totalBorrowed) - (totalExpense + totalLent)
+            currentBalance = (totalIncome + totalBorrowed + totalLentRepayments) - (totalExpense + totalLent + totalBorrowedRepayments)
         )
     }
 }
