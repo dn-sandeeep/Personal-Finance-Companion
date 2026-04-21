@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -98,8 +99,8 @@ import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import java.util.Calendar
 import java.util.Locale
-import com.sandeep.personalfinancecompanion.presentation.common.MagicEntryViewModel
-import com.sandeep.personalfinancecompanion.presentation.common.components.MagicEntryDialog
+import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentViewModel
+import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentDialog
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.usecase.AddTransactionUseCase
@@ -181,7 +182,7 @@ fun GoalContent(
     var showEditGoalDialog by remember { mutableStateOf<Goal?>(null) }
     var showMagicAgent by remember { mutableStateOf(false) }
 
-    val magicViewModel: MagicEntryViewModel = hiltViewModel()
+    val magicViewModel: VoiceAgentViewModel = hiltViewModel()
 
     val sheetState = rememberModalBottomSheetState()
 
@@ -287,7 +288,7 @@ fun GoalContent(
         }
     }
     if (showMagicAgent) {
-        MagicEntryDialog(
+        VoiceAgentDialog(
             viewModel = magicViewModel,
             onDismiss = { showMagicAgent = false },
             onConfirm = { amount, categoryName, typeName, notes ->
@@ -302,16 +303,6 @@ fun GoalContent(
     }
 
     Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showMagicAgent = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = "Magic AI Agent")
-            }
-        }
     ) { paddingValues ->
         Column(
             modifier = Modifier

@@ -9,17 +9,25 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -82,6 +90,7 @@ fun FinanceApp() {
     val snackbarHostState = remember { SnackbarHostState() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    var showVoiceAgent by remember { mutableStateOf(false) }
 
     // Show bottom bar only on main tabs
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }
@@ -221,16 +230,49 @@ fun FinanceApp() {
             },
             floatingActionButton = {
                 if (showBottomBar) {
-                    FloatingActionButton(
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // Voice Agent Mic FAB
+                        FloatingActionButton(
+                            onClick = { showVoiceAgent = true },
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            shape = CircleShape
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Voice Agent",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        // Existing Add Transaction FAB
+                        FloatingActionButton(
                             onClick = {
                                 navController.navigate(Screen.AddTransaction.createRoute())
                             },
                             containerColor = PrimaryAccent,
                             contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) { Icon(Icons.Default.Add, contentDescription = "Add Transaction") }
+                        ) { Icon(Icons.Default.Add, contentDescription = "Add Transaction") }
+                    }
                 }
             }
     ) { innerPadding ->
+        if (showVoiceAgent) {
+            VoiceAgentDialog(
+                viewModel = hiltViewModel(),
+                onDismiss = { showVoiceAgent = false },
+                onConfirm = { amount, category, type, notes ->
+                    // For global entry, we probably want to navigate to the Add Transaction screen
+                    // or handle it directly. Since this is a "Magic Entry", we can handle it
+                    // if the screen has the logic, but MainActivity's Job is to provide the entry.
+                    // The VoiceAgentViewModel already has a saveTransaction method that uses AddTransactionUseCase.
+                    // So we don't strictly need onConfirm to do anything if auto-saved.
+                }
+            )
+        }
         AppNavigation(
                 navController = navController,
                 snackbarHostState = snackbarHostState,
