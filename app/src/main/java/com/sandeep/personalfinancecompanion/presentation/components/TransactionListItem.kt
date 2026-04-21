@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,14 +52,20 @@ fun TransactionListItem(
 
     //val amountColor = if (isIncome) colorScheme.primary else colorScheme.onSurface
 
-    // Derive Status logic based on type/category for visual matching
-    val statusText = if (isIncome) "EARNED" else "SPEND"
-    val statusColor = if (isIncome) IncomeGreen else ExpenseRed
+    val (statusText, statusColor) = when (transaction.type) {
+        TransactionType.INCOME -> "EARNED" to IncomeGreen
+        TransactionType.EXPENSE -> "SPENT" to ExpenseRed
+        TransactionType.BORROWED -> "BORROWED" to Color(0xFF1976D2) // Professional Blue
+        TransactionType.LENT -> "LENT" to Color(0xFFF57C00)     // Professional Orange
+    }
 
     // Title mapping (Fallback to Category if Notes are empty)
-    val title =
-        if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
-    val subtitle = transaction.category.displayName
+    val title = if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
+    val subtitle = if (!transaction.peerName.isNullOrBlank()) {
+        "${transaction.category.displayName} • ${transaction.peerName}"
+    } else {
+        transaction.category.displayName
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -120,7 +127,7 @@ fun TransactionListItem(
                 Text(
                     text = CurrencyFormatter.formatAmount(transaction.amount, currency),
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (isIncome) IncomeGreen else ExpenseRed,
+                    color = statusColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )

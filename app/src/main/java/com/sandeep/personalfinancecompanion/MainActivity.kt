@@ -104,11 +104,16 @@ fun FinanceApp() {
                 currentRoute == Screen.Goals.route -> "Goals"
                 currentRoute == Screen.Insights.route -> "Insights"
                 currentRoute == Screen.Profile.route -> "Profile"
+                currentRoute == Screen.Debt.route -> "Lending & Debts"
                 currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
+                currentRoute?.startsWith("edit_transaction") == true -> "Edit Transaction"
                 else -> "Track Spend"
             }
 
-    val canNavigateBack = currentRoute?.startsWith("add_transaction") == true
+    val canNavigateBack = currentRoute?.startsWith("add_transaction") == true || 
+                          currentRoute?.startsWith("edit_transaction") == true ||
+                          currentRoute == Screen.Debt.route ||
+                          currentRoute == Screen.Profile.route
 
     Scaffold(
             modifier = Modifier.fillMaxSize(),

@@ -170,7 +170,8 @@ class VoiceAgentViewModel @Inject constructor(
                         amount = result.amount,
                         category = result.category,
                         type = result.type,
-                        notes = result.notes
+                        notes = result.notes,
+                        peerName = result.peerName
                     ).isSuccess
                     if (!success) allSuccess = false
                 }

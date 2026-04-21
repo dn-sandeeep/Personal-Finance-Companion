@@ -24,23 +24,18 @@ class GeminiDataSource(apiKey: String) {
                 You are a "Finance Data Extractor". Your job is to extract financial transactions from user text and return a JSON ARRAY of objects.
                 
                 RULES:
-                1. Always output a valid JSON ARRAY containing objects with: amount (Double), category (String), note (String), type (String), peer_name (String or null).
-                2. Transaction 'type' must be one of: INCOME, EXPENSE, BORROWED, LENT.
-                3. Evaluate the transaction 'type' specifically for EACH detected amount:
-                   - BORROWED: Use when user "took" money from someone or says "udhar liye".
-                   - LENT: Use when user "gave" money to someone or says "udhar diye".
-                   - INCOME/EXPENSE: Standard for other transactions.
-                4. Extract 'peer_name' if a person's name is mentioned (e.g., "Rahul", "Papa", "Sandeep").
-                5. Extract the Category intelligently (e.g., Petrol -> TRANSPORT, Lunch -> FOOD).
-                6. USE ONLY THESE CATEGORIES: FOOD, TRANSPORT, SHOPPING, ENTERTAINMENT, BILLS, HEALTH, EDUCATION, SALARY, INVESTMENT, GIFT, OTHER.
-                7. Do NOT include any other text in your response. Just the JSON ARRAY.
+                1. Always output a valid JSON ARRAY containing objects with: amount (Double), category (String), note (String), type (String).
+                2. Transaction 'type' must be either INCOME or EXPENSE.
+                3. Extract the Category intelligently (e.g., Petrol -> TRANSPORT, Lunch -> FOOD).
+                4. USE ONLY THESE CATEGORIES: FOOD, TRANSPORT, SHOPPING, ENTERTAINMENT, BILLS, HEALTH, EDUCATION, SALARY, INVESTMENT, GIFT, OTHER.
+                5. Do NOT include any other text in your response. Just the JSON ARRAY.
                 
                 EXAMPLES:
-                - Input: "500 udhar diye Rahul ko petrol ke liye"
-                  Output: [{"amount": 500.0, "category": "TRANSPORT", "note": "Udhar", "type": "LENT", "peer_name": "Rahul"}]
+                - Input: "Spent 500 on petrol and had lunch for 200"
+                  Output: [{"amount": 500.0, "category": "TRANSPORT", "note": "Petrol", "type": "EXPENSE"}, {"amount": 200.0, "category": "FOOD", "note": "Lunch", "type": "EXPENSE"}]
                 
-                - Input: "Received 50000 salary and borrowed 2000 from Rohit"
-                  Output: [{"amount": 50000.0, "category": "SALARY", "note": "Salary", "type": "INCOME", "peer_name": null}, {"amount": 2000.0, "category": "OTHER", "note": "Borrowed", "type": "BORROWED", "peer_name": "Rohit"}]
+                - Input: "Received 50000 salary"
+                  Output: [{"amount": 50000.0, "category": "SALARY", "note": "Salary", "type": "INCOME"}]
             """.trimIndent())
         }
     )
@@ -98,12 +93,8 @@ class GeminiDataSource(apiKey: String) {
                 Category.OTHER
             }
 
-            val typeStr = json.getString("type").uppercase()
-            val type = try {
-                TransactionType.valueOf(typeStr)
-            } catch (e: Exception) {
-                TransactionType.EXPENSE
-            }
+            val typeStr = json.optString("type", "EXPENSE").uppercase()
+            val type = if (typeStr == "INCOME") TransactionType.INCOME else TransactionType.EXPENSE
 
             VoiceAgentResult(
                 amount = json.getDouble("amount"),

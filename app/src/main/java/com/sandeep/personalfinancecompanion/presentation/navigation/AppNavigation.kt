@@ -113,8 +113,7 @@ fun AppNavigation(
         composable(Screen.Debt.route) {
             val debtViewModel: com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementViewModel = hiltViewModel()
             com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementScreen(
-                viewModel = debtViewModel,
-                onBackClick = { navController.popBackStack() }
+                viewModel = debtViewModel
             )
         }
 
@@ -154,7 +153,8 @@ fun AppNavigation(
                         transaction.type,
                         transaction.category,
                         transaction.notes,
-                        transaction.date
+                        transaction.date,
+                        transaction.peerName
                     )
                     navController.popBackStack()
                 },
