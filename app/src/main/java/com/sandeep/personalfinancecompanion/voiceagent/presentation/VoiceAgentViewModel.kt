@@ -93,11 +93,27 @@ class VoiceAgentViewModel @Inject constructor(
         voiceManager?.stopListening()
     }
 
+    fun backToEdit() {
+        _uiState.value = _uiState.value.copy(
+            parsedResults = emptyList(),
+            showPreview = false,
+            errorMessage = null
+        )
+    }
+
     fun parseAndProcess(context: Context) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val results = agentParser.parse(context, _uiState.value.inputText)
             
+            if (results.isEmpty()) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "No transactions detected. Try saying something like '100 for petrol'."
+                )
+                return@launch
+            }
+
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
                 parsedResults = results,

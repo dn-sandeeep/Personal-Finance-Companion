@@ -8,6 +8,10 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 val properties = Properties()
 val propertiesFile = rootProject.file("local.properties")
 if (propertiesFile.exists()) {

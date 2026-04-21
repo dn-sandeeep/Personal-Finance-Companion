@@ -56,8 +56,34 @@ fun VoiceAgentDialog(
         }
     }
 
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
+    // Logic to handle intent to close
+    val handleDismiss = {
+        if (uiState.inputText.isNotBlank() || uiState.parsedResults.isNotEmpty()) {
+            showExitConfirmation = true
+        } else {
+            onDismiss()
+        }
+    }
+
+    if (showExitConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmation = false },
+            title = { Text("Discard Entry?") },
+            text = { Text("You have recorded text or parsed results. Are you sure you want to discard them?") },
+            confirmButton = {
+                TextButton(onClick = onDismiss) { Text("Discard", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirmation = false }) { Text("Keep") }
+            },
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
+
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = handleDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Card(
@@ -129,16 +155,16 @@ fun VoiceAgentDialog(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = if (uiState.isListening) "Listening..." else "Tap the mic to speak",
+                    text = if (uiState.isListening) "Listening..." else if (uiState.isLoading) "Analyzing your speech..." else "Tap the mic to speak",
                     style = MaterialTheme.typography.bodyLarge,
                     color = if (uiState.isListening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(Modifier.height(24.dp))
 
-                // Input Preview (Updated by voice results)
+                // Input Preview (Only show when not showing results)
                 AnimatedVisibility(
-                    visible = uiState.parsedResults.isEmpty(),
+                    visible = uiState.parsedResults.isEmpty() && !uiState.isLoading,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
@@ -155,14 +181,14 @@ fun VoiceAgentDialog(
 
                 // AI Structured Preview (Multi-Entry Support)
                 AnimatedVisibility(
-                    visible = uiState.parsedResults.isNotEmpty(),
+                    visible = uiState.parsedResults.isNotEmpty() && !uiState.isLoading,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 300.dp) // Constrain height for many entries
+                            .heightIn(max = 300.dp)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -179,12 +205,24 @@ fun VoiceAgentDialog(
                 }
 
                 if (uiState.errorMessage != null) {
-                    Text(
-                        text = uiState.errorMessage!!,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = uiState.errorMessage!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -194,17 +232,21 @@ fun VoiceAgentDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    val isPreview = uiState.parsedResults.isNotEmpty()
+                    
                     OutlinedButton(
-                        onClick = onDismiss,
+                        onClick = if (isPreview) viewModel::backToEdit else handleDismiss,
                         modifier = Modifier.weight(1.0f),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Cancel")
+                        Icon(if (isPreview) Icons.Default.Edit else Icons.Default.Close, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (isPreview) "Edit Text" else "Cancel")
                     }
 
                     Button(
                         onClick = { 
-                            if (uiState.parsedResults.isNotEmpty()) {
+                            if (isPreview) {
                                 viewModel.saveTransactions(uiState.parsedResults)
                             } else {
                                 viewModel.parseAndProcess(context)
@@ -222,14 +264,13 @@ fun VoiceAgentDialog(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            val isPreview = uiState.parsedResults.isNotEmpty()
                             Icon(
-                                if (isPreview) Icons.Default.Check else Icons.Default.ArrowForward,
+                                if (isPreview) Icons.Default.Check else Icons.Default.AutoFixHigh,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text(if (isPreview) "Confirm & Save All" else "Process")
+                            Text(if (isPreview) "Confirm All" else "Process")
                         }
                     }
                 }
