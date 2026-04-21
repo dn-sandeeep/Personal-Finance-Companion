@@ -28,8 +28,7 @@ import androidx.compose.ui.window.DialogProperties
 @Composable
 fun VoiceAgentDialog(
     viewModel: VoiceAgentViewModel,
-    onDismiss: () -> Unit,
-    onConfirm: (amount: Double, category: String, type: String, notes: String) -> Unit
+    onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -44,8 +43,9 @@ fun VoiceAgentDialog(
         }
     )
 
-    // Initialize voice manager
+    // Initialize voice manager and reset state
     LaunchedEffect(Unit) {
+        viewModel.clear()
         viewModel.initVoiceManager(context)
     }
 
@@ -175,8 +175,12 @@ fun VoiceAgentDialog(
                         onClick = { 
                             if (uiState.parsedResult?.amount != null) {
                                 val res = uiState.parsedResult!!
-                                onConfirm(res.amount!!, res.category.name, res.type.name, res.notes)
-                                onDismiss()
+                                viewModel.saveTransaction(
+                                    amount = res.amount!!,
+                                    category = res.category,
+                                    type = res.type,
+                                    notes = res.notes
+                                )
                             } else {
                                 viewModel.parseAndProcess(context)
                             }

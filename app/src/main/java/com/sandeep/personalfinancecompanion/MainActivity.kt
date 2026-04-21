@@ -263,14 +263,7 @@ fun FinanceApp() {
         if (showVoiceAgent) {
             VoiceAgentDialog(
                 viewModel = hiltViewModel(),
-                onDismiss = { showVoiceAgent = false },
-                onConfirm = { amount, category, type, notes ->
-                    // For global entry, we probably want to navigate to the Add Transaction screen
-                    // or handle it directly. Since this is a "Magic Entry", we can handle it
-                    // if the screen has the logic, but MainActivity's Job is to provide the entry.
-                    // The VoiceAgentViewModel already has a saveTransaction method that uses AddTransactionUseCase.
-                    // So we don't strictly need onConfirm to do anything if auto-saved.
-                }
+                onDismiss = { showVoiceAgent = false }
             )
         }
         AppNavigation(
