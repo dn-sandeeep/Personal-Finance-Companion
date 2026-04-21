@@ -27,12 +27,14 @@ class VoiceAgentViewModel @Inject constructor(
 
     private var voiceManager: VoiceRecognizerManager? = null
 
+    private var confirmedTranscript: String = ""
+
     fun initVoiceManager(context: Context) {
         if (voiceManager == null) {
             voiceManager = VoiceRecognizerManager(
                 context = context,
-                onResults = { text ->
-                    onTextChanged(text)
+                onResults = { text, isFinal ->
+                    onVoiceResults(text, isFinal)
                 },
                 onError = { error ->
                     _uiState.value = _uiState.value.copy(
@@ -47,7 +49,36 @@ class VoiceAgentViewModel @Inject constructor(
         }
     }
 
+    private fun onVoiceResults(text: String, isFinal: Boolean) {
+        if (isFinal) {
+            confirmedTranscript = if (confirmedTranscript.isBlank()) {
+                text
+            } else {
+                "$confirmedTranscript $text"
+            }.trim()
+            
+            _uiState.value = _uiState.value.copy(
+                inputText = confirmedTranscript,
+                errorMessage = null
+            )
+        } else {
+            // Partial update: show confirmed + current partial
+            val displayResults = if (confirmedTranscript.isBlank()) {
+                text
+            } else {
+                "$confirmedTranscript $text"
+            }.trim()
+            
+            _uiState.value = _uiState.value.copy(
+                inputText = displayResults,
+                errorMessage = null
+            )
+        }
+    }
+
     fun onTextChanged(text: String) {
+        // Manual edits or final state update
+        confirmedTranscript = text
         _uiState.value = _uiState.value.copy(
             inputText = text,
             errorMessage = null
@@ -65,44 +96,49 @@ class VoiceAgentViewModel @Inject constructor(
     fun parseAndProcess(context: Context) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            val result = agentParser.parse(context, _uiState.value.inputText)
+            val results = agentParser.parse(context, _uiState.value.inputText)
             
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
-                parsedResult = result,
-                showPreview = !result.isReadyToSave // Show preview if not confident to auto-save
+                parsedResults = results,
+                showPreview = results.size > 1 || results.any { !it.isReadyToSave }
             )
 
-            // Auto-Save Logic: If the agent is confident and data is complete, save immediately
-            if (result.isReadyToSave && result.amount != null) {
-                saveTransaction(
-                    amount = result.amount,
-                    category = result.category,
-                    type = result.type,
-                    notes = result.notes
-                )
+            // Auto-Save Logic: If the agent is confident and there's only one complete result
+            if (results.size == 1) {
+                val result = results.first()
+                if (result.isReadyToSave && result.amount != null) {
+                    saveTransactions(results)
+                }
             }
         }
     }
 
-    fun saveTransaction(amount: Double, category: Category, type: TransactionType, notes: String) {
+    fun saveTransactions(results: List<VoiceAgentResult>) {
         viewModelScope.launch {
-            val success = addTransactionUseCase(
-                amount = amount,
-                category = category,
-                type = type,
-                notes = notes
-            ).isSuccess
+            var allSuccess = true
+            results.forEach { result ->
+                if (result.amount != null) {
+                    val success = addTransactionUseCase(
+                        amount = result.amount,
+                        category = result.category,
+                        type = result.type,
+                        notes = result.notes
+                    ).isSuccess
+                    if (!success) allSuccess = false
+                }
+            }
             
-            if (success) {
+            if (allSuccess) {
                 _uiState.value = _uiState.value.copy(isSuccess = true)
             } else {
-                _uiState.value = _uiState.value.copy(errorMessage = "Failed to save transaction")
+                _uiState.value = _uiState.value.copy(errorMessage = "Failed to save some transactions")
             }
         }
     }
 
     fun clear() {
+        confirmedTranscript = ""
         _uiState.value = VoiceAgentUiState()
     }
 
@@ -118,6 +154,6 @@ data class VoiceAgentUiState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
     val errorMessage: String? = null,
-    val parsedResult: VoiceAgentResult? = null,
+    val parsedResults: List<VoiceAgentResult> = emptyList(),
     val showPreview: Boolean = false
 )

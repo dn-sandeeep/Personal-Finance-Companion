@@ -13,7 +13,7 @@ class SmartParserRepositoryImpl @Inject constructor(
 ) : SmartParserRepository {
 
     override suspend fun parseText(context: Context, text: String): ParsedTransaction {
-        return parser.parse(context, text)
+        return parser.parse(context, text).firstOrNull() ?: ParsedTransaction()
     }
 
     override fun getSuggestions(text: String): List<String> {

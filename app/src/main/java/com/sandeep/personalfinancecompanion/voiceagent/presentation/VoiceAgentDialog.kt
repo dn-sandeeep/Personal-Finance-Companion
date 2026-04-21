@@ -6,8 +6,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -93,7 +95,7 @@ fun VoiceAgentDialog(
 
                 // Voice Pulse Animation
                 if (uiState.isListening) {
-                    VoicePulseAnimation()
+                    VoicePulseAnimation(onStop = viewModel::stopListening)
                 } else {
                     IconButton(
                         onClick = { 
@@ -136,7 +138,7 @@ fun VoiceAgentDialog(
 
                 // Input Preview (Updated by voice results)
                 AnimatedVisibility(
-                    visible = uiState.parsedResult == null,
+                    visible = uiState.parsedResults.isEmpty(),
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
@@ -151,14 +153,28 @@ fun VoiceAgentDialog(
                     )
                 }
 
-                // AI Structured Preview
+                // AI Structured Preview (Multi-Entry Support)
                 AnimatedVisibility(
-                    visible = uiState.parsedResult != null,
+                    visible = uiState.parsedResults.isNotEmpty(),
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    uiState.parsedResult?.let { result ->
-                        ParsedResultPreview(result = result)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp) // Constrain height for many entries
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "${uiState.parsedResults.size} transactions detected",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        uiState.parsedResults.forEach { result ->
+                            ParsedResultPreview(result = result)
+                        }
                     }
                 }
 
@@ -188,14 +204,8 @@ fun VoiceAgentDialog(
 
                     Button(
                         onClick = { 
-                            if (uiState.parsedResult?.amount != null) {
-                                val res = uiState.parsedResult!!
-                                viewModel.saveTransaction(
-                                    amount = res.amount!!,
-                                    category = res.category,
-                                    type = res.type,
-                                    notes = res.notes
-                                )
+                            if (uiState.parsedResults.isNotEmpty()) {
+                                viewModel.saveTransactions(uiState.parsedResults)
                             } else {
                                 viewModel.parseAndProcess(context)
                             }
@@ -212,14 +222,14 @@ fun VoiceAgentDialog(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            val isPreview = uiState.parsedResult != null
+                            val isPreview = uiState.parsedResults.isNotEmpty()
                             Icon(
                                 if (isPreview) Icons.Default.Check else Icons.Default.ArrowForward,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text(if (isPreview) "Confirm & Save" else "Process")
+                            Text(if (isPreview) "Confirm & Save All" else "Process")
                         }
                     }
                 }
@@ -229,7 +239,7 @@ fun VoiceAgentDialog(
 }
 
 @Composable
-fun VoicePulseAnimation() {
+fun VoicePulseAnimation(onStop: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -252,7 +262,7 @@ fun VoicePulseAnimation() {
                 )
         )
         IconButton(
-            onClick = { /* Stop handled by manager/UI */ },
+            onClick = onStop,
             modifier = Modifier
                 .size(80.dp)
                 .background(

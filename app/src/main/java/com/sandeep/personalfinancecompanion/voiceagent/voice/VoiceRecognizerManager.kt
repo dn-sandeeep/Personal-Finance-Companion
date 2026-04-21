@@ -15,14 +15,20 @@ import java.util.Locale
  */
 class VoiceRecognizerManager(
     private val context: Context,
-    private val onResults: (String) -> Unit,
+    private val onResults: (String, Boolean) -> Unit,
     private val onError: (String) -> Unit,
     private val onStateChange: (Boolean) -> Unit = {}
 ) : RecognitionListener {
 
     private var speechRecognizer: SpeechRecognizer? = null
+    private var isManualStopRequested = false
 
     fun startListening() {
+        isManualStopRequested = false
+        performStart()
+    }
+
+    private fun performStart() {
         try {
             if (speechRecognizer == null) {
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
@@ -38,19 +44,21 @@ class VoiceRecognizerManager(
             
             speechRecognizer?.startListening(intent)
             onStateChange(true)
-            Log.d("VoiceAgent", "Started listening...")
+            Log.d("VoiceAgent", "Sticky listening session started...")
         } catch (e: Exception) {
             onError("Initialization error: ${e.message}")
         }
     }
 
     fun stopListening() {
+        isManualStopRequested = true
         speechRecognizer?.stopListening()
         onStateChange(false)
-        Log.d("VoiceAgent", "Stopped listening.")
+        Log.d("VoiceAgent", "Manual stop requested.")
     }
 
     fun destroy() {
+        isManualStopRequested = true
         speechRecognizer?.destroy()
         speechRecognizer = null
     }
@@ -60,7 +68,8 @@ class VoiceRecognizerManager(
     override fun onRmsChanged(rmsdB: Float) {}
     override fun onBufferReceived(buffer: ByteArray?) {}
     override fun onEndOfSpeech() {
-        onStateChange(false)
+        // Speech ended, but if not manually stopped, we stay in "Listening" UI state
+        // and wait for results or restart
     }
 
     override fun onError(error: Int) {
@@ -76,22 +85,38 @@ class VoiceRecognizerManager(
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
             else -> "Unknown error"
         }
-        onError(errorMessage)
-        onStateChange(false)
+        
+        Log.e("VoiceAgent", "Speech Error: $errorMessage ($error)")
+
+        // Auto-restart if it was just a timeout and manual stop wasn't clicked
+        if (!isManualStopRequested && (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT || error == SpeechRecognizer.ERROR_NO_MATCH)) {
+            Log.d("VoiceAgent", "Restarting after timeout/no match...")
+            performStart()
+        } else if (!isManualStopRequested) {
+            onError(errorMessage)
+            onStateChange(false)
+        }
     }
 
     override fun onResults(results: Bundle?) {
         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         if (!matches.isNullOrEmpty()) {
-            onResults(matches[0])
+            onResults(matches[0], true)
         }
-        onStateChange(false)
+
+        // AUTO-RESTART for sticky listening
+        if (!isManualStopRequested) {
+            Log.d("VoiceAgent", "Sticky restart after results...")
+            performStart()
+        } else {
+            onStateChange(false)
+        }
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
         val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         if (!matches.isNullOrEmpty()) {
-            onResults(matches[0])
+            onResults(matches[0], false)
         }
     }
 

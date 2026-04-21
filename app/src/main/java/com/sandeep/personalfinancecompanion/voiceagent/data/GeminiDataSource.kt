@@ -21,45 +21,72 @@ class GeminiDataSource(apiKey: String) {
         apiKey = apiKey,
         systemInstruction = content {
             text("""
-                You are a "Finance Data Extractor". Your ONLY job is to extract financial data from user text and return a JSON block.
+                You are a "Finance Data Extractor". Your job is to extract financial transactions from user text and return a JSON ARRAY of objects.
                 
                 RULES:
-                1. Always output a valid JSON block containing: amount (Double), category (String), note (String), isExpense (Boolean).
-                2. Extract the Category intelligently (e.g., Petrol -> TRANSPORT, Lunch -> FOOD, Salary -> SALARY).
-                3. USE ONLY THESE CATEGORIES: FOOD, TRANSPORT, SHOPPING, ENTERTAINMENT, BILLS, HEALTH, EDUCATION, SALARY, INVESTMENT, GIFT, OTHER.
-                4. If the user mentions "added" or "income" or "got", set isExpense to false.
-                5. Do NOT include any other text in your response. Just the JSON block.
+                1. Always output a valid JSON ARRAY containing objects with: amount (Double), category (String), note (String), isExpense (Boolean).
+                2. Evaluate the transaction type (INCOME/EXPENSE) specifically for EACH detected amount based on its context.
+                3. Extract the Category intelligently (e.g., Petrol -> TRANSPORT, Lunch -> FOOD, Salary -> SALARY).
+                4. USE ONLY THESE CATEGORIES: FOOD, TRANSPORT, SHOPPING, ENTERTAINMENT, BILLS, HEALTH, EDUCATION, SALARY, INVESTMENT, GIFT, OTHER.
+                5. KEYWORDS for isExpense = false: "added", "income", "got", "received", "earned", "cashback", "refund", "salary", "bonus", "pagaar".
+                6. Do NOT include any other text in your response. Just the JSON ARRAY.
                 
-                EXAMPLE OUTPUT:
-                {"amount": 100.0, "category": "FOOD", "note": "Chai", "isExpense": true}
+                EXAMPLES:
+                - Input: "20 petrol and 30 for food"
+                  Output: [{"amount": 20.0, "category": "TRANSPORT", "note": "Petrol", "isExpense": true}, {"amount": 30.0, "category": "FOOD", "note": "Food", "isExpense": true}]
+                
+                - Input: "Received 50000 salary and spent 1200 on Bijli bill"
+                  Output: [{"amount": 50000.0, "category": "SALARY", "note": "Salary", "isExpense": false}, {"amount": 1200.0, "category": "BILLS", "note": "Bijli bill", "isExpense": true}]
             """.trimIndent())
         }
     )
 
-    suspend fun extractTransactionData(text: String): VoiceAgentResult? = withContext(Dispatchers.IO) {
+    suspend fun extractTransactionData(text: String): List<VoiceAgentResult> = withContext(Dispatchers.IO) {
         try {
             val response = model.generateContent(text)
-            val rawText = response.text ?: return@withContext null
+            val rawText = response.text ?: return@withContext emptyList()
             
             Log.d("VoiceAgent", "Gemini Raw Response: $rawText")
             
             return@withContext parseJsonResponse(rawText)
         } catch (e: Exception) {
             Log.e("VoiceAgent", "Gemini API Error", e)
-            null
+            emptyList()
         }
     }
 
-    private fun parseJsonResponse(text: String): VoiceAgentResult? {
-        return try {
-            val startIndex = text.indexOf('{')
-            val endIndex = text.lastIndexOf('}')
+    private fun parseJsonResponse(text: String): List<VoiceAgentResult> {
+        val results = mutableListOf<VoiceAgentResult>()
+        try {
+            val startIndex = text.indexOf('[')
+            val endIndex = text.lastIndexOf(']')
             
-            if (startIndex == -1 || endIndex == -1) return null
+            if (startIndex == -1 || endIndex == -1) {
+                // Try parsing as a single object if array markers are missing
+                val singleObjStart = text.indexOf('{')
+                val singleObjEnd = text.lastIndexOf('}')
+                if (singleObjStart != -1 && singleObjEnd != -1) {
+                    val jsonPart = text.substring(singleObjStart, singleObjEnd + 1)
+                    parseSingleObject(JSONObject(jsonPart))?.let { results.add(it) }
+                }
+                return results
+            }
             
             val jsonPart = text.substring(startIndex, endIndex + 1)
-            val json = JSONObject(jsonPart)
+            val jsonArray = org.json.JSONArray(jsonPart)
             
+            for (i in 0 until jsonArray.length()) {
+                val json = jsonArray.getJSONObject(i)
+                parseSingleObject(json)?.let { results.add(it) }
+            }
+        } catch (e: Exception) {
+            Log.e("VoiceAgent", "Parsing failed", e)
+        }
+        return results
+    }
+
+    private fun parseSingleObject(json: JSONObject): VoiceAgentResult? {
+        return try {
             val categoryStr = json.getString("category").uppercase()
             val category = try {
                 Category.valueOf(categoryStr)
@@ -76,7 +103,6 @@ class GeminiDataSource(apiKey: String) {
                 isReadyToSave = true
             )
         } catch (e: Exception) {
-            Log.e("VoiceAgent", "Parsing failed", e)
             null
         }
     }

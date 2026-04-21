@@ -13,24 +13,26 @@ class VoiceAgentRepositoryImpl @Inject constructor(
     private val mlKitParser: SmartTransactionParser
 ) : VoiceAgentParser {
 
-    override suspend fun parse(context: Context, text: String): VoiceAgentResult {
+    override suspend fun parse(context: Context, text: String): List<VoiceAgentResult> {
         // Try Gemini (High Accuracy) first
-        val geminiResult = geminiSource.extractTransactionData(text)
+        val geminiResults = geminiSource.extractTransactionData(text)
         
-        if (geminiResult != null && geminiResult.amount != null) {
-            return geminiResult
+        if (geminiResults.isNotEmpty()) {
+            return geminiResults
         }
 
         // Mandatory Fallback to ML Kit (Offline/Error)
-        val legacyResult = mlKitParser.parse(context, text)
+        val legacyResults = mlKitParser.parse(context, text)
         
-        return VoiceAgentResult(
-            amount = legacyResult.amount,
-            category = legacyResult.category,
-            type = legacyResult.type,
-            notes = legacyResult.notes,
-            confidence = legacyResult.confidence,
-            isReadyToSave = false // Require confirmation for fallback
-        )
+        return legacyResults.map { legacy ->
+            VoiceAgentResult(
+                amount = legacy.amount,
+                category = legacy.category,
+                type = legacy.type,
+                notes = legacy.notes,
+                confidence = legacy.confidence,
+                isReadyToSave = false // Require confirmation for offline fallback
+            )
+        }
     }
 }
