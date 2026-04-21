@@ -9,11 +9,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -43,9 +42,8 @@ fun VoiceAgentDialog(
         }
     )
 
-    // Initialize voice manager and reset state
+    // Initialize voice manager
     LaunchedEffect(Unit) {
-        viewModel.clear()
         viewModel.initVoiceManager(context)
     }
 
@@ -137,15 +135,32 @@ fun VoiceAgentDialog(
                 Spacer(Modifier.height(24.dp))
 
                 // Input Preview (Updated by voice results)
-                OutlinedTextField(
-                    value = uiState.inputText,
-                    onValueChange = viewModel::onTextChanged,
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("What did you spend today?") },
-                    shape = RoundedCornerShape(16.dp),
-                    label = { Text("Your Entry") },
-                    maxLines = 3
-                )
+                AnimatedVisibility(
+                    visible = uiState.parsedResult == null,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    OutlinedTextField(
+                        value = uiState.inputText,
+                        onValueChange = viewModel::onTextChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("What did you spend today?") },
+                        shape = RoundedCornerShape(16.dp),
+                        label = { Text("Your Entry") },
+                        maxLines = 3
+                    )
+                }
+
+                // AI Structured Preview
+                AnimatedVisibility(
+                    visible = uiState.parsedResult != null,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    uiState.parsedResult?.let { result ->
+                        ParsedResultPreview(result = result)
+                    }
+                }
 
                 if (uiState.errorMessage != null) {
                     Text(
@@ -187,7 +202,8 @@ fun VoiceAgentDialog(
                         },
                         modifier = Modifier.weight(1.0f),
                         enabled = uiState.inputText.isNotBlank() && !uiState.isLoading,
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
@@ -196,7 +212,14 @@ fun VoiceAgentDialog(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("Process")
+                            val isPreview = uiState.parsedResult != null
+                            Icon(
+                                if (isPreview) Icons.Default.Check else Icons.Default.ArrowForward,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(if (isPreview) "Confirm & Save" else "Process")
                         }
                     }
                 }
@@ -243,6 +266,121 @@ fun VoicePulseAnimation() {
                 modifier = Modifier.size(40.dp),
                 tint = Color.White
             )
+        }
+    }
+}
+
+@Composable
+fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.domain.VoiceAgentResult) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp, 
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Payments,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Amount",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = "₹${result.amount ?: 0.0}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Category,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Category",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                AssistChip(
+                    onClick = { },
+                    label = { Text(result.category.name) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Label,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Type",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                val isExpense = result.type == TransactionType.EXPENSE
+                Surface(
+                    color = if (isExpense) Color(0xFFFFEBEE) else Color(0xFFE8F5E9),
+                    contentColor = if (isExpense) Color(0xFFC62828) else Color(0xFF2E7D32),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = result.type.name,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }

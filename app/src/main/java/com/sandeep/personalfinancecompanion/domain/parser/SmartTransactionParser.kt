@@ -17,9 +17,9 @@ class SmartTransactionParser @Inject constructor() {
     private val categoryKeywords = mapOf(
         Category.FOOD to listOf("pizza", "burger", "lunch", "dinner", "tea", "chai", "swiggy", "zomato", "ice cream", "restaurant", "coffee", "starbucks", "khana", "nashta"),
         Category.TRANSPORT to listOf("petrol", "diesel", "rickshaw", "uber", "ola", "metro", "fuel", "bus", "train", "ticket", "auto", "cab"),
-        Category.SHOPPING to listOf("clothes", "amazon", "flipkart", "mall", "laptop", "mobile", "shoes", "dress", "kharidari"),
+        Category.SHOPPING to listOf("clothes", "Kapde", "amazon", "flipkart", "mall", "laptop", "mobile", "shoes", "dress", "kharidari"),
         Category.ENTERTAINMENT to listOf("movie", "netflix", "game", "concert", "theater", "spotify", "cinema", "club"),
-        Category.BILLS to listOf("rent", "electricity", "water", "internet", "recharge", "fastag", "insurance", "bill", "kiraya"),
+        Category.BILLS to listOf("rent", "electricity", "water", "internet", "recharge", "fastag", "insurance", "bill", "kiraya", "Bijli bill"),
         Category.HEALTH to listOf("doctor", "medicine", "hospital", "gym", "pharmacy", "dawai"),
         Category.EDUCATION to listOf("fees", "book", "course", "school", "college"),
         Category.SALARY to listOf("salary", "bonus", "stipend", "earnings", "pagaar"),
@@ -27,7 +27,7 @@ class SmartTransactionParser @Inject constructor() {
         Category.GIFT to listOf("gift", "shagun", "birthday", "tohfa")
     )
 
-    private val incomeKeywords = listOf("received", "earned", "salary", "bonus", "get", "credit", "aaye", "mile")
+    private val incomeKeywords = listOf("received", "income", "earned", "salary", "bonus", "get", "credit", "aaye", "mile")
     private val expenseKeywords = listOf("spent", "paid", "bought", "spent", "debit", "diye", "kharch")
 
     suspend fun parse(context: Context, text: String): ParsedTransaction {

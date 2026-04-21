@@ -60,6 +60,7 @@ import com.sandeep.personalfinancecompanion.presentation.navigation.Screen
 import com.sandeep.personalfinancecompanion.presentation.navigation.bottomNavItems
 import com.sandeep.personalfinancecompanion.ui.theme.PersonalFinanceCompanionTheme
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
+import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -91,6 +92,7 @@ fun FinanceApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     var showVoiceAgent by remember { mutableStateOf(false) }
+    val voiceViewModel: VoiceAgentViewModel = hiltViewModel()
 
     // Show bottom bar only on main tabs
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }
@@ -236,7 +238,10 @@ fun FinanceApp() {
                     ) {
                         // Voice Agent Mic FAB
                         FloatingActionButton(
-                            onClick = { showVoiceAgent = true },
+                            onClick = { 
+                                voiceViewModel.clear()
+                                showVoiceAgent = true 
+                            },
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                             shape = CircleShape
@@ -262,7 +267,7 @@ fun FinanceApp() {
     ) { innerPadding ->
         if (showVoiceAgent) {
             VoiceAgentDialog(
-                viewModel = hiltViewModel(),
+                viewModel = voiceViewModel,
                 onDismiss = { showVoiceAgent = false }
             )
         }
