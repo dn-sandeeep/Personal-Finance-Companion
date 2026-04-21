@@ -121,7 +121,16 @@ fun VoiceAgentDialog(
 
                 // Voice Pulse Animation
                 if (uiState.isListening) {
-                    VoicePulseAnimation(onStop = viewModel::stopListening)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        VoicePulseAnimation(onStop = viewModel::stopListening)
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "TAP TO STOP",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 } else {
                     IconButton(
                         onClick = { 
@@ -157,7 +166,7 @@ fun VoiceAgentDialog(
                 Text(
                     text = if (uiState.isListening) "Listening..." else if (uiState.isLoading) "Analyzing your speech..." else "Tap the mic to speak",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (uiState.isListening) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (uiState.isListening) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(Modifier.height(24.dp))
@@ -298,7 +307,7 @@ fun VoicePulseAnimation(onStop: () -> Unit) {
                 .size(80.dp)
                 .scale(scale)
                 .background(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
                     shape = CircleShape
                 )
         )
@@ -307,7 +316,7 @@ fun VoicePulseAnimation(onStop: () -> Unit) {
             modifier = Modifier
                 .size(80.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.error,
                     shape = CircleShape
                 )
         ) {

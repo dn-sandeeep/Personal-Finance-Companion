@@ -85,11 +85,26 @@ class VoiceAgentViewModel @Inject constructor(
         )
     }
 
+    private var silenceTimeoutJob: kotlinx.coroutines.Job? = null
+
     fun startListening() {
         voiceManager?.startListening()
+        startSilenceTimeout()
+    }
+
+    private fun startSilenceTimeout() {
+        silenceTimeoutJob?.cancel()
+        silenceTimeoutJob = viewModelScope.launch {
+            // If no results for 20 seconds, auto-stop
+            kotlinx.coroutines.delay(20000)
+            if (_uiState.value.isListening) {
+                stopListening()
+            }
+        }
     }
 
     fun stopListening() {
+        silenceTimeoutJob?.cancel()
         voiceManager?.stopListening()
     }
 
@@ -103,8 +118,24 @@ class VoiceAgentViewModel @Inject constructor(
 
     fun parseAndProcess(context: Context) {
         viewModelScope.launch {
+            // Auto-stop if still listening
+            if (_uiState.value.isListening) {
+                stopListening()
+                // Tiny delay to ensure the last chunk of speech is received
+                kotlinx.coroutines.delay(500)
+            }
+
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            val results = agentParser.parse(context, _uiState.value.inputText)
+            val inputToProcess = _uiState.value.inputText
+            if (inputToProcess.isBlank()) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "No text found. Please speak or type something."
+                )
+                return@launch
+            }
+
+            val results = agentParser.parse(context, inputToProcess)
             
             if (results.isEmpty()) {
                 _uiState.value = _uiState.value.copy(
