@@ -98,177 +98,178 @@ fun FinanceApp() {
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }
 
     val topBarTitle =
-            when {
-                currentRoute == Screen.Home.route -> "Home"
-                currentRoute == Screen.Transactions.route -> "History"
-                currentRoute == Screen.Goals.route -> "Goals"
-                currentRoute == Screen.Insights.route -> "Insights"
-                currentRoute == Screen.Profile.route -> "Profile"
-                currentRoute == Screen.Debt.route -> "Lending & Debts"
-                currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
-                currentRoute?.startsWith("edit_transaction") == true -> "Edit Transaction"
-                else -> "Track Spend"
-            }
+        when {
+            currentRoute == Screen.Home.route -> "Home"
+            currentRoute == Screen.Transactions.route -> "History"
+            currentRoute == Screen.Goals.route -> "Goals"
+            currentRoute == Screen.Insights.route -> "Insights"
+            currentRoute == Screen.Profile.route -> "Profile"
+            currentRoute == Screen.Debt.route -> "Lending & Debts"
+            currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
+            currentRoute?.startsWith("edit_transaction") == true -> "Edit Transaction"
+            else -> "Track Spend"
+        }
 
-    val canNavigateBack = currentRoute?.startsWith("add_transaction") == true || 
-                          currentRoute?.startsWith("edit_transaction") == true ||
-                          currentRoute == Screen.Debt.route ||
-                          currentRoute == Screen.Profile.route
+    val canNavigateBack = currentRoute?.startsWith("add_transaction") == true ||
+            currentRoute?.startsWith("edit_transaction") == true ||
+            currentRoute == Screen.Debt.route ||
+            currentRoute == Screen.Profile.route
 
     Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                        title = {
-                            Text(
-                                    text = topBarTitle,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = topBarTitle,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    if (canNavigateBack) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
                             )
-                        },
-                        navigationIcon = {
-                            if (canNavigateBack) {
-                                IconButton(onClick = { navController.popBackStack() }) {
-                                    Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = "Back"
-                                    )
-                                }
-                            }
-                        },
-                        actions = {
-                            Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier =
-                                            Modifier.padding(end = 12.dp)
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .clickable {
+                        }
+                    }
+                },
+                actions = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier =
+                            Modifier
+                                .padding(end = 12.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
 //                                                        navController.navigate(
 //                                                                Screen.Profile.route
 //                                                        ) { launchSingleTop = true }
-                                                        navController.navigate(Screen.Profile.route) {
-                                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                                saveState = true
-                                                            }
-                                                            launchSingleTop = true
-                                                            restoreState = true
-                                                        }
-                                                    }
-                                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                        text = "User",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = "User Profile",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        },
-                        colors =
-                                TopAppBarDefaults.topAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        titleContentColor = MaterialTheme.colorScheme.onSurface
-                                )
-                )
-            },
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            bottomBar = {
-                AnimatedVisibility(
-                        visible = showBottomBar,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it })
-                ) {
-                    NavigationBar(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            tonalElevation = 0.dp
-                    ) {
-                        bottomNavItems.forEach { item ->
-                            val isSelected =
-                                    navBackStackEntry?.destination?.hierarchy?.any {
-                                        it.route == item.route
-                                    } == true
-
-                            NavigationBarItem(
-                                    selected = isSelected,
-                                    onClick = {
-                                        navController.navigate(item.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
+                                    navController.navigate(Screen.Profile.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
-                                    },
-                                    icon = {
-                                        Icon(
-                                                imageVector =
-                                                        if (isSelected) item.selectedIcon
-                                                        else item.unselectedIcon,
-                                                contentDescription = item.label
-                                        )
-                                    },
-                                    label = {
-                                        Text(
-                                                text = item.label,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight =
-                                                        if (isSelected) FontWeight.Bold
-                                                        else FontWeight.Normal
-                                        )
-                                    },
-                                    colors =
-                                            NavigationBarItemDefaults.colors(
-                                                    selectedIconColor = PrimaryAccent,
-                                                    selectedTextColor = PrimaryAccent,
-                                                    indicatorColor =
-                                                            PrimaryAccent.copy(alpha = 0.1f)
-                                            )
-                            )
-                        }
-                    }
-                }
-            },
-            floatingActionButton = {
-                if (showBottomBar) {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                                .padding(8.dp)
                     ) {
-                        // Voice Agent Mic FAB
-                        FloatingActionButton(
-                            onClick = { 
-                                voiceViewModel.clear()
-                                showVoiceAgent = true 
-                            },
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            shape = CircleShape
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Mic,
-                                contentDescription = "Voice Agent",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+                        Text(
+                            text = "User",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "User Profile",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface
+                    )
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
+            ) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp
+                ) {
+                    bottomNavItems.forEach { item ->
+                        val isSelected =
+                            navBackStackEntry?.destination?.hierarchy?.any {
+                                it.route == item.route
+                            } == true
 
-                        // Existing Add Transaction FAB
-                        FloatingActionButton(
+                        NavigationBarItem(
+                            selected = isSelected,
                             onClick = {
-                                navController.navigate(Screen.AddTransaction.createRoute())
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             },
-                            containerColor = PrimaryAccent,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ) { Icon(Icons.Default.Add, contentDescription = "Add Transaction") }
+                            icon = {
+                                Icon(
+                                    imageVector =
+                                        if (isSelected) item.selectedIcon
+                                        else item.unselectedIcon,
+                                    contentDescription = item.label
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = item.label,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight =
+                                        if (isSelected) FontWeight.Bold
+                                        else FontWeight.Normal
+                                )
+                            },
+                            colors =
+                                NavigationBarItemDefaults.colors(
+                                    selectedIconColor = PrimaryAccent,
+                                    selectedTextColor = PrimaryAccent,
+                                    indicatorColor =
+                                        PrimaryAccent.copy(alpha = 0.1f)
+                                )
+                        )
                     }
                 }
             }
+        },
+        floatingActionButton = {
+            if (showBottomBar) {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Voice Agent Mic FAB
+                    FloatingActionButton(
+                        onClick = {
+                            voiceViewModel.clear()
+                            showVoiceAgent = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = "Voice Agent",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    // Existing Add Transaction FAB
+                    FloatingActionButton(
+                        onClick = {
+                            navController.navigate(Screen.AddTransaction.createRoute())
+                        },
+                        containerColor = PrimaryAccent,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) { Icon(Icons.Default.Add, contentDescription = "Add Transaction") }
+                }
+            }
+        }
     ) { innerPadding ->
         if (showVoiceAgent) {
             VoiceAgentDialog(
@@ -277,9 +278,9 @@ fun FinanceApp() {
             )
         }
         AppNavigation(
-                navController = navController,
-                snackbarHostState = snackbarHostState,
-                modifier = Modifier.padding(innerPadding)
+            navController = navController,
+            snackbarHostState = snackbarHostState,
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }
