@@ -552,83 +552,81 @@ private fun HomeContent(
         Spacer(modifier = Modifier.height(10.dp))
 
         // ──── Lending & Debts Summary Card ────
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 0.dp)
-                .clickable { onNavigateToDebt() },
-            shape = RoundedCornerShape(15.dp),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Handshake,
-                            contentDescription = null,
-                            tint = colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Lending & Debts",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "View Details",
-                        tint = colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Lent Summary
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Owed to You",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF2E7D32).copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = CurrencyFormatter.formatAmount(state.totalLent, state.selectedCurrency),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2E7D32)
-                        )
-                    }
-
-                    // Borrowed Summary
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "You Owe",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFC62828).copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = CurrencyFormatter.formatAmount(state.totalBorrowed, state.selectedCurrency),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFC62828)
-                        )
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+//        Card(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 0.dp)
+//                .clickable { onNavigateToDebt() },
+//            shape = RoundedCornerShape(15.dp),
+//            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+//            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+//        ) {
+//            Column(modifier = Modifier.padding(20.dp)) {
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Row(verticalAlignment = Alignment.CenterVertically) {
+//                        Icon(
+//                            imageVector = Icons.Default.Handshake,
+//                            contentDescription = null,
+//                            tint = colorScheme.primary,
+//                            modifier = Modifier.size(20.dp)
+//                        )
+//                        Spacer(modifier = Modifier.width(8.dp))
+//                        Text(
+//                            text = "Lending & Debts",
+//                            style = MaterialTheme.typography.titleMedium,
+//                            fontWeight = FontWeight.Bold,
+//                            color = colorScheme.onSurface
+//                        )
+//                    }
+//                    Icon(
+//                        imageVector = Icons.Default.ChevronRight,
+//                        contentDescription = "View Details",
+//                        tint = colorScheme.onSurfaceVariant
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.height(16.dp))
+//
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+//                ) {
+//                    // Lent Summary
+//                    Column(modifier = Modifier.weight(1f)) {
+//                        Text(
+//                            text = "Owed to You",
+//                            style = MaterialTheme.typography.labelSmall,
+//                            color = Color(0xFF2E7D32).copy(alpha = 0.7f)
+//                        )
+//                        Text(
+//                            text = CurrencyFormatter.formatAmount(state.totalLent, state.selectedCurrency),
+//                            style = MaterialTheme.typography.titleMedium,
+//                            fontWeight = FontWeight.Bold,
+//                            color = Color(0xFF2E7D32)
+//                        )
+//                    }
+//
+//                    // Borrowed Summary
+//                    Column(modifier = Modifier.weight(1f)) {
+//                        Text(
+//                            text = "You Owe",
+//                            style = MaterialTheme.typography.labelSmall,
+//                            color = Color(0xFFC62828).copy(alpha = 0.7f)
+//                        )
+//                        Text(
+//                            text = CurrencyFormatter.formatAmount(state.totalBorrowed, state.selectedCurrency),
+//                            style = MaterialTheme.typography.titleMedium,
+//                            fontWeight = FontWeight.Bold,
+//                            color = Color(0xFFC62828)
+//                        )
+//                    }
+//                }
+//            }
+//        }
 
         // ──── Category Breakdown ────
         Row(
