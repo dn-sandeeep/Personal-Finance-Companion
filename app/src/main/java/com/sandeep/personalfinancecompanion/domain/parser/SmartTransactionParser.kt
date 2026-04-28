@@ -15,8 +15,8 @@ import javax.inject.Singleton
 class SmartTransactionParser @Inject constructor() {
 
     private val categoryKeywords = mapOf(
-        Category.FOOD to listOf("pizza", "burger", "lunch", "dinner", "tea", "chai", "swiggy", "zomato", "ice cream", "restaurant", "coffee", "starbucks", "khana", "nashta", "biscuit", "doodh", "milk", "egg", "hotel"),
-        Category.TRANSPORT to listOf("petrol", "diesel", "rickshaw", "uber", "ola", "metro", "fuel", "bus", "train", "ticket", "auto", "cab", "parking", "puncture", "service", "toll", "fastag"),
+        Category.FOOD to listOf("pizza", "burger", "lunch", "dinner", "tea", "chai", "swiggy", "zomato", "ice cream", "restaurant", "coffee", "starbucks", "khana", "khane", "nashta", "nashte", "biscuit", "doodh", "milk", "egg", "ande", "hotel"),
+        Category.TRANSPORT to listOf("petrol", "diesel", "rickshaw", "uber", "ola", "metro", "fuel", "bus", "train", "ticket", "auto", "cab", "parking", "puncture", "service", "repair", "toll", "fastag"),
         Category.SHOPPING to listOf("clothes", "kapde", "amazon", "flipkart", "mall", "laptop", "mobile", "shoes", "dress", "kharidari", "grocery", "sabzi", "mandi", "kirana", "mart"),
         Category.ENTERTAINMENT to listOf("movie", "netflix", "game", "concert", "theater", "spotify", "cinema", "club", "outing", "trip", "party"),
         Category.BILLS to listOf("rent", "electricity", "water", "internet", "recharge", "fastag", "insurance", "bill", "kiraya", "bijli", "wifi", "broadband", "mobile bill"),
