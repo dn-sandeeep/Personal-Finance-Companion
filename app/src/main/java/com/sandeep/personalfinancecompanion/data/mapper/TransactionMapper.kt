@@ -20,7 +20,9 @@ fun TransactionEntity.toDomain(): Transaction {
             Category.OTHER
         },
         date = date,
-        notes = notes
+        notes = notes,
+        peerName = peerName,
+        isSettled = isSettled
     )
 }
 
@@ -31,6 +33,8 @@ fun Transaction.toEntity(): TransactionEntity {
         type = type.name,
         category = category.name,
         date = date,
-        notes = notes
+        notes = notes,
+        peerName = peerName,
+        isSettled = isSettled
     )
 }

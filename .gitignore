@@ -10,3 +10,7 @@
 local.properties
 /doc/
 PROJECT_NOTES.md
+# Build artifacts
+app/release/app-release.aab
+*.aab
+*.apk

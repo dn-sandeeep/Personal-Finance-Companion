@@ -41,7 +41,9 @@ sealed interface HomeUiState {
         val selectedDayLabel: String? = null,
         val selectedCategoryTransactions: List<Transaction>? = null,
         val selectedCategoryLabel: String? = null,
-        val goalTargetAmount: Double = 0.0
+        val goalTargetAmount: Double = 0.0,
+        val totalLent: Double = 0.0,
+        val totalBorrowed: Double = 0.0
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -133,6 +135,12 @@ class HomeViewModel @Inject constructor(
                         }
                     }
 
+                    val unsettledUdhaar = transactions.filter { !it.isSettled }
+                    val totalLentAmount = unsettledUdhaar.filter { it.type == TransactionType.LENT }.sumOf { it.amount } - 
+                                         unsettledUdhaar.filter { it.type == TransactionType.LENT_REPAYMENT }.sumOf { it.amount }
+                    val totalBorrowedAmount = unsettledUdhaar.filter { it.type == TransactionType.BORROWED }.sumOf { it.amount } - 
+                                             unsettledUdhaar.filter { it.type == TransactionType.BORROWED_REPAYMENT }.sumOf { it.amount }
+
                     _uiState.value = HomeUiState.Success(
                         balance = balance,
                         recentTransactions = transactions.take(5),
@@ -141,7 +149,9 @@ class HomeViewModel @Inject constructor(
                         selectedCurrency = currentCurrency,
                         weeklyTrend = weeklyTrend,
                         categoryExpenses = categoryStatsList,
-                        goalTargetAmount = 0.0 // It will be updated by the goalCollector below
+                        goalTargetAmount = 0.0, // It will be updated by the goalCollector below
+                        totalLent = totalLentAmount,
+                        totalBorrowed = totalBorrowedAmount
                     )
                 }
             } catch (e: Exception) {

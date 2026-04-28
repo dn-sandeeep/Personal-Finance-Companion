@@ -14,6 +14,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY date DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions WHERE isSettled = 0 AND (type = 'BORROWED' OR type = 'LENT' OR type = 'BORROWED_REPAYMENT' OR type = 'LENT_REPAYMENT') ORDER BY date DESC")
+    fun getUnsettledUdhaar(): Flow<List<TransactionEntity>>
+
     @Query("SELECT * FROM transactions WHERE date >= :sinceDate ORDER BY date DESC")
     fun getTransactionsSince(sinceDate: Long): Flow<List<TransactionEntity>>
     
@@ -28,6 +31,9 @@ interface TransactionDao {
     
     @Query("DELETE FROM transactions WHERE id = :id")
     fun deleteTransaction(id: String)
+
+    @Query("UPDATE transactions SET isSettled = :isSettled WHERE id = :id")
+    suspend fun updateSettlementStatus(id: String, isSettled: Boolean)
 
     @Query("UPDATE transactions SET amount = amount * :factor")
     suspend fun convertAllTransactions(factor: Double)

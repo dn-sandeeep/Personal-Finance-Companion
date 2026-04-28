@@ -61,10 +61,16 @@ fun AddEditTransactionScreen(
     var type by remember { mutableStateOf(initialType) }
     var selectedCategory by remember {
         mutableStateOf(
-            if (initialType == TransactionType.INCOME) Category.SALARY else Category.FOOD
+            when (initialType) {
+                TransactionType.INCOME -> Category.SALARY
+                TransactionType.BORROWED, TransactionType.LENT, 
+                TransactionType.BORROWED_REPAYMENT, TransactionType.LENT_REPAYMENT -> Category.UDHAAR
+                else -> Category.FOOD
+            }
         )
     }
     var notes by remember { mutableStateOf("") }
+    var peerName by remember { mutableStateOf("") }
     var date by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var expanded by remember { mutableStateOf(false) }
 
@@ -83,6 +89,7 @@ fun AddEditTransactionScreen(
                 selectedCategory = transaction.category
                 notes = transaction.notes
                 date = transaction.date
+                peerName = transaction.peerName ?: ""
             }
         }
     }
@@ -113,14 +120,7 @@ fun AddEditTransactionScreen(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
-            
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.outline
-                )
-            }
+
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -144,7 +144,7 @@ fun AddEditTransactionScreen(
                 },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
             ) {
-                Text("💰 Income")
+                Text("Income", style = MaterialTheme.typography.labelSmall)
             }
             SegmentedButton(
                 selected = type == TransactionType.EXPENSE,
@@ -154,7 +154,7 @@ fun AddEditTransactionScreen(
                 },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
             ) {
-                Text("💸 Expense")
+                Text("Expense", style = MaterialTheme.typography.labelSmall)
             }
         }
 
@@ -245,6 +245,25 @@ fun AddEditTransactionScreen(
             maxLines = 4
         )
 
+        // Person Name (Only for Udhaar types)
+        if (type == TransactionType.BORROWED || type == TransactionType.LENT) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = if (type == TransactionType.BORROWED) "Borrowed from (Person)" else "Lent to (Person)",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = peerName,
+                onValueChange = { peerName = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("e.g. Rahul, Papa, etc.") },
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         // Save Button
@@ -262,7 +281,9 @@ fun AddEditTransactionScreen(
                             type = type,
                             category = selectedCategory,
                             notes = notes,
-                            date = date
+                            date = date,
+                            peerName = if (type == TransactionType.BORROWED || type == TransactionType.LENT) peerName else null,
+                            isSettled = false
                         )
                         onSave(transaction)
                     }

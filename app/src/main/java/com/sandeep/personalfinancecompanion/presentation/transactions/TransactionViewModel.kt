@@ -89,7 +89,8 @@ class TransactionViewModel @Inject constructor(
         type: TransactionType,
         category: Category,
         notes: String,
-        date: Long
+        date: Long,
+        peerName: String? = null
     ) {
         viewModelScope.launch {
             val transaction = Transaction(
@@ -98,7 +99,9 @@ class TransactionViewModel @Inject constructor(
                 type = type,
                 category = category,
                 date = date,
-                notes = notes
+                notes = notes,
+                peerName = peerName,
+                isSettled = false
             )
             repository.addTransaction(transaction)
             
