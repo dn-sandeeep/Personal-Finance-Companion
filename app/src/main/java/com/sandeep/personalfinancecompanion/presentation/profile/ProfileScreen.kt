@@ -258,10 +258,11 @@ fun ProfileHeader() {
                     .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.trackspend_logo),
-                    contentDescription = "App Logo",
-                    modifier = Modifier.size(80.dp)
+                Text(
+                    text = "U",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))

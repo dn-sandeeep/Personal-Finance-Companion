@@ -120,14 +120,7 @@ fun AddEditTransactionScreen(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
-            
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.outline
-                )
-            }
+
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -149,7 +142,7 @@ fun AddEditTransactionScreen(
                     type = TransactionType.INCOME
                     selectedCategory = Category.SALARY
                 },
-                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 4)
+                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
             ) {
                 Text("Income", style = MaterialTheme.typography.labelSmall)
             }
@@ -159,30 +152,10 @@ fun AddEditTransactionScreen(
                     type = TransactionType.EXPENSE
                     selectedCategory = Category.FOOD
                 },
-                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 4)
+                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
             ) {
                 Text("Expense", style = MaterialTheme.typography.labelSmall)
             }
-//            SegmentedButton(
-//                selected = type == TransactionType.BORROWED,
-//                onClick = {
-//                    type = TransactionType.BORROWED
-//                    selectedCategory = Category.UDHAAR
-//                },
-//                shape = SegmentedButtonDefaults.itemShape(index = 2, count = 4)
-//            ) {
-//                Text("Borrowed", style = MaterialTheme.typography.labelSmall)
-//            }
-//            SegmentedButton(
-//                selected = type == TransactionType.LENT,
-//                onClick = {
-//                    type = TransactionType.LENT
-//                    selectedCategory = Category.UDHAAR
-//                },
-//                shape = SegmentedButtonDefaults.itemShape(index = 3, count = 4)
-//            ) {
-//                Text("Lent", style = MaterialTheme.typography.labelSmall)
-//            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
