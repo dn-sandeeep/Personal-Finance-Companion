@@ -136,8 +136,10 @@ class HomeViewModel @Inject constructor(
                     }
 
                     val unsettledUdhaar = transactions.filter { !it.isSettled }
-                    val totalLentAmount = unsettledUdhaar.filter { it.type == TransactionType.LENT }.sumOf { it.amount }
-                    val totalBorrowedAmount = unsettledUdhaar.filter { it.type == TransactionType.BORROWED }.sumOf { it.amount }
+                    val totalLentAmount = unsettledUdhaar.filter { it.type == TransactionType.LENT }.sumOf { it.amount } - 
+                                         unsettledUdhaar.filter { it.type == TransactionType.LENT_REPAYMENT }.sumOf { it.amount }
+                    val totalBorrowedAmount = unsettledUdhaar.filter { it.type == TransactionType.BORROWED }.sumOf { it.amount } - 
+                                             unsettledUdhaar.filter { it.type == TransactionType.BORROWED_REPAYMENT }.sumOf { it.amount }
 
                     _uiState.value = HomeUiState.Success(
                         balance = balance,

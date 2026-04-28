@@ -12,7 +12,7 @@ enum class Category(val displayName: String, val emoji: String) {
     FREELANCE("Freelance", "💼"),
     INVESTMENT("Investment", "📈"),
     GIFT("Gift", "🎁"),
-    UDHAAR("Udhaar", "🤝"),
+    UDHAAR("Lent & Borrowed", "🤝"),
     OTHER("Other", "📌");
 
     companion object {

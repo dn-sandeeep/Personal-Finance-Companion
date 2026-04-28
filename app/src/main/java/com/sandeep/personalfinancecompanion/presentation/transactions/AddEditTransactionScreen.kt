@@ -163,26 +163,26 @@ fun AddEditTransactionScreen(
             ) {
                 Text("Expense", style = MaterialTheme.typography.labelSmall)
             }
-            SegmentedButton(
-                selected = type == TransactionType.BORROWED,
-                onClick = {
-                    type = TransactionType.BORROWED
-                    selectedCategory = Category.UDHAAR
-                },
-                shape = SegmentedButtonDefaults.itemShape(index = 2, count = 4)
-            ) {
-                Text("Borrowed", style = MaterialTheme.typography.labelSmall)
-            }
-            SegmentedButton(
-                selected = type == TransactionType.LENT,
-                onClick = {
-                    type = TransactionType.LENT
-                    selectedCategory = Category.UDHAAR
-                },
-                shape = SegmentedButtonDefaults.itemShape(index = 3, count = 4)
-            ) {
-                Text("Lent", style = MaterialTheme.typography.labelSmall)
-            }
+//            SegmentedButton(
+//                selected = type == TransactionType.BORROWED,
+//                onClick = {
+//                    type = TransactionType.BORROWED
+//                    selectedCategory = Category.UDHAAR
+//                },
+//                shape = SegmentedButtonDefaults.itemShape(index = 2, count = 4)
+//            ) {
+//                Text("Borrowed", style = MaterialTheme.typography.labelSmall)
+//            }
+//            SegmentedButton(
+//                selected = type == TransactionType.LENT,
+//                onClick = {
+//                    type = TransactionType.LENT
+//                    selectedCategory = Category.UDHAAR
+//                },
+//                shape = SegmentedButtonDefaults.itemShape(index = 3, count = 4)
+//            ) {
+//                Text("Lent", style = MaterialTheme.typography.labelSmall)
+//            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
