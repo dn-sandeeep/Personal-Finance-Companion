@@ -32,6 +32,10 @@ import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.ui.theme.ExpenseRed
 import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
+
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @Composable
 fun TransactionListItem(
@@ -40,7 +44,7 @@ fun TransactionListItem(
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val isIncome = transaction.type == TransactionType.INCOME
+    val localizedCategoryName = LocalizationUtils.getCategoryName(transaction.category)
 
     // Assigning specific badge colors based on category
     val badgeColor = when (transaction.category) {
@@ -50,23 +54,30 @@ fun TransactionListItem(
         else -> colorScheme.surfaceVariant
     }
 
-    //val amountColor = if (isIncome) colorScheme.primary else colorScheme.onSurface
+    val statusText = when (transaction.type) {
+        TransactionType.INCOME -> stringResource(R.string.status_earned)
+        TransactionType.EXPENSE -> stringResource(R.string.status_spent)
+        TransactionType.BORROWED -> stringResource(R.string.status_borrowed)
+        TransactionType.LENT -> stringResource(R.string.status_lent)
+        TransactionType.BORROWED_REPAYMENT -> stringResource(R.string.status_repaid)
+        TransactionType.LENT_REPAYMENT -> stringResource(R.string.status_recovered)
+    }
 
-    val (statusText, statusColor) = when (transaction.type) {
-        TransactionType.INCOME -> "EARNED" to IncomeGreen
-        TransactionType.EXPENSE -> "SPENT" to ExpenseRed
-        TransactionType.BORROWED -> "BORROWED" to Color(0xFF1976D2) // Professional Blue
-        TransactionType.LENT -> "LENT" to Color(0xFFF57C00)     // Professional Orange
-        TransactionType.BORROWED_REPAYMENT -> "REPAID" to Color(0xFF1976D2)
-        TransactionType.LENT_REPAYMENT -> "RECOVERED" to Color(0xFFF57C00)
+    val statusColor = when (transaction.type) {
+        TransactionType.INCOME -> IncomeGreen
+        TransactionType.EXPENSE -> ExpenseRed
+        TransactionType.BORROWED -> Color(0xFF1976D2)
+        TransactionType.LENT -> Color(0xFFF57C00)
+        TransactionType.BORROWED_REPAYMENT -> Color(0xFF1976D2)
+        TransactionType.LENT_REPAYMENT -> Color(0xFFF57C00)
     }
 
     // Title mapping (Fallback to Category if Notes are empty)
-    val title = if (transaction.notes.isNotBlank()) transaction.notes else transaction.category.displayName
+    val title = if (transaction.notes.isNotBlank()) transaction.notes else localizedCategoryName
     val subtitle = if (!transaction.peerName.isNullOrBlank()) {
-        "${transaction.category.displayName} • ${transaction.peerName}"
+        "$localizedCategoryName • ${transaction.peerName}"
     } else {
-        transaction.category.displayName
+        localizedCategoryName
     }
 
     Card(

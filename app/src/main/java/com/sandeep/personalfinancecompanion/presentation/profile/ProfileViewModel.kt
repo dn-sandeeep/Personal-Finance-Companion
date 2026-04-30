@@ -27,6 +27,7 @@ data class ProfileState(
     val budgetAlertsEnabled: Boolean = true,
     val goalRemindersEnabled: Boolean = true,
     val selectedCurrency: Currency = Currency.INR,
+    val selectedLanguage: String = "en",
     val isLoading: Boolean = true,
     val exportStatus: ExportStatus = ExportStatus.Idle
 )
@@ -55,6 +56,8 @@ class ProfileViewModel @Inject constructor(
             selectedCurrency = currency,
             isLoading = false
         )
+    }.combine(preferencesRepository.languageFlow) { currentState, language ->
+        currentState.copy(selectedLanguage = language)
     }.combine(_exportStatus) { currentState, export ->
         currentState.copy(exportStatus = export)
     }.stateIn(
@@ -90,6 +93,12 @@ class ProfileViewModel @Inject constructor(
     fun updateCurrency(currency: Currency) {
         viewModelScope.launch {
             changeCurrencyUseCase(currency)
+        }
+    }
+
+    fun updateLanguage(languageCode: String) {
+        viewModelScope.launch {
+            preferencesRepository.updateLanguage(languageCode)
         }
     }
 

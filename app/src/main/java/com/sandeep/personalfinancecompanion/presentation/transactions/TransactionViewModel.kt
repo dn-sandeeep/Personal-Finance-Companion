@@ -9,6 +9,7 @@ import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.GetTransactionsUseCase
+import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import com.sandeep.personalfinancecompanion.util.NotificationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,18 +136,20 @@ class TransactionViewModel @Inject constructor(
         val totalSpent = monthlyExpenses.sumOf { it.amount }
         val previousSpent = totalSpent - amount
         
+        val currency = preferencesRepository.currencyFlow.first()
         // 100% threshold
         if (previousSpent < budget && totalSpent >= budget) {
-            notificationHelper.showBudgetAlert(
-                "Budget Exceeded",
-                "You have kharch kar diya complete budget ($budget) for this month!"
+            notificationHelper.showBudgetExceededAlert(
+                CurrencyFormatter.formatAmount(totalSpent, currency),
+                CurrencyFormatter.formatAmount(budget, currency)
             )
         } 
         // 80% threshold
         else if (previousSpent < budget * 0.8 && totalSpent >= budget * 0.8) {
-            notificationHelper.showBudgetAlert(
-                "Budget Alert",
-                "You have reached 80% of your monthly budget ($budget)."
+            notificationHelper.showBudgetWarningAlert(
+                "80%",
+                CurrencyFormatter.formatAmount(totalSpent, currency),
+                CurrencyFormatter.formatAmount(budget, currency)
             )
         }
     }

@@ -19,6 +19,8 @@ class MainViewModel @Inject constructor(
         observeReminders()
     }
 
+    val languageCode = preferencesRepository.languageFlow
+
     private fun observeReminders() {
         viewModelScope.launch {
             preferencesRepository.dailyReminderEnabledFlow.collectLatest { enabled ->

@@ -13,12 +13,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
+import kotlinx.coroutines.flow.combine
+
 @HiltViewModel
 class DebtManagementViewModel @Inject constructor(
     private val getUnsettledUdhaarUseCase: GetUnsettledUdhaarUseCase,
     private val settleDebtUseCase: SettleDebtUseCase,
     private val addTransactionUseCase: com.sandeep.personalfinancecompanion.domain.usecase.AddTransactionUseCase,
-    private val repository: com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DebtUiState())
@@ -30,7 +34,10 @@ class DebtManagementViewModel @Inject constructor(
 
     private fun loadDebts() {
         viewModelScope.launch {
-            getUnsettledUdhaarUseCase().collect { debts ->
+            combine(
+                getUnsettledUdhaarUseCase(),
+                userPreferencesRepository.currencyFlow
+            ) { debts, currency ->
                 // Calculate global totals
                 val totalBorrowed = debts.filter { it.type == TransactionType.BORROWED }.sumOf { it.amount } - 
                                    debts.filter { it.type == TransactionType.BORROWED_REPAYMENT }.sumOf { it.amount }
@@ -60,8 +67,6 @@ class DebtManagementViewModel @Inject constructor(
                         val netLent = lentAmount - lentRepaid
                         val netBorrowed = borrowedAmount - borrowedRepaid
                         
-                        // A person can have both or either. We'll show the net overall for simplicity.
-                        // If netLent > netBorrowed, they owe you. Else you owe them.
                         val balance = netLent - netBorrowed
                         
                         PeerDebtSummary(
@@ -71,20 +76,23 @@ class DebtManagementViewModel @Inject constructor(
                             history = peerTransactions.sortedByDescending { it.date }
                         )
                     }
-                    .filter { it.netAmount > 0 } // Only show people with pending balance
+                    .filter { it.netAmount > 0 }
                     .sortedByDescending { it.netAmount }
 
-                _uiState.value = DebtUiState(
+                DebtUiState(
                     peerSummaries = summaries,
                     totalBorrowed = if (totalBorrowed > 0) totalBorrowed else 0.0,
                     totalLent = if (totalLent > 0) totalLent else 0.0,
+                    selectedCurrency = currency,
                     isLoading = false
                 )
+            }.collect {
+                _uiState.value = it
             }
         }
     }
 
-    fun recordRepayment(peerName: String, amount: Double, isOwedToYou: Boolean, notes: String = "Repayment", date: Long = System.currentTimeMillis()) {
+    fun recordRepayment(peerName: String, amount: Double, isOwedToYou: Boolean, notes: String = "Repayment") {
         viewModelScope.launch {
             val repaymentType = if (isOwedToYou) TransactionType.LENT_REPAYMENT else TransactionType.BORROWED_REPAYMENT
             addTransactionUseCase(
@@ -118,5 +126,6 @@ data class DebtUiState(
     val peerSummaries: List<PeerDebtSummary> = emptyList(),
     val totalBorrowed: Double = 0.0,
     val totalLent: Double = 0.0,
+    val selectedCurrency: Currency = Currency.INR,
     val isLoading: Boolean = true
 )

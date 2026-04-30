@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,13 +72,13 @@ fun VoiceAgentDialog(
     if (showExitConfirmation) {
         AlertDialog(
             onDismissRequest = { showExitConfirmation = false },
-            title = { Text("Discard Entry?") },
-            text = { Text("You have recorded text or parsed results. Are you sure you want to discard them?") },
+            title = { Text(stringResource(R.string.title_discard_entry)) },
+            text = { Text(stringResource(R.string.msg_discard_entry_confirm)) },
             confirmButton = {
-                TextButton(onClick = onDismiss) { Text("Discard", color = MaterialTheme.colorScheme.error) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_discard), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showExitConfirmation = false }) { Text("Keep") }
+                TextButton(onClick = { showExitConfirmation = false }) { Text(stringResource(R.string.btn_keep)) }
             },
             shape = RoundedCornerShape(24.dp)
         )
@@ -111,7 +113,7 @@ fun VoiceAgentDialog(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Voice Agent",
+                        stringResource(R.string.title_voice_agent),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -125,7 +127,7 @@ fun VoiceAgentDialog(
                         VoicePulseAnimation(onStop = viewModel::stopListening)
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "TAP TO STOP",
+                            stringResource(R.string.label_tap_to_stop),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
                             fontWeight = FontWeight.Bold
@@ -154,7 +156,7 @@ fun VoiceAgentDialog(
                     ) {
                         Icon(
                             Icons.Default.Mic,
-                            contentDescription = "Start Listening",
+                            contentDescription = stringResource(R.string.cd_start_listening),
                             modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -164,7 +166,7 @@ fun VoiceAgentDialog(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = if (uiState.isListening) "Listening..." else if (uiState.isLoading) "Analyzing your speech..." else "Tap the mic to speak",
+                    text = if (uiState.isListening) stringResource(R.string.status_listening) else if (uiState.isLoading) stringResource(R.string.status_analyzing_speech) else stringResource(R.string.msg_tap_mic_to_speak),
                     style = MaterialTheme.typography.bodyLarge,
                     color = if (uiState.isListening) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -181,9 +183,9 @@ fun VoiceAgentDialog(
                         value = uiState.inputText,
                         onValueChange = viewModel::onTextChanged,
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("What did you spend today?") },
+                        placeholder = { Text(stringResource(R.string.magic_entry_placeholder)) },
                         shape = RoundedCornerShape(16.dp),
-                        label = { Text("Your Entry") },
+                        label = { Text(stringResource(R.string.label_your_entry)) },
                         maxLines = 3
                     )
                 }
@@ -202,7 +204,7 @@ fun VoiceAgentDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "${uiState.parsedResults.size} transactions detected",
+                            text = stringResource(R.string.msg_tx_detected, uiState.parsedResults.size),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -250,7 +252,7 @@ fun VoiceAgentDialog(
                     ) {
                         Icon(if (isPreview) Icons.Default.Edit else Icons.Default.Close, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(if (isPreview) "Edit Text" else "Cancel")
+                        Text(if (isPreview) stringResource(R.string.btn_edit_text) else stringResource(R.string.btn_cancel))
                     }
 
                     Button(
@@ -279,7 +281,7 @@ fun VoiceAgentDialog(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text(if (isPreview) "Confirm All" else "Process")
+                            Text(if (isPreview) stringResource(R.string.btn_confirm_all) else stringResource(R.string.btn_process))
                         }
                     }
                 }
@@ -322,7 +324,7 @@ fun VoicePulseAnimation(onStop: () -> Unit) {
         ) {
             Icon(
                 Icons.Default.Stop,
-                contentDescription = "Stop",
+                contentDescription = stringResource(R.string.cd_stop_listening),
                 modifier = Modifier.size(40.dp),
                 tint = Color.White
             )
@@ -361,7 +363,7 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Amount",
+                        stringResource(R.string.label_amount_simple),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -390,7 +392,7 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Category",
+                        stringResource(R.string.label_category),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -422,7 +424,7 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Type",
+                        stringResource(R.string.label_type),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -474,7 +476,7 @@ fun ParsedResultPreview(result: com.sandeep.personalfinancecompanion.voiceagent.
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "Person",
+                            stringResource(R.string.label_person),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

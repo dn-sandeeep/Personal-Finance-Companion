@@ -26,15 +26,12 @@ class GoalReminderWorker @AssistedInject constructor(
             if (incompleteGoals.size == 1) {
                 val goal = incompleteGoals.first()
                 val progressPercent = (goal.progress * 100).roundToInt()
-                notificationHelper.showGoalReminder(
+                notificationHelper.showGoalProgressReminder(
                     goal.title,
-                    "You've saved $progressPercent% so far. Keep going!"
+                    progressPercent
                 )
             } else {
-                notificationHelper.showGoalReminder(
-                    "Multiple Goals",
-                    "You have ${incompleteGoals.size} active goals. Don't forget to contribute today!"
-                )
+                notificationHelper.showMultipleGoalsReminder(incompleteGoals.size)
             }
         }
 

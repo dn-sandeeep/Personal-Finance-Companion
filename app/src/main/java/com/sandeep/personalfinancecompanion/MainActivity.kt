@@ -1,10 +1,11 @@
 package com.sandeep.personalfinancecompanion
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -24,32 +25,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.os.LocaleListCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -60,18 +45,28 @@ import com.sandeep.personalfinancecompanion.presentation.navigation.Screen
 import com.sandeep.personalfinancecompanion.presentation.navigation.bottomNavItems
 import com.sandeep.personalfinancecompanion.ui.theme.PersonalFinanceCompanionTheme
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
+import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentDialog
 import com.sandeep.personalfinancecompanion.voiceagent.presentation.VoiceAgentViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     @Inject lateinit var agentLifecycleManager: AgentLifecycleManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Apply saved language preference before UI is set
+        runBlocking {
+            val lang = mainViewModel.languageCode.first()
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
+        }
+
         // Triggering mainViewModel initialization to start observing and scheduling
         mainViewModel
         enableEdgeToEdge()
@@ -99,15 +94,15 @@ fun FinanceApp() {
 
     val topBarTitle =
         when {
-            currentRoute == Screen.Home.route -> "Home"
-            currentRoute == Screen.Transactions.route -> "History"
-            currentRoute == Screen.Goals.route -> "Goals"
-            currentRoute == Screen.Insights.route -> "Insights"
-            currentRoute == Screen.Profile.route -> "Profile"
-            currentRoute == Screen.Debt.route -> "Lending & Debts"
-            currentRoute?.startsWith("add_transaction") == true -> "Add Transaction"
-            currentRoute?.startsWith("edit_transaction") == true -> "Edit Transaction"
-            else -> "Track Spend"
+            currentRoute == Screen.Home.route -> stringResource(R.string.nav_home)
+            currentRoute == Screen.Transactions.route -> stringResource(R.string.nav_history)
+            currentRoute == Screen.Goals.route -> stringResource(R.string.nav_goals)
+            currentRoute == Screen.Insights.route -> stringResource(R.string.nav_insights)
+            currentRoute == Screen.Profile.route -> stringResource(R.string.nav_profile)
+            currentRoute == Screen.Debt.route -> stringResource(R.string.title_lending_debts)
+            currentRoute?.startsWith("add_transaction") == true -> stringResource(R.string.title_add_transaction)
+            currentRoute?.startsWith("edit_transaction") == true -> stringResource(R.string.title_edit_transaction)
+            else -> stringResource(R.string.app_name)
         }
 
     val canNavigateBack = currentRoute?.startsWith("add_transaction") == true ||
@@ -131,7 +126,7 @@ fun FinanceApp() {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = stringResource(R.string.cd_back)
                             )
                         }
                     }
@@ -158,7 +153,7 @@ fun FinanceApp() {
                                 .padding(8.dp)
                     ) {
                         Text(
-                            text = "User",
+                            text = stringResource(R.string.label_user),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -166,7 +161,7 @@ fun FinanceApp() {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "User Profile",
+                            contentDescription = stringResource(R.string.cd_user_profile),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)
                         )
@@ -196,6 +191,7 @@ fun FinanceApp() {
                                 it.route == item.route
                             } == true
 
+                        val label = stringResource(item.labelResId)
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
@@ -212,12 +208,12 @@ fun FinanceApp() {
                                     imageVector =
                                         if (isSelected) item.selectedIcon
                                         else item.unselectedIcon,
-                                    contentDescription = item.label
+                                    contentDescription = label
                                 )
                             },
                             label = {
                                 Text(
-                                    text = item.label,
+                                    text = label,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight =
                                         if (isSelected) FontWeight.Bold
@@ -254,7 +250,7 @@ fun FinanceApp() {
                     ) {
                         Icon(
                             imageVector = Icons.Default.Mic,
-                            contentDescription = "Voice Agent",
+                            contentDescription = stringResource(R.string.cd_voice_agent),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -266,7 +262,7 @@ fun FinanceApp() {
                         },
                         containerColor = PrimaryAccent,
                         contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) { Icon(Icons.Default.Add, contentDescription = "Add Transaction") }
+                    ) { Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_add_transaction)) }
                 }
             }
         }

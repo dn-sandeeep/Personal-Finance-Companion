@@ -102,6 +102,9 @@ import java.util.Locale
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +144,7 @@ fun GoalScreen(
                     onClick = { viewModel.retry() },
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
-                    Text("Retry")
+                    Text(stringResource(R.string.btn_retry))
                 }
             }
         }
@@ -190,7 +193,7 @@ fun GoalContent(
 
     if (showAddSavingsDialog != null) {
         AddSavingsDialog(
-            goalTitle = showAddSavingsDialog?.title ?: "",
+            goalTitle = LocalizationUtils.translateGoalTitle(showAddSavingsDialog?.title ?: ""),
             currency = currency,
             onDismiss = { showAddSavingsDialog = null },
             onConfirm = { amount ->
@@ -215,8 +218,8 @@ fun GoalContent(
     if (showDeleteConfirm != null) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = null },
-            title = { Text("Delete Goal?") },
-            text = { Text("Are you sure you want to delete '${showDeleteConfirm?.title}'? This will also remove all savings history for this goal.") },
+            title = { Text(stringResource(R.string.title_delete_goal)) },
+            text = { Text(stringResource(R.string.msg_delete_goal_confirm, LocalizationUtils.translateGoalTitle(showDeleteConfirm?.title ?: ""))) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -225,10 +228,10 @@ fun GoalContent(
                         selectedGoal = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
-                ) { Text("Delete", color = colorScheme.onError) }
+                ) { Text(stringResource(R.string.btn_delete), color = colorScheme.onError) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = null }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = null }) { Text(stringResource(R.string.btn_cancel)) }
             }
         )
     }
@@ -298,14 +301,14 @@ fun GoalContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Active Goals",
+                text = stringResource(R.string.title_active_goals),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Tracking your path to financial equilibrium.",
+                text = stringResource(R.string.subtitle_goals),
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
@@ -333,8 +336,8 @@ fun GoalContent(
             if (goals.isEmpty()) {
                 EmptyState(
                     emoji = "🎯",
-                    title = "No active goals",
-                    subtitle = "Set your first financial milestone today!"
+                    title = stringResource(R.string.title_no_active_goals),
+                    subtitle = stringResource(R.string.subtitle_no_active_goals)
                 )
             } else {
                 goals.forEach { goal ->
@@ -342,7 +345,7 @@ fun GoalContent(
                         icon = getIconForName(goal.iconName),
                         iconBgColor = Color(parseColor(goal.colorHex)).copy(alpha = 0.2f),
                         iconTintColor = Color(parseColor(goal.colorHex)),
-                        title = goal.title,
+                        title = LocalizationUtils.translateGoalTitle(goal.title),
                         progress = goal.progress,
                         isOverdue = goal.isOverdue,
                         daysRemaining = goal.daysRemaining,
@@ -408,10 +411,10 @@ fun GoalTypePickerDialog(
                 TextButton(onClick = {
                     selectedDate = datePickerState.selectedDateMillis
                     showDatePicker = false
-                }) { Text("Confirm") }
+                }) { Text(stringResource(R.string.btn_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.btn_cancel)) }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -420,7 +423,7 @@ fun GoalTypePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (isCustomMode) "Create Custom Goal" else "Select Goal Type") },
+        title = { Text(if (isCustomMode) stringResource(R.string.title_create_custom_goal) else stringResource(R.string.title_select_goal_type)) },
         text = {
             Column(
                 modifier = Modifier
@@ -452,7 +455,7 @@ fun GoalTypePickerDialog(
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Text(
-                                    text = title,
+                                    text = LocalizationUtils.translateGoalTitle(title),
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
                                 Spacer(modifier = Modifier.weight(1f))
@@ -480,7 +483,7 @@ fun GoalTypePickerDialog(
                         ) {
                             Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Create Your Own Goal")
+                            Text(stringResource(R.string.btn_create_new_goal))
                         }
                     }
                 } else {
@@ -489,9 +492,9 @@ fun GoalTypePickerDialog(
                         OutlinedTextField(
                             value = customTitle,
                             onValueChange = { customTitle = it },
-                            label = { Text("Goal Name") },
+                            label = { Text(stringResource(R.string.label_goal_name)) },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("e.g. Wedding, Europe Trip") }
+                            placeholder = { Text(stringResource(R.string.placeholder_goal_example)) }
                         )
 
                         OutlinedTextField(
@@ -515,7 +518,7 @@ fun GoalTypePickerDialog(
                                     }
                                 }
                             },
-                            label = { Text("Target Amount") },
+                            label = { Text(stringResource(R.string.label_target_amount)) },
                             modifier = Modifier.fillMaxWidth(),
                             prefix = { Text(currency.symbol) },
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
@@ -523,7 +526,7 @@ fun GoalTypePickerDialog(
                             )
                         )
 
-                        Text(text = "Choose Icon", style = MaterialTheme.typography.bodySmall)
+                        Text(text = stringResource(R.string.label_choose_icon), style = MaterialTheme.typography.bodySmall)
                         Row(
                             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -552,7 +555,7 @@ fun GoalTypePickerDialog(
                             }
                         }
 
-                        Text(text = "Choose Color", style = MaterialTheme.typography.bodySmall)
+                        Text(text = stringResource(R.string.label_choose_color), style = MaterialTheme.typography.bodySmall)
                         Row(
                             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -591,13 +594,13 @@ fun GoalTypePickerDialog(
                         Icon(Icons.Default.Add, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (selectedDate == null) "Add Target Date (Optional)"
-                            else "Target: ${
+                            text = if (selectedDate == null) stringResource(R.string.btn_add_target_date)
+                            else stringResource(R.string.msg_target_date, 
                                 java.text.SimpleDateFormat(
                                     "MMM dd, yyyy",
                                     Locale.getDefault()
                                 ).format(java.util.Date(selectedDate!!))
-                            }"
+                            )
                         )
                     }
                 }
@@ -624,7 +627,7 @@ fun GoalTypePickerDialog(
                 },
                 enabled = if (isCustomMode) customTitle.isNotBlank() && customAmount.isNotBlank() else selectedGoalIndex != null
             ) {
-                Text(if (isCustomMode) "Create Goal" else "Confirm Goal")
+                Text(if (isCustomMode) stringResource(R.string.btn_create_goal) else stringResource(R.string.btn_confirm_goal))
             }
         },
         dismissButton = {
@@ -634,7 +637,7 @@ fun GoalTypePickerDialog(
                     else onDismiss()
                 }
             ) {
-                Text(if (isCustomMode) "Back" else "Cancel")
+                Text(if (isCustomMode) stringResource(R.string.cd_back) else stringResource(R.string.btn_cancel))
             }
         },
         containerColor = MaterialTheme.colorScheme.surface
@@ -691,14 +694,14 @@ private fun PrimaryObjectiveCard(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "No Primary Objective Set",
+                    text = stringResource(R.string.msg_no_primary_objective),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Ready for a new target? Set a primary objective to focus your progress.",
+                    text = stringResource(R.string.msg_primary_objective_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -709,7 +712,7 @@ private fun PrimaryObjectiveCard(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
-                    Text("Set Primary Objective", fontSize = 12.sp)
+                    Text(stringResource(R.string.btn_set_primary_objective), fontSize = 12.sp)
                 }
             }
         }
@@ -739,7 +742,7 @@ private fun PrimaryObjectiveCard(
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = "PRIMARY OBJECTIVE",
+                            text = stringResource(R.string.label_primary_objective),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
@@ -755,7 +758,7 @@ private fun PrimaryObjectiveCard(
                             color = colorScheme.primary
                         )
                         Text(
-                            text = "Complete",
+                            text = stringResource(R.string.label_complete),
                             fontSize = 11.sp,
                             color = colorScheme.primary,
                             fontWeight = FontWeight.Medium
@@ -766,7 +769,7 @@ private fun PrimaryObjectiveCard(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = goal.title,
+                    text = LocalizationUtils.translateGoalTitle(goal.title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.onPrimaryContainer,
@@ -794,7 +797,7 @@ private fun PrimaryObjectiveCard(
                 ) {
                     Column {
                         Text(
-                            text = "Saved",
+                            text = stringResource(R.string.label_saved),
                             fontSize = 12.sp,
                             color = colorScheme.onSurfaceVariant
                         )
@@ -816,7 +819,7 @@ private fun PrimaryObjectiveCard(
 
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "Target",
+                            text = stringResource(R.string.label_target),
                             fontSize = 12.sp,
                             color = colorScheme.onSurfaceVariant
                         )
@@ -898,7 +901,7 @@ private fun NoSpendChallengeCard(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "No Spend Challenge",
+                            text = stringResource(R.string.label_no_spend_challenge),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = statusColor
@@ -961,7 +964,7 @@ private fun NoSpendChallengeCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     NoSpendMiniStat(
-                        label = "BEST STREAK",
+                        label = stringResource(R.string.label_best_streak),
                         value = "${streakData.bestStreak}d",
                         color = statusColor
                     )
@@ -973,7 +976,7 @@ private fun NoSpendChallengeCard(
                     )
 
                     NoSpendMiniStat(
-                        label = "POTENTIAL SAVINGS",
+                        label = stringResource(R.string.label_potential_savings),
                         value = CurrencyFormatter.formatAmount(
                             streakData.potentialSavings,
                             currency
@@ -1019,7 +1022,7 @@ fun NoSpendTargetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Challenge Target") },
+        title = { Text(stringResource(R.string.title_set_challenge_target)) },
         text = {
             Column {
                 options.forEach { days ->
@@ -1036,7 +1039,7 @@ fun NoSpendTargetDialog(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "$days Days Challenge",
+                            text = stringResource(R.string.label_days_challenge, days),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -1044,7 +1047,7 @@ fun NoSpendTargetDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
         }
     )
 }
@@ -1063,14 +1066,14 @@ fun NoSpendCalendarBottomSheet(
             .padding(bottom = 40.dp)
     ) {
         Text(
-            text = "No Spend Calendar",
+            text = stringResource(R.string.title_no_spend_calendar),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
         )
 
         Text(
-            text = "Track your discipline over the last 30 days.",
+            text = stringResource(R.string.subtitle_no_spend_calendar),
             style = MaterialTheme.typography.bodyMedium,
             color = colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 24.dp)
@@ -1154,7 +1157,7 @@ fun NoSpendCalendarBottomSheet(
         ) {
             Icon(Icons.Default.TrendingUp, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Adjust Challenge Target")
+            Text(stringResource(R.string.btn_adjust_target))
         }
     }
 }
@@ -1220,9 +1223,9 @@ private fun SmallGoalCard(
                         if (priority > 0) {
                             Spacer(modifier = Modifier.width(8.dp))
                             val priorityLabel = when(priority) {
-                                1 -> "PRIMARY"
-                                2 -> "SECONDARY"
-                                3 -> "TERTIARY"
+                                1 -> stringResource(R.string.priority_primary).uppercase()
+                                2 -> stringResource(R.string.priority_secondary).uppercase()
+                                3 -> stringResource(R.string.priority_tertiary).uppercase()
                                 else -> ""
                             }
                             val priorityColor = when(priority) {
@@ -1257,7 +1260,7 @@ private fun SmallGoalCard(
                                 .padding(horizontal = 4.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "OVERDUE",
+                                text = stringResource(R.string.label_overdue),
                                 color = colorScheme.error,
                                 fontSize = 8.sp,
                                 fontWeight = FontWeight.Bold
@@ -1272,7 +1275,7 @@ private fun SmallGoalCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
+                        contentDescription = stringResource(R.string.btn_edit_monthly_budget), // Reusing similar label
                         tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.size(16.dp)
                     )
@@ -1288,7 +1291,7 @@ private fun SmallGoalCard(
             ) {
                 Column {
                     Text(
-                        text = if (isOverdue) "Past Deadline" else if (daysRemaining != null) "$daysRemaining days left" else "${(progress * 100).toInt()}%",
+                        text = if (isOverdue) stringResource(R.string.label_past_deadline) else if (daysRemaining != null) stringResource(R.string.label_days_left, daysRemaining) else "${(progress * 100).toInt()}%",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isOverdue) colorScheme.error else colorScheme.onSurface
@@ -1341,14 +1344,14 @@ private fun CreateNewGoalButton(onClick: () -> Unit) {
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
+                    contentDescription = null,
                     tint = colorScheme.surface,
                     modifier = Modifier.size(16.dp)
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Create New Goal",
+                text = stringResource(R.string.btn_create_new_goal),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
@@ -1392,7 +1395,7 @@ private fun SavingVelocityCard(velocity: SavingVelocity) {
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "SAVING VELOCITY",
+                        text = stringResource(R.string.label_saving_velocity),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.primary,
@@ -1418,7 +1421,7 @@ private fun SavingVelocityCard(velocity: SavingVelocity) {
             when (velocity.status) {
                 VelocityStatus.ANALYZING -> {
                     Text(
-                        text = "Analyzing your saving cycle...",
+                        text = stringResource(R.string.msg_analyzing_cycle),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface,
@@ -1426,7 +1429,7 @@ private fun SavingVelocityCard(velocity: SavingVelocity) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Keep saving! We'll have your velocity stats ready in about 3 days.",
+                        text = stringResource(R.string.msg_analyzing_desc),
                         fontSize = 13.sp,
                         color = colorScheme.onSurfaceVariant,
                         lineHeight = 20.sp
@@ -1434,16 +1437,16 @@ private fun SavingVelocityCard(velocity: SavingVelocity) {
                 }
                 else -> {
                     val statusText = when (velocity.status) {
-                        VelocityStatus.AHEAD -> "Ahead of schedule"
-                        VelocityStatus.BEHIND -> "Behind schedule"
-                        else -> "On track"
+                        VelocityStatus.AHEAD -> stringResource(R.string.status_ahead)
+                        VelocityStatus.BEHIND -> stringResource(R.string.status_behind)
+                        else -> stringResource(R.string.status_on_track)
                     }
                     val diffText = if (velocity.diffWeeks != 0) {
-                        " ${Math.abs(velocity.diffWeeks)} weeks ${if (velocity.diffWeeks > 0) "early" else "late"}"
+                        " ${Math.abs(velocity.diffWeeks)} ${stringResource(R.string.nav_history).lowercase()} ${if (velocity.diffWeeks > 0) stringResource(R.string.label_early) else stringResource(R.string.label_late)}"
                     } else ""
 
                     Text(
-                        text = "$statusText to reach your\n${velocity.primaryGoalTitle} goal$diffText.",
+                        text = stringResource(R.string.msg_velocity_reach, statusText, LocalizationUtils.translateGoalTitle(velocity.primaryGoalTitle), diffText),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface,
@@ -1454,7 +1457,7 @@ private fun SavingVelocityCard(velocity: SavingVelocity) {
                     velocity.acceleratorCategory?.let { category ->
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Your reduced spending in '${category.displayName}'\nover the last 14 days has\naccelerated your progress.",
+                            text = stringResource(R.string.msg_accelerator, LocalizationUtils.getCategoryName(category)),
                             fontSize = 13.sp,
                             color = colorScheme.onSurfaceVariant,
                             lineHeight = 20.sp
@@ -1497,25 +1500,25 @@ fun SavingVelocityInfoDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-        title = { Text("How Velocity Works") },
+        title = { Text(stringResource(R.string.title_how_velocity_works)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Column {
-                    Text("Goal Selection", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text("We analyze your highest priority goal, or the one with the closest deadline.", fontSize = 13.sp)
+                    Text(stringResource(R.string.label_goal_selection), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(stringResource(R.string.desc_goal_selection), fontSize = 13.sp)
                 }
                 Column {
-                    Text("Bonus Filter", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text("One-off large saves (>300% of average) are excluded from pace predictions to keep your estimates realistic.", fontSize = 13.sp)
+                    Text(stringResource(R.string.label_bonus_filter), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(stringResource(R.string.desc_bonus_filter), fontSize = 13.sp)
                 }
                 Column {
-                    Text("Accelerators", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text("We look for categories where you're spending less than usual and showing you how that helps your savings.", fontSize = 13.sp)
+                    Text(stringResource(R.string.label_accelerators), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(stringResource(R.string.desc_accelerators), fontSize = 13.sp)
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Got it") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_got_it)) }
         }
     )
 }
@@ -1531,13 +1534,13 @@ fun AddSavingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Savings to $goalTitle") },
+        title = { Text(stringResource(R.string.title_add_savings, goalTitle)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = amountText,
                     onValueChange = { amountText = it },
-                    label = { Text("Amount (${currency.symbol})") },
+                    label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
@@ -1552,12 +1555,12 @@ fun AddSavingsDialog(
                     amountText.toDoubleOrNull()?.let { onConfirm(it) }
                 }
             ) {
-                Text("Confirm")
+                Text(stringResource(R.string.btn_confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.btn_cancel))
             }
         }
     )
@@ -1592,7 +1595,7 @@ fun GoalDetailBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = goal.title,
+                text = LocalizationUtils.translateGoalTitle(goal.title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
@@ -1639,12 +1642,12 @@ fun GoalDetailBottomSheet(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Total Saved",
+                        text = stringResource(R.string.label_total_saved),
                         fontSize = 12.sp,
                         color = colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Target",
+                        text = stringResource(R.string.label_target),
                         fontSize = 12.sp,
                         color = colorScheme.onSurfaceVariant
                     )
@@ -1708,7 +1711,7 @@ fun GoalDetailBottomSheet(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Target Deadline",
+                            text = stringResource(R.string.label_target_deadline),
                             fontSize = 11.sp,
                             color = colorScheme.onSurfaceVariant
                         )
@@ -1716,7 +1719,7 @@ fun GoalDetailBottomSheet(
                             text = if (goal.targetDate != null)
                                 java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                                     .format(java.util.Date(goal.targetDate))
-                            else "Not set",
+                            else stringResource(R.string.label_not_set),
                             fontWeight = FontWeight.Bold,
                             color = if (goal.isOverdue) colorScheme.error else colorScheme.onSurface
                         )
@@ -1728,7 +1731,7 @@ fun GoalDetailBottomSheet(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Assign Priority",
+            text = stringResource(R.string.label_assign_priority),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = colorScheme.onSurface
@@ -1741,10 +1744,10 @@ fun GoalDetailBottomSheet(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val priorities = listOf(
-                Triple(1, "Primary", colorScheme.primary),
-                Triple(2, "Secondary", colorScheme.secondary),
-                Triple(3, "Tertiary", colorScheme.tertiary),
-                Triple(0, "None", colorScheme.outline)
+                Triple(1, stringResource(R.string.priority_primary), colorScheme.primary),
+                Triple(2, stringResource(R.string.priority_secondary), colorScheme.secondary),
+                Triple(3, stringResource(R.string.priority_tertiary), colorScheme.tertiary),
+                Triple(0, stringResource(R.string.priority_none), colorScheme.outline)
             )
 
             priorities.forEach { (rank, label, color) ->
@@ -1774,7 +1777,7 @@ fun GoalDetailBottomSheet(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Savings History",
+            text = stringResource(R.string.label_savings_history),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = colorScheme.onSurface
@@ -1790,7 +1793,7 @@ fun GoalDetailBottomSheet(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No savings recorded yet.",
+                    text = stringResource(R.string.msg_no_savings),
                     style = MaterialTheme.typography.bodyMedium,
                     color = colorScheme.onSurfaceVariant
                 )
@@ -1809,7 +1812,7 @@ fun GoalDetailBottomSheet(
                     ) {
                         Column {
                             Text(
-                                text = "Deposit",
+                                text = stringResource(R.string.label_deposit),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = colorScheme.onSurface
@@ -1874,10 +1877,10 @@ fun EditGoalDialog(
                 TextButton(onClick = {
                     selectedDate = datePickerState.selectedDateMillis
                     showDatePicker = false
-                }) { Text("Confirm") }
+                }) { Text(stringResource(R.string.btn_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.btn_cancel)) }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -1886,7 +1889,7 @@ fun EditGoalDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Goal Details") },
+        title = { Text(stringResource(R.string.title_edit_goal_details)) },
         text = {
             Column(
                 modifier = Modifier
@@ -1897,7 +1900,7 @@ fun EditGoalDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Goal Name") },
+                    label = { Text(stringResource(R.string.label_goal_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -1922,7 +1925,7 @@ fun EditGoalDialog(
                             }
                         }
                     },
-                    label = { Text("Target Amount") },
+                    label = { Text(stringResource(R.string.label_target_amount)) },
                     modifier = Modifier.fillMaxWidth(),
                     prefix = { Text(currency.symbol) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
@@ -1930,42 +1933,7 @@ fun EditGoalDialog(
                     )
                 )
 
-                Text(text = "Choose Icon", style = MaterialTheme.typography.bodySmall)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    icons.chunked(4).forEach { chunk ->
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            chunk.forEach { icon ->
-                                val isSelected = iconName == icon
-                                IconButton(
-                                    onClick = { iconName = icon },
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .background(
-                                            if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .border(
-                                            if (isSelected) 2.dp else 0.dp,
-                                            if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                ) {
-                                    Icon(
-                                        imageVector = getIconForName(icon),
-                                        contentDescription = null,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Re-doing the layout for icons as the nested column logic above is a bit weird for a Row.
-                // Let's use a FlowRow or similar, but for simplicity just a scrollable Row.
+                Text(text = stringResource(R.string.label_choose_icon), style = MaterialTheme.typography.bodySmall)
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1994,7 +1962,7 @@ fun EditGoalDialog(
                     }
                 }
 
-                Text(text = "Choose Color", style = MaterialTheme.typography.bodySmall)
+                Text(text = stringResource(R.string.label_choose_color), style = MaterialTheme.typography.bodySmall)
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -2016,6 +1984,8 @@ fun EditGoalDialog(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 TextButton(
                     onClick = { showDatePicker = true },
                     modifier = Modifier.fillMaxWidth()
@@ -2027,13 +1997,13 @@ fun EditGoalDialog(
                         Icon(Icons.Default.Add, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (selectedDate == null) "Set Target Date (Optional)"
-                            else "Target: ${
+                            text = if (selectedDate == null) stringResource(R.string.btn_add_target_date)
+                            else stringResource(R.string.msg_target_date, 
                                 java.text.SimpleDateFormat(
                                     "MMM dd, yyyy",
                                     Locale.getDefault()
                                 ).format(java.util.Date(selectedDate!!))
-                            }"
+                            )
                         )
                     }
                 }
@@ -2042,17 +2012,22 @@ fun EditGoalDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val amount = targetAmount.replace(",", "").toDoubleOrNull() ?: goal.targetAmount
-                    onConfirm(title, amount, iconName, colorHex, selectedDate)
+                    onConfirm(
+                        title,
+                        targetAmount.replace(",", "").toDoubleOrNull() ?: 0.0,
+                        iconName,
+                        colorHex,
+                        selectedDate
+                    )
                 },
-                enabled = title.isNotBlank()
+                enabled = title.isNotBlank() && targetAmount.isNotBlank()
             ) {
-                Text("Save Changes")
+                Text(stringResource(R.string.btn_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.btn_cancel))
             }
         },
         containerColor = MaterialTheme.colorScheme.surface

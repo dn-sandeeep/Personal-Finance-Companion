@@ -62,6 +62,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TransactionListScreen(
@@ -87,7 +90,7 @@ fun TransactionListScreen(
         // ──── Headers ────
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text(
-                text = "CASH FLOW ARCHIVE",
+                text = stringResource(R.string.label_cash_flow_archive),
                 style = MaterialTheme.typography.labelSmall,
                 color = colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -106,10 +109,10 @@ fun TransactionListScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 placeholder = { 
-                    Text("Search entries...", color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) 
+                    Text(stringResource(R.string.placeholder_search), color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) 
                 },
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search", tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    Icon(Icons.Default.Search, contentDescription = stringResource(R.string.placeholder_search), tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                 },
                 shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -130,17 +133,17 @@ fun TransactionListScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Chip(
-                    text = "All Activity",
+                    text = stringResource(R.string.label_all_activity),
                     isSelected = selectedFilter == null,
                     onClick = { viewModel.onFilterChanged(null) }
                 )
                 Chip(
-                    text = "Income",
+                    text = stringResource(R.string.label_income),
                     isSelected = selectedFilter == TransactionType.INCOME,
                     onClick = { viewModel.onFilterChanged(TransactionType.INCOME) }
                 )
                 Chip(
-                    text = "Expenses",
+                    text = stringResource(R.string.label_expenses),
                     isSelected = selectedFilter == TransactionType.EXPENSE,
                     onClick = { viewModel.onFilterChanged(TransactionType.EXPENSE) }
                 )
@@ -162,14 +165,14 @@ fun TransactionListScreen(
                     Text(text = "⚠️", style = MaterialTheme.typography.displayLarge)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = listState.error ?: "Failed to load transactions",
+                        text = listState.error ?: stringResource(R.string.error_load_transactions),
                         style = MaterialTheme.typography.bodyLarge,
                         color = colorScheme.error,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(onClick = { /* ViewModel logic to retry if needed */ }) {
-                        Text("Retry")
+                        Text(stringResource(R.string.btn_retry))
                     }
                 }
             }
@@ -181,8 +184,8 @@ fun TransactionListScreen(
             listState.transactions.isEmpty() -> {
                 EmptyState(
                     emoji = "🔍",
-                    title = "No transactions found",
-                    subtitle = "Adjust filters to see history"
+                    title = stringResource(R.string.msg_no_transactions_found),
+                    subtitle = stringResource(R.string.msg_adjust_filters)
                 )
             }
             else -> {
@@ -190,6 +193,9 @@ fun TransactionListScreen(
                 val groupedByDate = listState.transactions.groupBy {
                     formatDateHeader(it.date)
                 }
+
+                val todayLabel = stringResource(R.string.label_today)
+                val yesterdayLabel = stringResource(R.string.label_yesterday)
 
                 LazyColumn(
                     modifier = Modifier
@@ -210,15 +216,19 @@ fun TransactionListScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                val translatedHeader = dateHeader
+                                    .replace("TODAY", todayLabel)
+                                    .replace("YESTERDAY", yesterdayLabel)
+
                                 Text(
-                                    text = dateHeader.uppercase(),
+                                    text = translatedHeader.uppercase(),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = colorScheme.onSurfaceVariant,
                                     letterSpacing = 1.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "${CurrencyFormatter.formatAmount(kotlin.math.abs(netAmount), listState.selectedCurrency)} Net",
+                                    text = "${CurrencyFormatter.formatAmount(kotlin.math.abs(netAmount), listState.selectedCurrency)} ${stringResource(R.string.label_net)}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = if (netAmount >= 0) IncomeGreen else ExpenseRed
                                 )
@@ -226,6 +236,8 @@ fun TransactionListScreen(
                         }
 
                         items(items = transactions, key = { it.id }) { transaction ->
+                            val msgDeleted = stringResource(R.string.msg_transaction_deleted)
+                            val labelUndo = stringResource(R.string.label_undo)
                             SwipeableTransactionItem(
                                 transaction = transaction,
                                 currency = listState.selectedCurrency,
@@ -233,8 +245,8 @@ fun TransactionListScreen(
                                     viewModel.deleteTransaction(transaction.id)
                                     scope.launch {
                                         val result = snackbarHostState.showSnackbar(
-                                            message = "Transaction deleted",
-                                            actionLabel = "Undo",
+                                            message = msgDeleted,
+                                            actionLabel = labelUndo,
                                             duration = SnackbarDuration.Short
                                         )
                                         if (result == SnackbarResult.ActionPerformed) {

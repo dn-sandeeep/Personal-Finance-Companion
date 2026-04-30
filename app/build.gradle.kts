@@ -33,6 +33,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        resourceConfigurations += setOf("en", "hi")
     }
 
     buildTypes {
@@ -72,6 +73,7 @@ ksp {
 dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)

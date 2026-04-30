@@ -12,41 +12,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sandeep.personalfinancecompanion.R
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,7 +95,7 @@ fun AddEditTransactionScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (transactionId == null) "NEW ENTRY" else "EDIT ENTRY",
+                text = if (transactionId == null) stringResource(R.string.label_new_entry) else stringResource(R.string.label_edit_entry),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -127,7 +108,7 @@ fun AddEditTransactionScreen(
 
         // Type Selector (Segmented Button)
         Text(
-            text = "Transaction Type",
+            text = stringResource(R.string.label_tx_type),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -144,7 +125,7 @@ fun AddEditTransactionScreen(
                 },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
             ) {
-                Text("Income", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.label_income), style = MaterialTheme.typography.labelSmall)
             }
             SegmentedButton(
                 selected = type == TransactionType.EXPENSE,
@@ -154,7 +135,7 @@ fun AddEditTransactionScreen(
                 },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
             ) {
-                Text("Expense", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.label_expense), style = MaterialTheme.typography.labelSmall)
             }
         }
 
@@ -162,7 +143,7 @@ fun AddEditTransactionScreen(
 
         // Amount
         Text(
-            text = "Amount (${currency.symbol})",
+            text = stringResource(R.string.label_amount, currency.symbol),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -175,7 +156,7 @@ fun AddEditTransactionScreen(
                 amountError = null
             },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter amount") },
+            placeholder = { Text(stringResource(R.string.placeholder_enter_amount)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             shape = RoundedCornerShape(14.dp),
             singleLine = true,
@@ -187,7 +168,7 @@ fun AddEditTransactionScreen(
 
         // Category Dropdown
         Text(
-            text = "Category",
+            text = stringResource(R.string.label_category),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -198,7 +179,7 @@ fun AddEditTransactionScreen(
             onExpandedChange = { expanded = !expanded }
         ) {
             OutlinedTextField(
-                value = "${selectedCategory.emoji} ${selectedCategory.displayName}",
+                value = "${selectedCategory.emoji} ${LocalizationUtils.getCategoryName(selectedCategory)}",
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -215,7 +196,7 @@ fun AddEditTransactionScreen(
             ) {
                 categories.forEach { category ->
                     DropdownMenuItem(
-                        text = { Text("${category.emoji} ${category.displayName}") },
+                        text = { Text("${category.emoji} ${LocalizationUtils.getCategoryName(category)}") },
                         onClick = {
                             selectedCategory = category
                             expanded = false
@@ -229,7 +210,7 @@ fun AddEditTransactionScreen(
 
         // Notes
         Text(
-            text = "Notes (optional)",
+            text = stringResource(R.string.label_notes_optional),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -239,7 +220,7 @@ fun AddEditTransactionScreen(
             value = notes,
             onValueChange = { notes = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Add a note...") },
+            placeholder = { Text(stringResource(R.string.placeholder_add_note)) },
             shape = RoundedCornerShape(14.dp),
             minLines = 2,
             maxLines = 4
@@ -249,7 +230,7 @@ fun AddEditTransactionScreen(
         if (type == TransactionType.BORROWED || type == TransactionType.LENT) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = if (type == TransactionType.BORROWED) "Borrowed from (Person)" else "Lent to (Person)",
+                text = if (type == TransactionType.BORROWED) stringResource(R.string.label_borrowed_from) else stringResource(R.string.label_lent_to),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -258,7 +239,7 @@ fun AddEditTransactionScreen(
                 value = peerName,
                 onValueChange = { peerName = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("e.g. Rahul, Papa, etc.") },
+                placeholder = { Text(stringResource(R.string.hint_debtor_name)) },
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
             )
@@ -267,12 +248,13 @@ fun AddEditTransactionScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         // Save Button
+        val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
         Button(
             onClick = {
                 val parsedAmount = amount.toDoubleOrNull()
                 when {
                     parsedAmount == null || parsedAmount <= 0 -> {
-                        amountError = "Please enter a valid amount greater than 0"
+                        amountError = errorInvalidAmount
                     }
                     else -> {
                         val transaction = Transaction(
@@ -298,7 +280,7 @@ fun AddEditTransactionScreen(
             )
         ) {
             Text(
-                text = if (transactionId == null) "Save Transaction" else "Update Transaction",
+                text = if (transactionId == null) stringResource(R.string.btn_save_tx) else stringResource(R.string.btn_update_tx),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

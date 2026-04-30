@@ -1,3 +1,278 @@
 <resources>
     <string name="app_name">Track Spend</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_goals">Goals</string>
+    <string name="nav_insights">Insights</string>
+    <string name="nav_profile">Profile</string>
+    
+    <!-- Common Actions -->
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_retry">Retry</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_got_it">Got it</string>
+    <!-- Screen Titles -->
+    <string name="title_lending_debts">Lending &amp; Debts</string>
+    <string name="title_add_transaction">Add Transaction</string>
+    <string name="title_edit_transaction">Edit Transaction</string>
+    <!-- Content Descriptions -->
+    <string name="cd_back">Back</string>
+    <string name="cd_user_profile">User Profile</string>
+    <string name="cd_voice_agent">Voice Agent</string>
+    <string name="cd_add_transaction">Add Transaction</string>
+    
+    <!-- Misc Labels -->
+    <string name="label_user">User</string>
+    <!-- Home Screen -->
+    <string name="btn_set_monthly_budget">Set Monthly Budget</string>
+    <string name="btn_edit_monthly_budget">Edit Monthly Budget</string>
+    <string name="label_amount">Amount (%s)</string>
+    <string name="label_amount_simple">Amount</string>
+    <string name="label_total_balance">TOTAL BALANCE</string>
+    <string name="label_monthly_income">MONTHLY\nINCOME</string>
+    <string name="label_monthly_expenses">MONTHLY\nEXPENSES</string>
+    <string name="label_weekly_trend">Weekly Trend</string>
+    <string name="label_savings_goal">Savings Goal</string>
+    <string name="label_budget_tracker">Monthly Budget Tracker</string>
+    <string name="label_category_breakdown">Category Breakdown</string>
+    <string name="label_view_all">VIEW ALL</string>
+    <string name="msg_no_budget_title">No budget set yet 💸</string>
+    <string name="msg_no_budget_subtitle">Set a monthly limit to track your spending discipline.</string>
+    <string name="msg_no_tx_title">No transactions yet</string>
+    <string name="msg_no_tx_subtitle">Tap + to add your first one!</string>
+    <string name="msg_edit_budget_desc">Set a new monthly spending limit to track against.</string>
+    <string name="msg_transactions_for">Transactions for %s</string>
+    <string name="msg_no_transactions_day">You didn\'t record any transactions on this day.</string>
+    <string name="label_num_transactions">%d transactions</string>
+    <string name="cd_edit_budget">Edit Budget</string>
+    <string name="cd_view_details">View Details</string>
+    
+    <!-- Transaction Screens -->
+    <string name="label_income">Income</string>
+    <string name="label_expense">Expense</string>
+    <string name="label_all_activity">All Activity</string>
+    <string name="label_expenses">Expenses</string>
+    <string name="label_cash_flow_archive">CASH FLOW ARCHIVE</string>
+    <string name="label_net">Net</string>
+    <string name="msg_no_transactions_found">No transactions found</string>
+    <string name="msg_adjust_filters">Adjust filters to see history</string>
+    <string name="msg_transaction_deleted">Transaction deleted</string>
+    <string name="label_undo">Undo</string>
+    <string name="label_today">TODAY</string>
+    <string name="label_yesterday">YESTERDAY</string>
+    <string name="error_load_transactions">Failed to load transactions</string>
+    <string name="label_new_entry">NEW ENTRY</string>
+    <string name="label_edit_entry">EDIT ENTRY</string>
+    <string name="label_tx_type">Transaction Type</string>
+    <string name="label_category">Category</string>
+    <string name="label_notes_optional">Notes (optional)</string>
+    <string name="label_borrowed_from">Borrowed from (Person)</string>
+    <string name="label_lent_to">Lent to (Person)</string>
+    <string name="btn_save_tx">Save Transaction</string>
+    <string name="btn_update_tx">Update Transaction</string>
+    <string name="error_invalid_amount">Please enter a valid amount greater than 0</string>
+    <string name="placeholder_enter_amount">Enter amount</string>
+    <string name="placeholder_add_note">Add a note...</string>
+    <string name="placeholder_search">Search entries...</string>
+    <string name="hint_debtor_name">e.g. Rahul, Papa, etc.</string>
+    
+    <!-- Magic Entry (AI) -->
+    <string name="title_magic_entry">Magic Entry Agent</string>
+    <string name="magic_entry_placeholder">What did you spend today?</string>
+    <string name="magic_entry_predicted_details">Predicted Details:</string>
+    <string name="magic_entry_analyze">Analyze with AI</string>
+    <string name="cd_voice_input">Voice Input</string>
+    <!-- Goals Screen -->
+    <string name="title_active_goals">Active Goals</string>
+    <string name="subtitle_goals">Tracking your path to financial equilibrium.</string>
+    <string name="msg_no_primary_objective">No Primary Objective Set</string>
+    <string name="msg_primary_objective_desc">Ready for a new target? Set a primary objective to focus your progress.</string>
+    <string name="btn_set_primary_objective">Set Primary Objective</string>
+    <string name="label_primary_objective">PRIMARY OBJECTIVE</string>
+    <string name="label_complete">Complete</string>
+    <string name="label_saved">Saved</string>
+    <string name="label_target">Target</string>
+    <string name="label_no_spend_challenge">No Spend Challenge</string>
+    <string name="label_best_streak">BEST STREAK</string>
+    <string name="label_potential_savings">POTENTIAL SAVINGS</string>
+    <string name="title_set_challenge_target">Set Challenge Target</string>
+    <string name="label_days_challenge">%d Days Challenge</string>
+    <string name="title_no_spend_calendar">No Spend Calendar</string>
+    <string name="subtitle_no_spend_calendar">Track your discipline over the last 30 days.</string>
+    <string name="btn_adjust_target">Adjust Challenge Target</string>
+    <string name="label_overdue">OVERDUE</string>
+    <string name="label_past_deadline">Past Deadline</string>
+    <string name="label_days_left">%d days left</string>
+    <string name="btn_create_new_goal">Create New Goal</string>
+    <string name="label_saving_velocity">SAVING VELOCITY</string>
+    <string name="msg_analyzing_cycle">Analyzing your saving cycle...</string>
+    <string name="msg_analyzing_desc">Keep saving! We\'ll have your velocity stats ready in about 3 days.</string>
+    <string name="status_ahead">Ahead of schedule</string>
+    <string name="status_behind">Behind schedule</string>
+    <string name="status_on_track">On track</string>
+    <string name="label_early">early</string>
+    <string name="label_late">late</string>
+    <string name="msg_velocity_reach">%1$s to reach your\n%2$s goal%3$s.</string>
+    <string name="msg_accelerator">Your reduced spending in \'%s\'\nover the last 14 days has\naccelerated your progress.</string>
+    <string name="title_how_velocity_works">How Velocity Works</string>
+    <string name="label_goal_selection">Goal Selection</string>
+    <string name="desc_goal_selection">We analyze your highest priority goal, or the one with the closest deadline.</string>
+    <string name="label_bonus_filter">Bonus Filter</string>
+    <string name="desc_bonus_filter">One-off large saves (&gt;300%% of average) are excluded from pace predictions to keep your estimates realistic.</string>
+    <string name="label_accelerators">Accelerators</string>
+    <string name="desc_accelerators">We look for categories where you\'re spending less than usual and showing you how that helps your savings.</string>
+    <string name="title_add_savings">Add Savings to %s</string>
+    <string name="label_total_saved">Total Saved</string>
+    <string name="label_target_deadline">Target Deadline</string>
+    <string name="label_not_set">Not set</string>
+    <string name="label_assign_priority">Assign Priority</string>
+    <string name="priority_primary">Primary</string>
+    <string name="priority_secondary">Secondary</string>
+    <string name="priority_tertiary">Tertiary</string>
+    <string name="priority_none">None</string>
+    <string name="label_savings_history">Savings History</string>
+    <string name="msg_no_savings">No savings recorded yet.</string>
+    <string name="label_deposit">Deposit</string>
+    <string name="title_edit_goal_details">Edit Goal Details</string>
+    <string name="label_goal_name">Goal Name</string>
+    <string name="label_target_amount">Target Amount</string>
+    <string name="label_choose_icon">Choose Icon</string>
+    <string name="label_choose_color">Choose Color</string>
+    <string name="title_create_custom_goal">Create Custom Goal</string>
+    <string name="title_select_goal_type">Select Goal Type</string>
+    <string name="placeholder_goal_example">e.g. Wedding, Europe Trip</string>
+    <string name="btn_create_goal">Create Goal</string>
+    <string name="btn_confirm_goal">Confirm Goal</string>
+    <string name="btn_add_target_date">Add Target Date (Optional)</string>
+    <string name="msg_target_date">Target: %s</string>
+    <string name="title_delete_goal">Delete Goal?</string>
+    <string name="msg_delete_goal_confirm">Are you sure you want to delete \'%s\'? This will also remove all savings history for this goal.</string>
+    <string name="title_no_active_goals">No active goals</string>
+    <string name="subtitle_no_active_goals">Set your first financial milestone today!</string>
+
+    <!-- Debt Management Screen -->
+    <string name="label_owed_to_you">Owed to You</string>
+    <string name="label_you_owe">You Owe</string>
+    <string name="label_people_ledgers">People &amp; Ledgers</string>
+    <string name="label_net_owed_to_you">Net Owed to You</string>
+    <string name="label_net_you_owe">Net You Owe</string>
+    <string name="label_payment">Payment</string>
+    <string name="btn_settle_all">Settle All</string>
+    <string name="tx_loan_given">Loan Given</string>
+    <string name="tx_debt_taken">Debt Taken</string>
+    <string name="tx_payment_received">Payment Received</string>
+    <string name="tx_payment_made">Payment Made</string>
+    <string name="title_record_repayment">Record Repayment for %s</string>
+    <string name="label_note">Note</string>
+    <string name="msg_no_debts_title">No outstanding debts</string>
+    <string name="msg_no_debts_subtitle">Your slate is clean! 🤝</string>
+    <!-- Profile Screen -->
+    <string name="msg_export_success">Data exported successfully!</string>
+    <string name="msg_export_failed">Failed to save file: %s</string>
+    <string name="label_notifications_alerts">Notifications &amp; Alerts</string>
+    <string name="label_daily_reminder">Daily Reminder</string>
+    <string name="desc_daily_reminder">Get notified at 8:00 PM to log transactions</string>
+    <string name="label_budget_alerts">Budget Alerts</string>
+    <string name="desc_budget_alerts">Notify when reach 80%% or 100%% of budget</string>
+    <string name="label_goal_progress">Goal Progress</string>
+    <string name="desc_goal_progress">Periodic updates on your savings goals</string>
+    <string name="label_account_settings">Account Settings</string>
+    <string name="label_language">Language</string>
+    <string name="title_select_language">Select Language</string>
+    <string name="label_currency">Currency</string>
+    <string name="label_export_data">Export Data</string>
+    <string name="status_exporting">Exporting...</string>
+    <string name="label_csv_pdf">CSV / PDF</string>
+    <string name="label_version">Track Spend v1.0</string>
+    <string name="label_free_account">Free Account</string>
+    <string name="label_under_development">UNDER DEVELOPMENT</string>
+    <string name="title_select_currency">Select Currency</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_selected">Selected</string>
+
+    <!-- Insights Screen -->
+    <string name="error_analytics_load">Analytics failed to load</string>
+    <string name="title_no_insights">No insights yet</string>
+    <string name="subtitle_no_insights">Add some transactions to see your spending patterns!</string>
+    <string name="label_top_category">Top Category</string>
+    <string name="label_transactions">Transactions</string>
+    <string name="label_total_income_insights">Total Income</string>
+    <string name="label_total_expense_insights">Total Expense</string>
+    <string name="label_spending_by_category">Spending by Category</string>
+    <!-- Voice Agent -->
+    <string name="title_voice_agent">Voice Agent</string>
+    <string name="title_discard_entry">Discard Entry?</string>
+    <string name="msg_discard_entry_confirm">You have recorded text or parsed results. Are you sure you want to discard them?</string>
+    <string name="btn_discard">Discard</string>
+    <string name="btn_keep">Keep</string>
+    <string name="label_tap_to_stop">TAP TO STOP</string>
+    <string name="status_listening">Listening...</string>
+    <string name="status_analyzing_speech">Analyzing your speech...</string>
+    <string name="msg_tap_mic_to_speak">Tap the mic to speak</string>
+    <string name="label_your_entry">Your Entry</string>
+    <string name="msg_tx_detected">%d transactions detected</string>
+    <string name="btn_edit_text">Edit Text</string>
+    <string name="btn_confirm_all">Confirm All</string>
+    <string name="btn_process">Process</string>
+    <string name="label_type">Type</string>
+    <string name="label_person">Person</string>
+    <string name="cd_start_listening">Start Listening</string>
+    <string name="cd_stop_listening">Stop Listening</string>
+    <!-- Transaction Status -->
+    <string name="status_earned">EARNED</string>
+    <string name="status_spent">SPENT</string>
+    <string name="status_borrowed">BORROWED</string>
+    <string name="status_lent">LENT</string>
+    <string name="status_repaid">REPAID</string>
+    <string name="status_recovered">RECOVERED</string>
+    <!-- Days of the week -->
+    <string name="day_monday">Monday</string>
+    <string name="day_tuesday">Tuesday</string>
+    <string name="day_wednesday">Wednesday</string>
+    <string name="day_thursday">Thursday</string>
+    <string name="day_friday">Friday</string>
+    <string name="day_saturday">Saturday</string>
+    <string name="day_sunday">Sunday</string>
+    <!-- Categories -->
+    <string name="cat_food">Food</string>
+    <string name="cat_transport">Transport</string>
+    <string name="cat_shopping">Shopping</string>
+    <string name="cat_entertainment">Entertainment</string>
+    <string name="cat_bills">Bills</string>
+    <string name="cat_health">Health</string>
+    <string name="cat_education">Education</string>
+    <string name="cat_salary">Salary</string>
+    <string name="cat_freelance">Freelance</string>
+    <string name="cat_investment">Investment</string>
+    <string name="cat_gift">Gift</string>
+    <string name="cat_udhaar">Lent &amp; Borrowed</string>
+    <string name="cat_other">Other</string>
+    <!-- Predefined Goals -->
+    <string name="goal_new_car">New Car</string>
+    <string name="goal_dream_home">Dream Home</string>
+    <string name="goal_new_phone">New Phone</string>
+    <string name="goal_education">Education</string>
+    <string name="goal_retirement">Retirement</string>
+    <!-- Notifications -->
+    <string name="nt_reminders_title">Reminders</string>
+    <string name="nt_reminders_desc">Daily reminders to log your expenses</string>
+    <string name="nt_budget_alerts_title">Budget Alerts</string>
+    <string name="nt_budget_alerts_desc">Alerts when you approach or exceed your budget</string>
+    <string name="nt_goal_reminders_title">Goal Reminders</string>
+    <string name="nt_goal_reminders_desc">Updates on your savings goals</string>
+    <string name="nt_daily_reminder_title">Finance Reminder</string>
+    <string name="nt_daily_reminder_text">Don\'t forget to log your expenses for today!</string>
+    <string name="nt_goal_update_title">Goal Update: %s</string>
+    <string name="nt_budget_exceeded_title">Budget Exceeded</string>
+    <string name="nt_budget_exceeded_text">You have spent %1$s, which is over your monthly budget of %2$s.</string>
+    <string name="nt_budget_warning_title">Budget Alert</string>
+    <string name="nt_budget_warning_text">You have reached %1$s of your budget (%2$s spent of %3$s).</string>
+    <string name="nt_goal_reminder_single">You\'ve saved %d%% so far. Keep going!</string>
+    <string name="nt_goal_reminder_multiple_title">Multiple Goals</string>
+    <string name="nt_goal_reminder_multiple_text">You have %d active goals. Don\'t forget to contribute today!</string>
 </resources>

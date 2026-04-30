@@ -62,6 +62,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.personalfinancecompanion.R
 import com.sandeep.personalfinancecompanion.presentation.profile.components.CurrencySelectionDialog
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
+import androidx.compose.ui.res.stringResource
+
+import com.sandeep.personalfinancecompanion.presentation.profile.components.LanguageSelectionDialog
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.material.icons.filled.Language
+import androidx.core.os.LocaleListCompat
 
 @Composable
 fun ProfileScreen(
@@ -71,6 +77,7 @@ fun ProfileScreen(
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
     var showCurrencyDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     // Permission launcher for Android 13+
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -84,6 +91,9 @@ fun ProfileScreen(
     val context = LocalContext.current
     var csvDataToSave by remember { mutableStateOf<String?>(null) }
 
+    val msgExportSuccess = stringResource(R.string.msg_export_success)
+    val msgExportFailed = stringResource(R.string.msg_export_failed)
+
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/csv")
     ) { uri ->
@@ -93,9 +103,9 @@ fun ProfileScreen(
                     context.contentResolver.openOutputStream(it)?.use { outputStream ->
                         outputStream.write(data.toByteArray())
                     }
-                    Toast.makeText(context, "Data exported successfully!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, msgExportSuccess, Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Failed to save file: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, String.format(msgExportFailed, e.message), Toast.LENGTH_SHORT).show()
                 } finally {
                     viewModel.resetExportStatus()
                     csvDataToSave = null
@@ -132,7 +142,7 @@ fun ProfileScreen(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Notifications & Alerts",
+                text = stringResource(R.string.label_notifications_alerts),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -141,8 +151,8 @@ fun ProfileScreen(
 
             SettingsCard {
                 SettingsToggleItem(
-                    title = "Daily Reminder",
-                    description = "Get notified at 8:00 PM to log transactions",
+                    title = stringResource(R.string.label_daily_reminder),
+                    description = stringResource(R.string.desc_daily_reminder),
                     icon = Icons.Default.NotificationsActive,
                     checked = state.dailyReminderEnabled,
                     onCheckedChange = { enabled ->
@@ -157,8 +167,8 @@ fun ProfileScreen(
                 Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
                 SettingsToggleItem(
-                    title = "Budget Alerts",
-                    description = "Notify when reach 80% or 100% of budget",
+                    title = stringResource(R.string.label_budget_alerts),
+                    description = stringResource(R.string.desc_budget_alerts),
                     icon = Icons.Default.AccountBalanceWallet,
                     checked = state.budgetAlertsEnabled,
                     onCheckedChange = { viewModel.toggleBudgetAlerts(it) }
@@ -167,8 +177,8 @@ fun ProfileScreen(
                 Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
                 SettingsToggleItem(
-                    title = "Goal Progress",
-                    description = "Periodic updates on your savings goals",
+                    title = stringResource(R.string.label_goal_progress),
+                    description = stringResource(R.string.desc_goal_progress),
                     icon = Icons.Default.Flag,
                     checked = state.goalRemindersEnabled,
                     onCheckedChange = { viewModel.toggleGoalReminders(it) }
@@ -178,7 +188,7 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Account Settings",
+                text = stringResource(R.string.label_account_settings),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -187,15 +197,22 @@ fun ProfileScreen(
 
             SettingsCard {
                 SettingsItem(
-                    title = "Currency",
+                    title = stringResource(R.string.label_currency),
                     value = "${state.selectedCurrency.flag} ${state.selectedCurrency.code}",
                     icon = Icons.Default.CurrencyExchange,
                     onClick = { showCurrencyDialog = true }
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
                 SettingsItem(
-                    title = "Export Data",
-                    value = if (state.exportStatus is ExportStatus.Loading) "Exporting..." else "CSV / PDF",
+                    title = stringResource(R.string.label_language),
+                    value = if (state.selectedLanguage == "hi") "हिन्दी" else "English",
+                    icon = Icons.Default.Language,
+                    onClick = { showLanguageDialog = true }
+                )
+                Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                SettingsItem(
+                    title = stringResource(R.string.label_export_data),
+                    value = if (state.exportStatus is ExportStatus.Loading) stringResource(R.string.status_exporting) else stringResource(R.string.label_csv_pdf),
                     icon = Icons.Default.Download,
                     onClick = { viewModel.exportData() },
                     isUnderDevelopment = false
@@ -204,23 +221,10 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
             
-            // Temporarily hidden until Login is implemented
-            // Button(
-            //     onClick = { /* Logout logic */ },
-            //     modifier = Modifier.fillMaxWidth(),
-            //     colors = ButtonDefaults.buttonColors(
-            //         containerColor = MaterialTheme.colorScheme.errorContainer,
-            //         contentColor = MaterialTheme.colorScheme.error
-            //     ),
-            //     shape = RoundedCornerShape(12.dp)
-            // ) {
-            //     Text("Logout Account", fontWeight = FontWeight.Bold)
-            // }
-            
             Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Track Spend v1.0",
+                    text = stringResource(R.string.label_version),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -233,6 +237,17 @@ fun ProfileScreen(
             selectedCurrency = state.selectedCurrency,
             onCurrencySelected = { viewModel.updateCurrency(it) },
             onDismiss = { showCurrencyDialog = false }
+        )
+    }
+
+    if (showLanguageDialog) {
+        LanguageSelectionDialog(
+            selectedLanguageCode = state.selectedLanguage,
+            onLanguageSelected = { code ->
+                viewModel.updateLanguage(code)
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(code))
+            },
+            onDismiss = { showLanguageDialog = false }
         )
     }
 }
@@ -267,13 +282,13 @@ fun ProfileHeader() {
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "User",
+                text = stringResource(R.string.label_user),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Free Account",
+                text = stringResource(R.string.label_free_account),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.8f)
             )
@@ -393,7 +408,7 @@ fun SettingsItem(
                 )
                 if (isUnderDevelopment) {
                     Text(
-                        text = "UNDER DEVELOPMENT",
+                        text = stringResource(R.string.label_under_development),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Red,
                         fontWeight = FontWeight.ExtraBold

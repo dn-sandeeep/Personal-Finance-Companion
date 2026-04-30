@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
+import com.sandeep.personalfinancecompanion.R
+
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
     data object Transactions : Screen("transactions")
@@ -29,7 +31,7 @@ sealed class Screen(val route: String) {
 }
 
 data class BottomNavItem(
-    val label: String,
+    val labelResId: Int,
     val route: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
@@ -37,31 +39,31 @@ data class BottomNavItem(
 
 val bottomNavItems = listOf(
     BottomNavItem(
-        label = "Home",
+        labelResId = R.string.nav_home,
         route = Screen.Home.route,
         selectedIcon = Icons.Filled.Home,
         unselectedIcon = Icons.Outlined.Home
     ),
     BottomNavItem(
-        label = "History",
+        labelResId = R.string.nav_history,
         route = Screen.Transactions.route,
         selectedIcon = Icons.Filled.History,
         unselectedIcon = Icons.Outlined.History
     ),
     BottomNavItem(
-        label = "Goals",
+        labelResId = R.string.nav_goals,
         route = Screen.Goals.route,
         selectedIcon = Icons.Filled.FlagCircle,
         unselectedIcon = Icons.Outlined.FlagCircle
     ),
     BottomNavItem(
-        label = "Insights",
+        labelResId = R.string.nav_insights,
         route = Screen.Insights.route,
         selectedIcon = Icons.Filled.BarChart,
         unselectedIcon = Icons.Outlined.BarChart
     ),
     BottomNavItem(
-        label = "Profile",
+        labelResId = R.string.nav_profile,
         route = Screen.Profile.route,
         selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person
