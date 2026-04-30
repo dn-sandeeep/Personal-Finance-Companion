@@ -1888,6 +1888,7 @@ fun EditGoalDialog(
         }
         mutableStateOf(formatted)
     }
+    var errorText by remember { mutableStateOf<String?>(null) }
     var iconName by remember { mutableStateOf(goal.iconName) }
     var colorHex by remember { mutableStateOf(goal.colorHex) }
     var selectedDate by remember { mutableStateOf(goal.targetDate) }
@@ -1896,6 +1897,9 @@ fun EditGoalDialog(
 
     val icons = listOf("DirectionsCar", "Home", "Smartphone", "School", "TrendingUp", "Star", "FlightTakeoff", "Security", "BeachAccess", "Celebration", "Devices", "Fast food", "MedicalServices", "FitnessCenter")
     val colors = listOf("#F44336", "#2196F3", "#4CAF50", "#FF9800", "#9C27B0", "#E91E63", "#00BCD4", "#607D8B")
+
+    val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
+    val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -1926,14 +1930,14 @@ fun EditGoalDialog(
             ) {
                 OutlinedTextField(
                     value = title,
-                    onValueChange = { title = it },
+                    onValueChange = { newValue: String -> title = newValue },
                     label = { Text(stringResource(R.string.label_goal_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = targetAmount,
-                    onValueChange = { input ->
+                    onValueChange = { input: String ->
                         val clean = input.replace(",", "").filter { it.isDigit() || it == '.' }
                         if (clean.length <= 13) {
                             if (clean.isEmpty()) {
