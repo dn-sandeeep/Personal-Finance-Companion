@@ -151,9 +151,16 @@ fun AddEditTransactionScreen(
 
         OutlinedTextField(
             value = amount,
-            onValueChange = {
-                amount = it.filter { char -> char.isDigit() || char == '.' }
-                amountError = null
+            onValueChange = { input ->
+                val filtered = input.filter { char -> char.isDigit() || char == '.' }
+                // Basic length check to prevent massive strings
+                if (filtered.length <= 13) {
+                    val parts = filtered.split(".")
+                    if (parts.size <= 2 && (parts.size < 2 || parts[1].length <= 2)) {
+                        amount = filtered
+                        amountError = null
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(R.string.placeholder_enter_amount)) },
@@ -249,12 +256,16 @@ fun AddEditTransactionScreen(
 
         // Save Button
         val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
+        val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
         Button(
             onClick = {
                 val parsedAmount = amount.toDoubleOrNull()
                 when {
                     parsedAmount == null || parsedAmount <= 0 -> {
                         amountError = errorInvalidAmount
+                    }
+                    parsedAmount > 1000000000.0 -> {
+                        amountError = errorAmountTooLarge
                     }
                     else -> {
                         val transaction = Transaction(

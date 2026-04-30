@@ -76,6 +76,7 @@
     <string name="btn_save_tx">लेनदेन सेव करें</string>
     <string name="btn_update_tx">लेनदेन अपडेट करें</string>
     <string name="error_invalid_amount">कृपया 0 से अधिक वैध राशि दर्ज करें</string>
+    <string name="error_amount_too_large">राशि बहुत अधिक है (अधिकतम 100 करोड़)</string>
     <string name="placeholder_enter_amount">राशि दर्ज करें</string>
     <string name="placeholder_add_note">नोट जोड़ें...</string>
     <string name="placeholder_search">एंट्रीज खोजें...</string>

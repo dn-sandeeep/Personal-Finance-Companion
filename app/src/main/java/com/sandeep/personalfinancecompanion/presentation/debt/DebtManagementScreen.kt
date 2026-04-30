@@ -314,6 +314,10 @@ fun RecordRepaymentDialog(
 ) {
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
+    var errorText by remember { mutableStateOf<String?>(null) }
+
+    val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
+    val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -322,12 +326,20 @@ fun RecordRepaymentDialog(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = amount,
-                    onValueChange = { amount = it },
+                    onValueChange = { newValue -> 
+                        val filtered = newValue.filter { it.isDigit() || it == '.' }
+                        if (filtered.length <= 13) {
+                            amount = filtered
+                            errorText = null
+                        }
+                    },
                     label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = errorText != null,
+                    supportingText = errorText?.let { { Text(it) } }
                 )
                 OutlinedTextField(
                     value = note,
@@ -339,7 +351,18 @@ fun RecordRepaymentDialog(
         },
         confirmButton = {
             Button(onClick = {
-                amount.toDoubleOrNull()?.let { onConfirm(it, note) }
+                val parsed = amount.toDoubleOrNull()
+                when {
+                    parsed == null || parsed <= 0 -> {
+                        errorText = errorInvalidAmount
+                    }
+                    parsed > 1000000000.0 -> {
+                        errorText = errorAmountTooLarge
+                    }
+                    else -> {
+                        onConfirm(parsed, note)
+                    }
+                }
             }) {
                 Text(stringResource(R.string.btn_save))
             }

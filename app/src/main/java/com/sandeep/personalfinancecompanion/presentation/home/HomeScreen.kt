@@ -727,6 +727,10 @@ fun EditBudgetDialog(
     onConfirm: (Double) -> Unit
 ) {
     var budgetInput by remember { mutableStateOf(currentLimit.toInt().toString()) }
+    var errorText by remember { mutableStateOf<String?>(null) }
+
+    val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
+    val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -743,11 +747,19 @@ fun EditBudgetDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = budgetInput,
-                    onValueChange = { newValue: String -> budgetInput = newValue },
+                    onValueChange = { newValue: String -> 
+                        val filtered = newValue.filter { it.isDigit() || it == '.' }
+                        if (filtered.length <= 13) {
+                            budgetInput = filtered
+                            errorText = null
+                        }
+                    },
                     label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = errorText != null,
+                    supportingText = errorText?.let { { Text(it) } }
                 )
             }
         },
@@ -755,8 +767,16 @@ fun EditBudgetDialog(
             Button(
                 onClick = {
                     val newLimit = budgetInput.toDoubleOrNull()
-                    if (newLimit != null && newLimit > 0) {
-                        onConfirm(newLimit)
+                    when {
+                        newLimit == null || newLimit <= 0 -> {
+                            errorText = errorInvalidAmount
+                        }
+                        newLimit > 1000000000.0 -> {
+                            errorText = errorAmountTooLarge
+                        }
+                        else -> {
+                            onConfirm(newLimit)
+                        }
                     }
                 }
             ) {

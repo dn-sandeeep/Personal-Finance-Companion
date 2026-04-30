@@ -76,6 +76,7 @@
     <string name="btn_save_tx">Save Transaction</string>
     <string name="btn_update_tx">Update Transaction</string>
     <string name="error_invalid_amount">Please enter a valid amount greater than 0</string>
+    <string name="error_amount_too_large">Amount is too large (max 100 Crore)</string>
     <string name="placeholder_enter_amount">Enter amount</string>
     <string name="placeholder_add_note">Add a note...</string>
     <string name="placeholder_search">Search entries...</string>

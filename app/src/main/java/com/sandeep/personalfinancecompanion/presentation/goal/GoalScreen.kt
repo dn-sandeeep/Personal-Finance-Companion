@@ -501,20 +501,24 @@ fun GoalTypePickerDialog(
                             value = customAmount,
                             onValueChange = { input ->
                                 val clean = input.replace(",", "").filter { it.isDigit() || it == '.' }
-                                if (clean.isEmpty()) {
-                                    customAmount = ""
-                                } else {
-                                    try {
-                                        val parts = clean.split(".")
-                                        val integerPart = parts[0].toLongOrNull() ?: 0L
-                                        val formatted = java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(integerPart)
-                                        customAmount = when {
-                                            parts.size > 1 -> "$formatted.${parts[1].take(2)}"
-                                            clean.endsWith(".") -> "$formatted."
-                                            else -> formatted
+                                if (clean.length <= 13) {
+                                    if (clean.isEmpty()) {
+                                        customAmount = ""
+                                    } else {
+                                        try {
+                                            val parts = clean.split(".")
+                                            if (parts.size <= 2 && (parts.size < 2 || parts[1].length <= 2)) {
+                                                val integerPart = parts[0].toLongOrNull() ?: 0L
+                                                val formatted = java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(integerPart)
+                                                customAmount = when {
+                                                    parts.size > 1 -> "$formatted.${parts[1].take(2)}"
+                                                    clean.endsWith(".") -> "$formatted."
+                                                    else -> formatted
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            customAmount = clean
                                         }
-                                    } catch (e: Exception) {
-                                        customAmount = clean
                                     }
                                 }
                             },
@@ -1531,6 +1535,10 @@ fun AddSavingsDialog(
     onConfirm: (Double) -> Unit
 ) {
     var amountText by remember { mutableStateOf("") }
+    var errorText by remember { mutableStateOf<String?>(null) }
+
+    val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
+    val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -1539,20 +1547,39 @@ fun AddSavingsDialog(
             Column {
                 OutlinedTextField(
                     value = amountText,
-                    onValueChange = { amountText = it },
+                    onValueChange = { input ->
+                        val filtered = input.filter { it.isDigit() || it == '.' }
+                        if (filtered.length <= 13) {
+                            amountText = filtered
+                            errorText = null
+                        }
+                    },
                     label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
-                    )
+                    ),
+                    isError = errorText != null,
+                    supportingText = errorText?.let { { Text(it) } }
                 )
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    amountText.toDoubleOrNull()?.let { onConfirm(it) }
+                    val parsed = amountText.toDoubleOrNull()
+                    when {
+                        parsed == null || parsed <= 0 -> {
+                            errorText = errorInvalidAmount
+                        }
+                        parsed > 1000000000.0 -> {
+                            errorText = errorAmountTooLarge
+                        }
+                        else -> {
+                            onConfirm(parsed)
+                        }
+                    }
                 }
             ) {
                 Text(stringResource(R.string.btn_confirm))
@@ -1908,20 +1935,25 @@ fun EditGoalDialog(
                     value = targetAmount,
                     onValueChange = { input ->
                         val clean = input.replace(",", "").filter { it.isDigit() || it == '.' }
-                        if (clean.isEmpty()) {
-                            targetAmount = ""
-                        } else {
-                            try {
-                                val parts = clean.split(".")
-                                val integerPart = parts[0].toLongOrNull() ?: 0L
-                                val formatted = java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(integerPart)
-                                targetAmount = when {
-                                    parts.size > 1 -> "$formatted.${parts[1].take(2)}"
-                                    clean.endsWith(".") -> "$formatted."
-                                    else -> formatted
+                        if (clean.length <= 13) {
+                            if (clean.isEmpty()) {
+                                targetAmount = ""
+                            } else {
+                                try {
+                                    val parts = clean.split(".")
+                                    if (parts.size <= 2 && (parts.size < 2 || parts[1].length <= 2)) {
+                                        val integerPart = parts[0].toLongOrNull() ?: 0L
+                                        val formatted = java.text.NumberFormat.getIntegerInstance(java.util.Locale.US).format(integerPart)
+                                        targetAmount = when {
+                                            parts.size > 1 -> "$formatted.${parts[1].take(2)}"
+                                            clean.endsWith(".") -> "$formatted."
+                                            else -> formatted
+                                        }
+                                        errorText = null
+                                    }
+                                } catch (e: Exception) {
+                                    targetAmount = clean
                                 }
-                            } catch (e: Exception) {
-                                targetAmount = clean
                             }
                         }
                     },
@@ -1930,7 +1962,9 @@ fun EditGoalDialog(
                     prefix = { Text(currency.symbol) },
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
-                    )
+                    ),
+                    isError = errorText != null,
+                    supportingText = errorText?.let { { Text(it) } }
                 )
 
                 Text(text = stringResource(R.string.label_choose_icon), style = MaterialTheme.typography.bodySmall)
