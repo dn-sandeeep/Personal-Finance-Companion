@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Track Spend</string>
+    <string name="app_name">Gandhi Money</string>
     
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -189,7 +189,7 @@
     <string name="label_export_data">Export Data</string>
     <string name="status_exporting">Exporting...</string>
     <string name="label_csv_pdf">CSV / PDF</string>
-    <string name="label_version">Track Spend v1.0</string>
+    <string name="label_version">Gandhi Money v1.0</string>
     <string name="label_free_account">Free Account</string>
     <string name="label_under_development">UNDER DEVELOPMENT</string>
     <string name="title_select_currency">Select Currency</string>

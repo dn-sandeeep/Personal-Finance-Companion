@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ट्रैक स्पेंड</string>
+    <string name="app_name">Gandhi Money</string>
     
     <!-- Navigation -->
     <string name="nav_home">होम</string>
@@ -189,7 +189,7 @@
     <string name="label_export_data">डेटा निर्यात करें</string>
     <string name="status_exporting">निर्यात किया जा रहा है...</string>
     <string name="label_csv_pdf">CSV / PDF</string>
-    <string name="label_version">ट्रैक स्पेंड v1.0</string>
+    <string name="label_version">Gandhi Money v1.0</string>
     <string name="label_free_account">फ्री अकाउंट</string>
     <string name="label_under_development">निर्माणाधीन (UNDER DEVELOPMENT)</string>
     <string name="title_select_currency">मुद्रा चुनें</string>
