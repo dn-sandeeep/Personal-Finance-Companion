@@ -18,6 +18,9 @@ object CurrencyFormatter {
             Currency.CHF -> Locale("de", "CH")
             Currency.CNY -> Locale.CHINA
             Currency.AED -> Locale("ar", "AE")
+            Currency.NPR -> Locale("en", "NP")
+            Currency.BDT -> Locale("en", "BD")
+            Currency.AFN -> Locale("en", "AF")
         }
 
         val format = NumberFormat.getCurrencyInstance(locale)
@@ -39,6 +42,9 @@ object CurrencyFormatter {
             Currency.CHF -> Locale("de", "CH")
             Currency.CNY -> Locale.CHINA
             Currency.AED -> Locale("ar", "AE")
+            Currency.NPR -> Locale("en", "NP")
+            Currency.BDT -> Locale("en", "BD")
+            Currency.AFN -> Locale("en", "AF")
         }
 
         val format = NumberFormat.getNumberInstance(locale).apply {
