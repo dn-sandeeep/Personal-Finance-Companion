@@ -2,6 +2,7 @@ package com.sandeep.personalfinancecompanion.presentation.insights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
@@ -24,7 +25,7 @@ data class InsightsState(
     val isLoading: Boolean = true,
     val categoryBreakdown: List<PieChartEntry> = emptyList(),
     val balanceSummary: BalanceSummary = BalanceSummary(0.0, 0.0, 0.0),
-    val topCategory: String = "",
+    val topCategory: Category? = null,
     val totalTransactions: Int = 0,
     val error: String? = null
 )
@@ -64,6 +65,7 @@ class InsightsViewModel @Inject constructor(
 
                     val chartEntries = expensesByCategory.mapIndexed { index, (category, amount) ->
                         PieChartEntry(
+                            category = category,
                             label = "${category.emoji} ${category.displayName}",
                             value = amount,
                             color = ChartColors[index % ChartColors.size]
@@ -71,9 +73,8 @@ class InsightsViewModel @Inject constructor(
                     }
 
                     val topCategory = if (expensesByCategory.isNotEmpty()) {
-                        val top = expensesByCategory.first()
-                        "${top.first.emoji} ${top.first.displayName}"
-                    } else "N/A"
+                        expensesByCategory.first().first
+                    } else null
 
                     _state.value = InsightsState(
                         isLoading = false,

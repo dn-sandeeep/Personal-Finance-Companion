@@ -33,6 +33,9 @@ import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
 import com.sandeep.personalfinancecompanion.presentation.components.PieChart
 import com.sandeep.personalfinancecompanion.ui.theme.ExpenseRed
 import com.sandeep.personalfinancecompanion.ui.theme.IncomeGreen
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @Composable
 fun InsightsScreen(
@@ -63,7 +66,7 @@ fun InsightsScreen(
                 Text(text = "🏥", style = MaterialTheme.typography.displayLarge)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = state.error ?: "Analytics failed to load",
+                    text = state.error ?: stringResource(R.string.error_analytics_load),
                     style = MaterialTheme.typography.bodyLarge,
                     color = colorScheme.error,
                     textAlign = TextAlign.Center
@@ -74,8 +77,8 @@ fun InsightsScreen(
         state.categoryBreakdown.isEmpty() -> {
             EmptyState(
                 emoji = "📊",
-                title = "No insights yet",
-                subtitle = "Add some transactions to see your spending patterns!"
+                title = stringResource(R.string.title_no_insights),
+                subtitle = stringResource(R.string.subtitle_no_insights)
             )
         }
 
@@ -101,13 +104,17 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            val topCatName = state.topCategory?.let { 
+                "${it.emoji} ${LocalizationUtils.getCategoryName(it)}"
+            } ?: "N/A"
+            
             StatCard(
-                title = "Top Category",
-                value = state.topCategory,
+                title = stringResource(R.string.label_top_category),
+                value = topCatName,
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                title = "Transactions",
+                title = stringResource(R.string.label_transactions),
                 value = state.totalTransactions.toString(),
                 modifier = Modifier.weight(1f)
             )
@@ -129,7 +136,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
                     Text(
-                        text = "Total Income",
+                        text = stringResource(R.string.label_total_income_insights),
                         style = MaterialTheme.typography.labelMedium,
                         color = IncomeGreen
                     )
@@ -154,7 +161,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
                     Text(
-                        text = "Total Expense",
+                        text = stringResource(R.string.label_total_expense_insights),
                         style = MaterialTheme.typography.labelMedium,
                         color = ExpenseRed
                     )
@@ -175,7 +182,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
 
         // Pie Chart Section
         Text(
-            text = "Spending by Category",
+            text = stringResource(R.string.label_spending_by_category),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = colorScheme.onSurface

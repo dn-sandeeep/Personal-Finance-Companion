@@ -32,17 +32,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 import androidx.compose.ui.res.stringResource
 import com.sandeep.personalfinancecompanion.R
 
 @Composable
-fun CurrencySelectionDialog(
-    selectedCurrency: Currency,
-    onCurrencySelected: (Currency) -> Unit,
+fun LanguageSelectionDialog(
+    selectedLanguageCode: String,
+    onLanguageSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val languages = listOf(
+        Pair("en", "English"),
+        Pair("hi", "हिन्दी")
+    )
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -65,7 +69,7 @@ fun CurrencySelectionDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.title_select_currency),
+                        text = stringResource(R.string.title_select_language),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -78,17 +82,15 @@ fun CurrencySelectionDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 400.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(Currency.entries) { currency ->
-                        CurrencyItem(
-                            currency = currency,
-                            isSelected = currency == selectedCurrency,
+                    items(languages) { (code, label) ->
+                        LanguageItem(
+                            label = label,
+                            isSelected = code == selectedLanguageCode,
                             onClick = {
-                                onCurrencySelected(currency)
+                                onLanguageSelected(code)
                                 onDismiss()
                             }
                         )
@@ -100,8 +102,8 @@ fun CurrencySelectionDialog(
 }
 
 @Composable
-fun CurrencyItem(
-    currency: Currency,
+fun LanguageItem(
+    label: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -120,27 +122,15 @@ fun CurrencyItem(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = currency.flag,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(end = 16.dp)
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) PrimaryAccent else MaterialTheme.colorScheme.onSurface
             )
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = currency.label,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) PrimaryAccent else MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "${currency.code} (${currency.symbol})",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
 
             if (isSelected) {
                 Icon(

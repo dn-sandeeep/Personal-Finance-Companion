@@ -11,7 +11,7 @@ import com.sandeep.personalfinancecompanion.data.local.entity.GoalContributionEn
 @Database(
     entities = [TransactionEntity::class, GoalEntity::class, GoalContributionEntity::class],
     version = 5,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 

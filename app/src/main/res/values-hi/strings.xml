@@ -1,0 +1,279 @@
+<resources>
+    <string name="app_name">Gandhi Money</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">होम</string>
+    <string name="nav_history">इतिहास</string>
+    <string name="nav_goals">लक्ष्य</string>
+    <string name="nav_insights">इनसाइट्स</string>
+    <string name="nav_profile">प्रोफाइल</string>
+    
+    <!-- Common Actions -->
+    <string name="btn_save">सेव करें</string>
+    <string name="btn_cancel">रद्द करें</string>
+    <string name="btn_confirm">पुष्टि करें</string>
+    <string name="btn_delete">हटाएं</string>
+    <string name="btn_retry">पुनः प्रयास करें</string>
+    <string name="btn_ok">ठीक है</string>
+    <string name="btn_got_it">समझ गए</string>
+    <!-- Screen Titles -->
+    <string name="title_lending_debts">उधार और कर्ज</string>
+    <string name="title_add_transaction">लेनदेन जोड़ें</string>
+    <string name="title_edit_transaction">लेनदेन संपादित करें</string>
+    <!-- Content Descriptions -->
+    <string name="cd_back">पीछे</string>
+    <string name="cd_user_profile">यूजर प्रोफाइल</string>
+    <string name="cd_voice_agent">वॉइस एजेंट</string>
+    <string name="cd_add_transaction">लेनदेन जोड़ें</string>
+    
+    <!-- Misc Labels -->
+    <string name="label_user">यूजर</string>
+    <!-- Home Screen -->
+    <string name="btn_set_monthly_budget">मासिक बजट सेट करें</string>
+    <string name="btn_edit_monthly_budget">मासिक बजट संपादित करें</string>
+    <string name="label_amount">राशि (%s)</string>
+    <string name="label_amount_simple">राशि</string>
+    <string name="label_total_balance">कुल शेष</string>
+    <string name="label_monthly_income">मासिक\nआय</string>
+    <string name="label_monthly_expenses">मासिक\nखर्च</string>
+    <string name="label_weekly_trend">साप्ताहिक रुझान</string>
+    <string name="label_savings_goal">बचत लक्ष्य</string>
+    <string name="label_budget_tracker">मासिक बजट ट्रैकर</string>
+    <string name="label_category_breakdown">श्रेणी विवरण</string>
+    <string name="label_view_all">सभी देखें</string>
+    <string name="msg_no_budget_title">अभी तक कोई बजट सेट नहीं किया गया है 💸</string>
+    <string name="msg_no_budget_subtitle">अपने खर्च करने के अनुशासन को ट्रैक करने के लिए एक मासिक सीमा निर्धारित करें।</string>
+    <string name="msg_no_tx_title">अभी तक कोई लेनदेन नहीं</string>
+    <string name="msg_no_tx_subtitle">अपनी पहली एंट्री जोड़ने के लिए + दबाएं!</string>
+    <string name="msg_edit_budget_desc">ट्रैक करने के लिए एक नई मासिक खर्च सीमा निर्धारित करें।</string>
+    <string name="msg_transactions_for">%s के लिए लेनदेन</string>
+    <string name="msg_no_transactions_day">आपने इस दिन कोई लेनदेन रिकॉर्ड नहीं किया।</string>
+    <string name="label_num_transactions">%d लेनदेन</string>
+    <string name="cd_edit_budget">बजट संपादित करें</string>
+    <string name="cd_view_details">विवरण देखें</string>
+    
+    <!-- Transaction Screens -->
+    <string name="label_income">आय</string>
+    <string name="label_expense">खर्च</string>
+    <string name="label_all_activity">सभी गतिविधियां</string>
+    <string name="label_expenses">खर्चे</string>
+    <string name="label_cash_flow_archive">नकद प्रवाह पुरालेख</string>
+    <string name="label_net">कुल</string>
+    <string name="msg_no_transactions_found">कोई लेनदेन नहीं मिला</string>
+    <string name="msg_adjust_filters">इतिहास देखने के लिए फिल्टर बदलें</string>
+    <string name="msg_transaction_deleted">लेनदेन हटा दिया गया</string>
+    <string name="label_undo">पूर्ववत करें</string>
+    <string name="label_today">आज</string>
+    <string name="label_yesterday">कल</string>
+    <string name="error_load_transactions">लेनदेन लोड करने में विफल</string>
+    <string name="label_new_entry">नई एंट्री</string>
+    <string name="label_edit_entry">एंट्री संपादित करें</string>
+    <string name="label_tx_type">लेनदेन का प्रकार</string>
+    <string name="label_category">श्रेणी</string>
+    <string name="label_notes_optional">नोट (वैकल्पिक)</string>
+    <string name="label_borrowed_from">उधार लिया (व्यक्ति)</string>
+    <string name="label_lent_to">उधार दिया (व्यक्ति)</string>
+    <string name="btn_save_tx">लेनदेन सेव करें</string>
+    <string name="btn_update_tx">लेनदेन अपडेट करें</string>
+    <string name="error_invalid_amount">कृपया 0 से अधिक वैध राशि दर्ज करें</string>
+    <string name="error_amount_too_large">राशि बहुत अधिक है (अधिकतम 100 करोड़)</string>
+    <string name="placeholder_enter_amount">राशि दर्ज करें</string>
+    <string name="placeholder_add_note">नोट जोड़ें...</string>
+    <string name="placeholder_search">एंट्रीज खोजें...</string>
+    <string name="hint_debtor_name">जैसे: राहुल, पापा, आदि</string>
+    
+    <!-- Magic Entry (AI) -->
+    <string name="title_magic_entry">मैजिक एंट्री एजेंट</string>
+    <string name="magic_entry_placeholder">आपने आज क्या खर्च किया?</string>
+    <string name="magic_entry_predicted_details">अनुमानित विवरण:</string>
+    <string name="magic_entry_analyze">AI के साथ विश्लेषण करें</string>
+    <string name="cd_voice_input">वॉइस इनपुट</string>
+    <!-- Goals Screen -->
+    <string name="title_active_goals">सक्रिय लक्ष्य</string>
+    <string name="subtitle_goals">वित्तीय संतुलन की ओर आपके पथ पर नज़र रखना।</string>
+    <string name="msg_no_primary_objective">कोई प्राथमिक लक्ष्य निर्धारित नहीं है</string>
+    <string name="msg_primary_objective_desc">एक नए लक्ष्य के लिए तैयार हैं? अपनी प्रगति पर ध्यान केंद्रित करने के लिए एक प्राथमिक लक्ष्य निर्धारित करें।</string>
+    <string name="btn_set_primary_objective">प्राथमिक लक्ष्य निर्धारित करें</string>
+    <string name="label_primary_objective">प्राथमिक लक्ष्य</string>
+    <string name="label_complete">पूर्ण</string>
+    <string name="label_saved">बचाया</string>
+    <string name="label_target">लक्ष्य</string>
+    <string name="label_no_spend_challenge">नो स्पेंड चैलेंज</string>
+    <string name="label_best_streak">सर्वश्रेष्ठ स्ट्रीक</string>
+    <string name="label_potential_savings">संभावित बचत</string>
+    <string name="title_set_challenge_target">चैलेंज लक्ष्य निर्धारित करें</string>
+    <string name="label_days_challenge">%d दिनों का चैलेंज</string>
+    <string name="title_no_spend_calendar">नो स्पेंड कैलेंडर</string>
+    <string name="subtitle_no_spend_calendar">पिछले 30 दिनों में अपने अनुशासन को ट्रैक करें।</string>
+    <string name="btn_adjust_target">चैलेंज लक्ष्य बदलें</string>
+    <string name="label_overdue">समय सीमा समाप्त</string>
+    <string name="label_past_deadline">समय सीमा बीत गई</string>
+    <string name="label_days_left">%d दिन शेष</string>
+    <string name="btn_create_new_goal">नया लक्ष्य बनाएं</string>
+    <string name="label_saving_velocity">बचत वेग (Velocity)</string>
+    <string name="msg_analyzing_cycle">आपकी बचत चक्र का विश्लेषण किया जा रहा है...</string>
+    <string name="msg_analyzing_desc">बचत जारी रखें! लगभग 3 दिनों में आपके वेग के आंकड़े तैयार हो जाएंगे।</string>
+    <string name="status_ahead">समय से आगे</string>
+    <string name="status_behind">समय से पीछे</string>
+    <string name="status_on_track">सही रास्ते पर</string>
+    <string name="label_early">जल्दी</string>
+    <string name="label_late">देरी से</string>
+    <string name="msg_velocity_reach">अपने %2$s लक्ष्य तक पहुँचने के लिए आप %1$s हैं (%3$s)।</string>
+    <string name="msg_accelerator">पिछले 14 दिनों में \'%s\' में आपके कम खर्च ने आपकी प्रगति को तेज कर दिया है।</string>
+    <string name="title_how_velocity_works">Velocity कैसे काम करती है</string>
+    <string name="label_goal_selection">लक्ष्य चयन</string>
+    <string name="desc_goal_selection">हम आपके सर्वोच्च प्राथमिकता वाले लक्ष्य, या निकटतम समय सीमा वाले लक्ष्य का विश्लेषण करते हैं।</string>
+    <string name="label_bonus_filter">बोनस फ़िल्टर</string>
+    <string name="desc_bonus_filter">आपके अनुमानों को यथार्थवादी रखने के लिए एक बार की बड़ी बचत (औसत से &gt;300%%) को गणना से बाहर रखा गया है।</string>
+    <string name="label_accelerators">त्वरक (Accelerators)</string>
+    <string name="desc_accelerators">हम उन श्रेणियों की तलाश करते हैं जहाँ आप सामान्य से कम खर्च कर रहे हैं और दिखाते हैं कि इससे आपकी बचत में कैसे मदद मिलती है।</string>
+    <string name="title_add_savings">%s में बचत जोड़ें</string>
+    <string name="label_total_saved">कुल बचत</string>
+    <string name="label_target_deadline">लक्ष्य समय सीमा</string>
+    <string name="label_not_set">निर्धारित नहीं</string>
+    <string name="label_assign_priority">प्राथमिकता दें</string>
+    <string name="priority_primary">प्राथमिक</string>
+    <string name="priority_secondary">द्वितीयक</string>
+    <string name="priority_tertiary">तृतीयक</string>
+    <string name="priority_none">कोई नहीं</string>
+    <string name="label_savings_history">बचत इतिहास</string>
+    <string name="msg_no_savings">अभी तक कोई बचत रिकॉर्ड नहीं की गई है।</string>
+    <string name="label_deposit">जमा</string>
+    <string name="title_edit_goal_details">लक्ष्य विवरण संपादित करें</string>
+    <string name="label_goal_name">लक्ष्य का नाम</string>
+    <string name="label_target_amount">लक्ष्य राशि</string>
+    <string name="label_choose_icon">आइकन चुनें</string>
+    <string name="label_choose_color">रंग चुनें</string>
+    <string name="title_create_custom_goal">कस्टम लक्ष्य बनाएं</string>
+    <string name="title_select_goal_type">लक्ष्य का प्रकार चुनें</string>
+    <string name="placeholder_goal_example">जैसे: शादी, यूरोप ट्रिप</string>
+    <string name="btn_create_goal">लक्ष्य बनाएं</string>
+    <string name="btn_confirm_goal">लक्ष्य की पुष्टि करें</string>
+    <string name="btn_add_target_date">लक्ष्य तिथि जोड़ें (वैकल्पिक)</string>
+    <string name="msg_target_date">लक्ष्य: %s</string>
+    <string name="title_delete_goal">लक्ष्य हटाएं?</string>
+    <string name="msg_delete_goal_confirm">क्या आप वाकई \'%s\' को हटाना चाहते हैं? यह इस लक्ष्य के सभी बचत इतिहास को भी हटा देगा।</string>
+    <string name="title_no_active_goals">कोई सक्रिय लक्ष्य नहीं</string>
+    <string name="subtitle_no_active_goals">आज ही अपना पहला वित्तीय मील का पत्थर निर्धारित करें!</string>
+
+    <!-- Debt Management Screen -->
+    <string name="label_owed_to_you">आपको मिलने वाले</string>
+    <string name="label_you_owe">आपको देने वाले</string>
+    <string name="label_people_ledgers">लोग और लेजर</string>
+    <string name="label_net_owed_to_you">आपको कुल मिलने वाले</string>
+    <string name="label_net_you_owe">आपको कुल देने वाले</string>
+    <string name="label_payment">भुगतान</string>
+    <string name="btn_settle_all">सब चुकता करें</string>
+    <string name="tx_loan_given">उधार दिया</string>
+    <string name="tx_debt_taken">कर्ज लिया</string>
+    <string name="tx_payment_received">भुगतान प्राप्त हुआ</string>
+    <string name="tx_payment_made">भुगतान किया</string>
+    <string name="title_record_repayment">%s के लिए भुगतान रिकॉर्ड करें</string>
+    <string name="label_note">नोट</string>
+    <string name="msg_no_debts_title">कोई बकाया कर्ज नहीं</string>
+    <string name="msg_no_debts_subtitle">आपका खाता साफ है! 🤝</string>
+    <!-- Profile Screen -->
+    <string name="msg_export_success">डेटा सफलतापूर्वक निर्यात (export) किया गया!</string>
+    <string name="msg_export_failed">फ़ाइल सहेजने में विफल: %s</string>
+    <string name="label_notifications_alerts">सूचनाएं और अलर्ट</string>
+    <string name="label_daily_reminder">दैनिक रिमाइंडर</string>
+    <string name="desc_daily_reminder">लेनदेन लॉग करने के लिए रात 8:00 बजे सूचना प्राप्त करें</string>
+    <string name="label_budget_alerts">बजट अलर्ट</string>
+    <string name="desc_budget_alerts">बजट के 80%% या 100%% तक पहुँचने पर सूचित करें</string>
+    <string name="label_goal_progress">लक्ष्य प्रगति</string>
+    <string name="desc_goal_progress">आपकी बचत लक्ष्यों पर समय-समय पर अपडेट</string>
+    <string name="label_account_settings">खाता सेटिंग्स</string>
+    <string name="label_language">भाषा (Language)</string>
+    <string name="title_select_language">भाषा चुनें</string>
+    <string name="label_currency">मुद्रा (Currency)</string>
+    <string name="label_export_data">डेटा निर्यात करें</string>
+    <string name="status_exporting">निर्यात किया जा रहा है...</string>
+    <string name="label_csv_pdf">CSV / PDF</string>
+    <string name="label_version">Gandhi Money v1.0</string>
+    <string name="label_free_account">फ्री अकाउंट</string>
+    <string name="label_under_development">निर्माणाधीन (UNDER DEVELOPMENT)</string>
+    <string name="title_select_currency">मुद्रा चुनें</string>
+    <string name="cd_close">बंद करें</string>
+    <string name="cd_selected">चयनित</string>
+
+    <!-- Insights Screen -->
+    <string name="error_analytics_load">एनालिटिक्स लोड करने में विफल</string>
+    <string name="title_no_insights">अभी तक कोई अंतर्दृष्टि नहीं</string>
+    <string name="subtitle_no_insights">अपने खर्च के पैटर्न देखने के लिए कुछ लेनदेन जोड़ें!</string>
+    <string name="label_top_category">शीर्ष श्रेणी</string>
+    <string name="label_transactions">लेनदेन</string>
+    <string name="label_total_income_insights">कुल आय</string>
+    <string name="label_total_expense_insights">कुल खर्च</string>
+    <string name="label_spending_by_category">श्रेणी के अनुसार खर्च</string>
+    <!-- Voice Agent -->
+    <string name="title_voice_agent">वॉइस एजेंट</string>
+    <string name="title_discard_entry">एंट्री छोड़ दें?</string>
+    <string name="msg_discard_entry_confirm">आपने कुछ रिकॉर्ड किया है। क्या आप वाकई इसे हटाना चाहते हैं?</string>
+    <string name="btn_discard">छोड़ दें</string>
+    <string name="btn_keep">रखें</string>
+    <string name="label_tap_to_stop">रुकने के लिए दबाएं</string>
+    <string name="status_listening">सुन रहा हूँ...</string>
+    <string name="status_analyzing_speech">आपकी आवाज़ का विश्लेषण किया जा रहा है...</string>
+    <string name="msg_tap_mic_to_speak">बोलने के लिए माइक दबाएं</string>
+    <string name="label_your_entry">आपकी एंट्री</string>
+    <string name="msg_tx_detected">%d लेनदेन मिले</string>
+    <string name="btn_edit_text">टेक्स्ट संपादित करें</string>
+    <string name="btn_confirm_all">सब पुष्टि करें</string>
+    <string name="btn_process">प्रोसेस करें</string>
+    <string name="label_type">प्रकार</string>
+    <string name="label_person">व्यक्ति</string>
+    <string name="cd_start_listening">सुनना शुरू करें</string>
+    <string name="cd_stop_listening">सुनना बंद करें</string>
+    <!-- Transaction Status -->
+    <string name="status_earned">प्राप्त</string>
+    <string name="status_spent">खर्च</string>
+    <string name="status_borrowed">उधार लिया</string>
+    <string name="status_lent">उधार दिया</string>
+    <string name="status_repaid">चुकाया</string>
+    <string name="status_recovered">वसूल किया</string>
+    <!-- Days of the week -->
+    <string name="day_monday">सोमवार</string>
+    <string name="day_tuesday">मंगलवार</string>
+    <string name="day_wednesday">बुधवार</string>
+    <string name="day_thursday">गुरुवार</string>
+    <string name="day_friday">शुक्रवार</string>
+    <string name="day_saturday">शनिवार</string>
+    <string name="day_sunday">रविवार</string>
+    <!-- Categories -->
+    <string name="cat_food">भोजन</string>
+    <string name="cat_transport">यातायात</string>
+    <string name="cat_shopping">खरीदारी</string>
+    <string name="cat_entertainment">मनोरंजन</string>
+    <string name="cat_bills">बिल</string>
+    <string name="cat_health">स्वास्थ्य</string>
+    <string name="cat_education">शिक्षा</string>
+    <string name="cat_salary">वेतन</string>
+    <string name="cat_freelance">फ्रीलांस</string>
+    <string name="cat_investment">निवेश</string>
+    <string name="cat_gift">उपहार</string>
+    <string name="cat_udhaar">उधार और कर्ज</string>
+    <string name="cat_other">अन्य</string>
+    <!-- Predefined Goals -->
+    <string name="goal_new_car">नई कार</string>
+    <string name="goal_dream_home">सपनों का घर</string>
+    <string name="goal_new_phone">नया फोन</string>
+    <string name="goal_education">शिक्षा</string>
+    <string name="goal_retirement">रिटायरमेंट</string>
+    <!-- Notifications -->
+    <string name="nt_reminders_title">रिमाइंडर</string>
+    <string name="nt_reminders_desc">लेनदेन लॉग करने के लिए दैनिक रिमाइंडर</string>
+    <string name="nt_budget_alerts_title">बजट अलर्ट</string>
+    <string name="nt_budget_alerts_desc">जब आप अपने बजट के करीब पहुँचें या उससे अधिक हो जाएँ</string>
+    <string name="nt_goal_reminders_title">लक्ष्य रिमाइंडर</string>
+    <string name="nt_goal_reminders_desc">आपकी बचत लक्ष्यों पर अपडेट</string>
+    <string name="nt_daily_reminder_title">फाइनेंस रिमाइंडर</string>
+    <string name="nt_daily_reminder_text">आज के अपने खर्चे लॉग करना न भूलें!</string>
+    <string name="nt_goal_update_title">लक्ष्य अपडेट: %s</string>
+    <string name="nt_budget_exceeded_title">बजट समाप्त</string>
+    <string name="nt_budget_exceeded_text">आपने %1$s खर्च किए हैं, जो आपके %2$s के मासिक बजट से अधिक है।</string>
+    <string name="nt_budget_warning_title">बजट अलर्ट</string>
+    <string name="nt_budget_warning_text">आप अपने बजट के %1$s पर पहुँच गए हैं (%3$s में से %2$s खर्च)।</string>
+    <string name="nt_goal_reminder_single">आपने अब तक %d%% बचत की है। जारी रखें!</string>
+    <string name="nt_goal_reminder_multiple_title">कई लक्ष्य</string>
+    <string name="nt_goal_reminder_multiple_text">आपके पास %d सक्रिय लक्ष्य हैं। आज योगदान देना न भूलें!</string>
+</resources>

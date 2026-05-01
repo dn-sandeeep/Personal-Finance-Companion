@@ -21,6 +21,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     private object PreferencesKeys {
         val BUDGET_LIMIT = doublePreferencesKey("budget_limit")
+        val LANGUAGE_CODE = stringPreferencesKey("language_code")
         val CURRENCY_CODE = stringPreferencesKey("currency_code")
         val DAILY_REMINDER_ENABLED = booleanPreferencesKey("daily_reminder_enabled")
         val REMINDER_TIME = stringPreferencesKey("reminder_time")
@@ -32,6 +33,11 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val budgetLimitFlow: Flow<Double> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.BUDGET_LIMIT] ?: 0.0
+        }
+
+    override val languageFlow: Flow<String> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.LANGUAGE_CODE] ?: "en"
         }
 
     override val currencyFlow: Flow<Currency> = dataStore.data
@@ -67,6 +73,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateBudgetLimit(limit: Double) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.BUDGET_LIMIT] = limit
+        }
+    }
+
+    override suspend fun updateLanguage(languageCode: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LANGUAGE_CODE] = languageCode
         }
     }
 

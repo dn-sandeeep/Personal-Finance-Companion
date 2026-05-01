@@ -31,8 +31,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter.formatAmount
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
+import com.sandeep.personalfinancecompanion.domain.model.Category
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 data class PieChartEntry(
+    val category: Category? = null,
     val label: String,
     val value: Double,
     val color: Color
@@ -93,7 +98,7 @@ fun PieChart(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Total",
+                    text = stringResource(R.string.label_net),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -105,6 +110,10 @@ fun PieChart(
         // Legend
         entries.forEach { entry ->
             val percentage = ((entry.value / total) * 100).toInt()
+            val translatedLabel = if (entry.category != null) {
+                "${entry.category.emoji} ${LocalizationUtils.getCategoryName(entry.category)}"
+            } else entry.label
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -120,7 +129,7 @@ fun PieChart(
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
-                    text = entry.label,
+                    text = translatedLabel,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f)
                 )

@@ -27,12 +27,13 @@ android {
         applicationId = "com.sandeep.personalfinancecompanion"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        resourceConfigurations += setOf("en", "hi")
     }
 
     buildTypes {
@@ -72,6 +73,7 @@ ksp {
 dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)

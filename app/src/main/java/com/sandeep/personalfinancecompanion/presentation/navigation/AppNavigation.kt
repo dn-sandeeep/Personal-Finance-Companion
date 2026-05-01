@@ -113,6 +113,7 @@ fun AppNavigation(
         composable(Screen.Debt.route) {
             val debtViewModel: com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementViewModel = hiltViewModel()
             com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementScreen(
+                //onBack = { navController.popBackStack() },
                 viewModel = debtViewModel
             )
         }

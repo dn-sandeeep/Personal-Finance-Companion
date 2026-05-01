@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserPreferencesRepository {
     val budgetLimitFlow: Flow<Double>
+    val languageFlow: Flow<String>
     val currencyFlow: Flow<Currency>
     val dailyReminderEnabledFlow: Flow<Boolean>
     val reminderTimeFlow: Flow<String>
@@ -13,6 +14,7 @@ interface UserPreferencesRepository {
     val noSpendTargetFlow: Flow<Int>
 
     suspend fun updateBudgetLimit(limit: Double)
+    suspend fun updateLanguage(languageCode: String)
     suspend fun updateCurrency(currency: Currency)
     suspend fun updateDailyReminderEnabled(enabled: Boolean)
     suspend fun updateReminderTime(time: String)

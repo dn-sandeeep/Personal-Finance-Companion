@@ -8,14 +8,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.sandeep.personalfinancecompanion.presentation.common.MagicEntryViewModel
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +63,7 @@ fun MagicEntryDialog(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Magic Entry Agent",
+                        stringResource(R.string.title_magic_entry),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -76,10 +76,10 @@ fun MagicEntryDialog(
                     value = uiState.inputText,
                     onValueChange = viewModel::onTextChanged,
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("What did you spend today?") },
+                    placeholder = { Text(stringResource(R.string.magic_entry_placeholder)) },
                     trailingIcon = {
                         IconButton(onClick = { /* TODO: Trigger Speech to Text */ }) {
-                            Icon(Icons.Default.Mic, contentDescription = "Voice Input")
+                            Icon(Icons.Default.Mic, contentDescription = stringResource(R.string.cd_voice_input))
                         }
                     },
                     shape = RoundedCornerShape(16.dp),
@@ -114,7 +114,7 @@ fun MagicEntryDialog(
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Column(Modifier.padding(16.dp)) {
-                                Text("Predicted Details:", style = MaterialTheme.typography.labelMedium)
+                                Text(stringResource(R.string.magic_entry_predicted_details), style = MaterialTheme.typography.labelMedium)
                                 Spacer(Modifier.height(8.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -128,7 +128,7 @@ fun MagicEntryDialog(
                                             fontWeight = FontWeight.Black
                                         )
                                         Text(
-                                            "${result.category.emoji} ${result.category.displayName}",
+                                            "${result.category.emoji} ${LocalizationUtils.getCategoryName(result.category)}",
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
@@ -147,7 +147,7 @@ fun MagicEntryDialog(
                                         },
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        Text("Save")
+                                        Text(stringResource(R.string.btn_save))
                                     }
                                 }
                             }
@@ -171,7 +171,7 @@ fun MagicEntryDialog(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Analyze with AI")
+                        Text(stringResource(R.string.magic_entry_analyze))
                     }
                 }
             }

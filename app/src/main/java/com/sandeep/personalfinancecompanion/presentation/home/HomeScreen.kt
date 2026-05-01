@@ -3,55 +3,22 @@ package com.sandeep.personalfinancecompanion.presentation.home
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,13 +28,15 @@ import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
-import com.sandeep.personalfinancecompanion.presentation.components.BudgetRing
-import com.sandeep.personalfinancecompanion.presentation.components.EmptyState
-import com.sandeep.personalfinancecompanion.presentation.components.WeeklyTrendChart
+import com.sandeep.personalfinancecompanion.presentation.components.*
+import com.sandeep.personalfinancecompanion.ui.theme.PrimaryAccent
 import com.sandeep.personalfinancecompanion.util.CurrencyFormatter
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import com.sandeep.personalfinancecompanion.R
+import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,7 +77,7 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = { viewModel.retry() }) {
-                    Text("Retry")
+                    Text(stringResource(R.string.btn_retry))
                 }
             }
         }
@@ -167,6 +136,8 @@ private fun DayDetailsContent(
     currency: Currency
 ) {
     val timeFormatter = remember { SimpleDateFormat("hh:mm a, MMM dd, yyyy", Locale.getDefault()) }
+    val translatedLabel = LocalizationUtils.translateDayName(dayLabel)
+        .let { LocalizationUtils.translateCategoryName(it) }
 
     Column(
         modifier = Modifier
@@ -175,7 +146,7 @@ private fun DayDetailsContent(
             .padding(bottom = 32.dp)
     ) {
         Text(
-            text = "Transactions for $dayLabel",
+            text = stringResource(R.string.msg_transactions_for, translatedLabel),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -186,8 +157,8 @@ private fun DayDetailsContent(
         if (transactions.isEmpty()) {
             EmptyState(
                 emoji = "📅",
-                title = "No transactions",
-                subtitle = "You didn't record any transactions on this day."
+                title = stringResource(R.string.msg_no_tx_title),
+                subtitle = stringResource(R.string.msg_no_transactions_day)
             )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -221,7 +192,7 @@ private fun DayDetailsContent(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = transaction.category.displayName,
+                                    text = LocalizationUtils.getCategoryName(transaction.category),
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -312,7 +283,7 @@ private fun HomeContent(
         ) {
             Column {
                 Text(
-                    text = "TOTAL BALANCE",
+                    text = stringResource(R.string.label_total_balance),
                     style = MaterialTheme.typography.labelSmall,
                     color = colorScheme.onPrimary.copy(alpha = 0.7f),
                     letterSpacing = 1.5.sp
@@ -354,7 +325,7 @@ private fun HomeContent(
                             Spacer(modifier = Modifier.width(6.dp))
                             Column {
                                 Text(
-                                    text = "MONTHLY\nINCOME",
+                                    text = stringResource(R.string.label_monthly_income),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onPrimary.copy(alpha = 0.7f),
                                     lineHeight = 14.sp,
@@ -393,7 +364,7 @@ private fun HomeContent(
                             Spacer(modifier = Modifier.width(6.dp))
                             Column {
                                 Text(
-                                    text = "MONTHLY\nEXPENSES",
+                                    text = stringResource(R.string.label_monthly_expenses),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onPrimary.copy(alpha = 0.7f),
                                     lineHeight = 14.sp,
@@ -435,17 +406,11 @@ private fun HomeContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Weekly Trend",
+                        text = stringResource(R.string.label_weekly_trend),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
-//                    Text(
-//                        text = "+12.5% ↗",
-//                        style = MaterialTheme.typography.bodySmall,
-//                        color = colorScheme.secondary,
-//                        fontWeight = FontWeight.SemiBold
-//                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -483,13 +448,13 @@ private fun HomeContent(
                 ) {
                     Column {
                         Text(
-                            text = "Savings Goal",
+                            text = stringResource(R.string.label_savings_goal),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onSurface
                         )
                         Text(
-                            text = "Monthly Budget Tracker",
+                            text = stringResource(R.string.label_budget_tracker),
                             style = MaterialTheme.typography.bodySmall,
                             color = colorScheme.onSurfaceVariant
                         )
@@ -497,7 +462,7 @@ private fun HomeContent(
                     IconButton(onClick = { showBudgetDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Budget",
+                            contentDescription = stringResource(R.string.cd_edit_budget),
                             tint = colorScheme.primary
                         )
                     }
@@ -513,14 +478,14 @@ private fun HomeContent(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "No budget set yet 💸",
+                            text = stringResource(R.string.msg_no_budget_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Set a monthly limit to track your spending discipline.",
+                            text = stringResource(R.string.msg_no_budget_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -530,7 +495,7 @@ private fun HomeContent(
                             onClick = { showBudgetDialog = true },
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Set Monthly Budget")
+                            Text(stringResource(R.string.btn_set_monthly_budget))
                         }
                     }
                 } else {
@@ -551,83 +516,6 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // ──── Lending & Debts Summary Card ────
-//        Card(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(horizontal = 0.dp)
-//                .clickable { onNavigateToDebt() },
-//            shape = RoundedCornerShape(15.dp),
-//            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-//            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-//        ) {
-//            Column(modifier = Modifier.padding(20.dp)) {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Row(verticalAlignment = Alignment.CenterVertically) {
-//                        Icon(
-//                            imageVector = Icons.Default.Handshake,
-//                            contentDescription = null,
-//                            tint = colorScheme.primary,
-//                            modifier = Modifier.size(20.dp)
-//                        )
-//                        Spacer(modifier = Modifier.width(8.dp))
-//                        Text(
-//                            text = "Lending & Debts",
-//                            style = MaterialTheme.typography.titleMedium,
-//                            fontWeight = FontWeight.Bold,
-//                            color = colorScheme.onSurface
-//                        )
-//                    }
-//                    Icon(
-//                        imageVector = Icons.Default.ChevronRight,
-//                        contentDescription = "View Details",
-//                        tint = colorScheme.onSurfaceVariant
-//                    )
-//                }
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-//                ) {
-//                    // Lent Summary
-//                    Column(modifier = Modifier.weight(1f)) {
-//                        Text(
-//                            text = "Owed to You",
-//                            style = MaterialTheme.typography.labelSmall,
-//                            color = Color(0xFF2E7D32).copy(alpha = 0.7f)
-//                        )
-//                        Text(
-//                            text = CurrencyFormatter.formatAmount(state.totalLent, state.selectedCurrency),
-//                            style = MaterialTheme.typography.titleMedium,
-//                            fontWeight = FontWeight.Bold,
-//                            color = Color(0xFF2E7D32)
-//                        )
-//                    }
-//
-//                    // Borrowed Summary
-//                    Column(modifier = Modifier.weight(1f)) {
-//                        Text(
-//                            text = "You Owe",
-//                            style = MaterialTheme.typography.labelSmall,
-//                            color = Color(0xFFC62828).copy(alpha = 0.7f)
-//                        )
-//                        Text(
-//                            text = CurrencyFormatter.formatAmount(state.totalBorrowed, state.selectedCurrency),
-//                            style = MaterialTheme.typography.titleMedium,
-//                            fontWeight = FontWeight.Bold,
-//                            color = Color(0xFFC62828)
-//                        )
-//                    }
-//                }
-//            }
-//        }
-
         // ──── Category Breakdown ────
         Row(
             modifier = Modifier
@@ -637,14 +525,14 @@ private fun HomeContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Category Breakdown",
+                text = stringResource(R.string.label_category_breakdown),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
             )
             TextButton(onClick = onNavigateToTransactions) {
                 Text(
-                    text = "VIEW ALL",
+                    text = stringResource(R.string.label_view_all),
                     style = MaterialTheme.typography.labelSmall,
                     color = colorScheme.primary,
                     fontWeight = FontWeight.Bold,
@@ -658,8 +546,8 @@ private fun HomeContent(
         if (state.categoryExpenses.isEmpty()) {
             EmptyState(
                 emoji = "💸",
-                title = "No transactions yet",
-                subtitle = "Tap + to add your first one!"
+                title = stringResource(R.string.msg_no_tx_title),
+                subtitle = stringResource(R.string.msg_no_tx_subtitle)
             )
         } else {
             // Premium Segmented Bar Summary
@@ -753,7 +641,7 @@ private fun CategoryBreakdownItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stats.category.displayName,
+                        text = LocalizationUtils.getCategoryName(stats.category),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
@@ -774,7 +662,7 @@ private fun CategoryBreakdownItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${stats.transactionCount} transactions",
+                        text = stringResource(R.string.label_num_transactions, stats.transactionCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = colorScheme.onSurfaceVariant
                     )
@@ -839,27 +727,39 @@ fun EditBudgetDialog(
     onConfirm: (Double) -> Unit
 ) {
     var budgetInput by remember { mutableStateOf(currentLimit.toInt().toString()) }
+    var errorText by remember { mutableStateOf<String?>(null) }
+
+    val errorInvalidAmount = stringResource(R.string.error_invalid_amount)
+    val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Edit Monthly Budget")
+            Text(text = stringResource(R.string.btn_edit_monthly_budget))
         },
         text = {
             Column {
                 Text(
-                    text = "Set a new monthly spending limit to track against.",
+                    text = stringResource(R.string.msg_edit_budget_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = budgetInput,
-                    onValueChange = { newValue: String -> budgetInput = newValue },
-                    label = { Text("Amount (${currency.symbol})") },
+                    onValueChange = { newValue: String -> 
+                        val filtered = newValue.filter { it.isDigit() || it == '.' }
+                        if (filtered.length <= 13) {
+                            budgetInput = filtered
+                            errorText = null
+                        }
+                    },
+                    label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = errorText != null,
+                    supportingText = errorText?.let { { Text(it) } }
                 )
             }
         },
@@ -867,20 +767,27 @@ fun EditBudgetDialog(
             Button(
                 onClick = {
                     val newLimit = budgetInput.toDoubleOrNull()
-                    if (newLimit != null && newLimit > 0) {
-                        onConfirm(newLimit)
+                    when {
+                        newLimit == null || newLimit <= 0 -> {
+                            errorText = errorInvalidAmount
+                        }
+                        newLimit > 1000000000.0 -> {
+                            errorText = errorAmountTooLarge
+                        }
+                        else -> {
+                            onConfirm(newLimit)
+                        }
                     }
                 }
             ) {
-                Text("Save")
+                Text(stringResource(R.string.btn_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.btn_cancel))
             }
         },
         containerColor = MaterialTheme.colorScheme.primaryContainer
     )
 }
-

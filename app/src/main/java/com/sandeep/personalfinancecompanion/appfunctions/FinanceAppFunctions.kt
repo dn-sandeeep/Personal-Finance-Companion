@@ -20,7 +20,7 @@ class FinanceAppFunctions @Inject constructor(
 ) {
 
     /**
-     * Records a new expense or spending transaction in the Track Spend finance tracker.
+     * Records a new expense or spending transaction in the Gandhi Money finance tracker.
      * Use this function when the user mentions they spent money, paid for something, 
      * or made a purchase (e.g., "I spent 500 on pizza").
      * 
@@ -56,7 +56,7 @@ class FinanceAppFunctions @Inject constructor(
     }
 
     /**
-     * Records a new income or earnings transaction in the Track Spend tracker.
+     * Records a new income or earnings transaction in the Gandhi Money tracker.
      * Use this function when the user mentions they received money, earned a salary, 
      * got a bonus, or received a gift (e.g., "I got my salary of 50000").
      * 

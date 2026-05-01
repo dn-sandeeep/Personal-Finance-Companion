@@ -13,12 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.sandeep.personalfinancecompanion.R
 
 @Composable
 fun EmptyState(
     emoji: String = "📊",
-    title: String = "No data yet",
-    subtitle: String = "Add your first transaction to get started!",
+    title: String = stringResource(R.string.msg_no_tx_title),
+    subtitle: String = stringResource(R.string.msg_no_tx_subtitle),
     modifier: Modifier = Modifier
 ) {
     Column(
