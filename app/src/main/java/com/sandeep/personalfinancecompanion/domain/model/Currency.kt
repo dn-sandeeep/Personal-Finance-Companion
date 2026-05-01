@@ -16,7 +16,10 @@ enum class Currency(
     CAD("CAD", "C$", "Canadian Dollar", "🇨🇦", 61.0),
     CHF("CHF", "Fr", "Swiss Franc", "🇨🇭", 110.0),
     CNY("CNY", "¥", "Chinese Yuan", "🇨🇳", 11.5),
-    AED("AED", "د.إ", "UAE Dirham", "🇦🇪", 22.6);
+    AED("AED", "د.إ", "UAE Dirham", "🇦🇪", 22.6),
+    NPR("NPR", "Rs", "Nepalese Rupee", "🇳🇵", 0.62),
+    BDT("BDT", "৳", "Bangladeshi Taka", "🇧🇩", 0.76),
+    AFN("AFN", "؋", "Afghan Afghani", "🇦🇫", 1.17);
 
     companion object {
         fun fromCode(code: String?): Currency {

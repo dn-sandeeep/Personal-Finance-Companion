@@ -33,7 +33,7 @@
     <string name="btn_edit_monthly_budget">Edit Monthly Budget</string>
     <string name="label_amount">Amount (%s)</string>
     <string name="label_amount_simple">Amount</string>
-    <string name="label_total_balance">TOTAL BALANCE</string>
+    <string name="label_total_balance">.TOTAL BALANCE</string>
     <string name="label_monthly_income">MONTHLY\nINCOME</string>
     <string name="label_monthly_expenses">MONTHLY\nEXPENSES</string>
     <string name="label_weekly_trend">Weekly Trend</string>
