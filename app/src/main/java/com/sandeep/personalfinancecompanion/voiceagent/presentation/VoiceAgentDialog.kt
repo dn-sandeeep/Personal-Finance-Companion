@@ -42,6 +42,8 @@ fun VoiceAgentDialog(
         onResult = { isGranted ->
             if (isGranted) {
                 viewModel.startListening()
+            } else {
+                viewModel.onAudioPermissionDenied()
             }
         }
     )
@@ -49,6 +51,12 @@ fun VoiceAgentDialog(
     // Initialize voice manager
     LaunchedEffect(Unit) {
         viewModel.initVoiceManager(context)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopListening()
+        }
     }
 
     // Close on success

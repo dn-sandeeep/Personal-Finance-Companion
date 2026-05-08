@@ -108,6 +108,13 @@ class VoiceAgentViewModel @Inject constructor(
         voiceManager?.stopListening()
     }
 
+    fun onAudioPermissionDenied() {
+        _uiState.value = _uiState.value.copy(
+            isListening = false,
+            errorMessage = "Microphone permission is required to use voice input."
+        )
+    }
+
     fun backToEdit() {
         _uiState.value = _uiState.value.copy(
             parsedResults = emptyList(),
