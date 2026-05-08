@@ -23,6 +23,7 @@ if (propertiesFile.exists()) {
     properties.load(propertiesFile.inputStream())
 }
 val geminiApiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
+val clarityProjectId = properties.getProperty("CLARITY_PROJECT_ID") ?: ""
 
 android {
     namespace = "com.sandeep.personalfinancecompanion"
@@ -38,6 +39,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("String", "CLARITY_PROJECT_ID", "\"${clarityProjectId.escapeBuildConfigString()}\"")
         resourceConfigurations += setOf("en", "hi")
     }
 
@@ -129,6 +131,10 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
 
+    // Microsoft Clarity
+    //implementation(libs.clarity.compose)
+    implementation("com.microsoft.clarity:clarity-compose:3.8.1")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -137,4 +143,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+fun String.escapeBuildConfigString(): String {
+    return replace("\\", "\\\\").replace("\"", "\\\"")
 }

@@ -39,6 +39,9 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.microsoft.clarity.Clarity
+import com.microsoft.clarity.ClarityConfig
+import com.microsoft.clarity.models.LogLevel
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsEvent
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsParam
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
@@ -64,6 +67,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val clarityConfig = ClarityConfig(
+            projectId = BuildConfig.CLARITY_PROJECT_ID,
+            logLevel = LogLevel.Info
+        )
+        Clarity.initialize(applicationContext, clarityConfig)
         
         // Apply saved language preference before UI is set
         runBlocking {
