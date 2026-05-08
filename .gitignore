@@ -8,6 +8,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/google-services.json
 /doc/
 PROJECT_NOTES.md
 # Build artifacts

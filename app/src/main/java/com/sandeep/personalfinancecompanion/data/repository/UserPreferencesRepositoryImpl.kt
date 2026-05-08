@@ -28,6 +28,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val BUDGET_ALERTS_ENABLED = booleanPreferencesKey("budget_alerts_enabled")
         val GOAL_REMINDERS_ENABLED = booleanPreferencesKey("goal_reminders_enabled")
         val NO_SPEND_TARGET = intPreferencesKey("no_spend_target")
+        val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
     }
 
     override val budgetLimitFlow: Flow<Double> = dataStore.data
@@ -68,6 +69,11 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val noSpendTargetFlow: Flow<Int> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.NO_SPEND_TARGET] ?: 30
+        }
+
+    override val analyticsEnabledFlow: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ANALYTICS_ENABLED] ?: false
         }
 
     override suspend fun updateBudgetLimit(limit: Double) {
@@ -115,6 +121,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateNoSpendTarget(days: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.NO_SPEND_TARGET] = days
+        }
+    }
+
+    override suspend fun updateAnalyticsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ANALYTICS_ENABLED] = enabled
         }
     }
 }

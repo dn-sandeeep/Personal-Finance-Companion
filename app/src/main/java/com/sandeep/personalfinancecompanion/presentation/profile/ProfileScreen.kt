@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -219,6 +220,26 @@ fun ProfileScreen(
                     icon = Icons.Default.Download,
                     onClick = { viewModel.exportData() },
                     isUnderDevelopment = false
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(R.string.label_privacy),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            SettingsCard {
+                SettingsToggleItem(
+                    title = stringResource(R.string.label_usage_analytics),
+                    description = stringResource(R.string.desc_usage_analytics),
+                    icon = Icons.Default.QueryStats,
+                    checked = state.analyticsEnabled,
+                    onCheckedChange = { viewModel.updateAnalyticsEnabled(it) }
                 )
             }
 

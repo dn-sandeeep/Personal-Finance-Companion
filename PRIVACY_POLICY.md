@@ -1,6 +1,6 @@
 # Privacy Policy for Personal Finance Companion
 
-**Last Updated: April 09, 2026**
+**Last Updated: May 08, 2026**
 
 This Privacy Policy describes how **Personal Finance Companion** ("the App") handles your information. Your privacy is our top priority, and we have designed the App to protect your financial data.
 
@@ -15,8 +15,10 @@ The App allows you to manually enter financial data, including:
 
 **This data is stored locally on your device only.** We do not transmit this data to any external servers or third parties.
 
-### b. Automatically Collected Information
-The App does not automatically collect any personal information, device identifiers, or usage analytics.
+### b. Usage and Crash Analytics
+The App can collect privacy-safe usage analytics and crash reports through Firebase Analytics and Firebase Crashlytics only if you enable the "Usage & Crash Analytics" setting in the App. Analytics helps us understand which features are used most, where crashes happen, and where the App can be improved.
+
+We do not intentionally send financial amounts, notes, person names, raw voice text, transaction IDs, goal names, or exact financial details in analytics events or crash report metadata.
 
 ## 2. Permissions
 The App may request the following permissions for specific features:
@@ -28,12 +30,13 @@ All your financial data is stored securely on your device's internal storage usi
 Because your data stays on your device, we do not have access to it. If you delete the App, your local data will also be deleted unless you have used the "Export Data" feature to save a backup on your device.
 
 ## 4. Third-Party Sharing
-We **do not** share, sell, or trade any of your personal or financial data with third-party companies, advertisers, or analytics providers.
+We **do not** share, sell, or trade any of your personal or financial data with advertisers or data brokers. If you enable Usage & Crash Analytics, privacy-safe app usage events and crash reports are processed by Firebase Analytics and Firebase Crashlytics.
 
 ## 5. Your Choices and Controls
 - **Data Export:** You can export your data to a CSV file at any time via the Profile settings.
 - **Data Deletion:** You can delete specific transactions or reset all data by clearing the App's storage in your device settings.
 - **Permission Control:** You can enable or disable notifications at any time from the App settings or Android system settings.
+- **Usage & Crash Analytics:** You can enable or disable usage analytics and crash reporting at any time from the Profile settings.
 
 ## 6. Future Changes
 We may update this Privacy Policy from time to time. Any changes will be reflected in the "Last Updated" date at the top of this document.

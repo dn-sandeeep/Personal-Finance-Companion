@@ -183,6 +183,9 @@
     <string name="label_goal_progress">Goal Progress</string>
     <string name="desc_goal_progress">Periodic updates on your savings goals</string>
     <string name="label_account_settings">Account Settings</string>
+    <string name="label_privacy">Privacy</string>
+    <string name="label_usage_analytics">Usage &amp; Crash Analytics</string>
+    <string name="desc_usage_analytics">Share privacy-safe usage and crash reports to improve the app</string>
     <string name="label_language">Language</string>
     <string name="title_select_language">Select Language</string>
     <string name="label_currency">Currency</string>

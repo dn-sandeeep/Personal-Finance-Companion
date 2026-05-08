@@ -46,6 +46,9 @@ fun HomeScreen(
     onNavigateToDebt: () -> Unit,
     onAddIncome: () -> Unit,
     onAddExpense: () -> Unit,
+    onBudgetDialogOpened: () -> Unit = {},
+    onBudgetSaved: () -> Unit = {},
+    onCategoryBreakdownSelected: (Category) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,11 +98,14 @@ fun HomeScreen(
                     viewModel.selectDay(dayOfWeek)
                 },
                 onCategorySelected = { category ->
+                    onCategoryBreakdownSelected(category)
                     viewModel.selectCategory(category)
                 },
                 onUpdateBudget = { newLimit ->
+                    onBudgetSaved()
                     viewModel.updateBudgetLimit(newLimit)
-                }
+                },
+                onBudgetDialogOpened = onBudgetDialogOpened
             )
 
             if (state.selectedDayTransactions != null || state.selectedCategoryTransactions != null) {
@@ -243,7 +249,8 @@ private fun HomeContent(
     onAddExpense: () -> Unit,
     onDaySelected: (Int) -> Unit,
     onCategorySelected: (Category) -> Unit,
-    onUpdateBudget: (Double) -> Unit
+    onUpdateBudget: (Double) -> Unit,
+    onBudgetDialogOpened: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var showBudgetDialog by remember { mutableStateOf(false) }
@@ -463,7 +470,10 @@ private fun HomeContent(
                             color = colorScheme.onSurfaceVariant
                         )
                     }
-                    IconButton(onClick = { showBudgetDialog = true }) {
+                    IconButton(onClick = {
+                        onBudgetDialogOpened()
+                        showBudgetDialog = true
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(R.string.cd_edit_budget),
@@ -496,7 +506,10 @@ private fun HomeContent(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { showBudgetDialog = true },
+                            onClick = {
+                                onBudgetDialogOpened()
+                                showBudgetDialog = true
+                            },
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(stringResource(R.string.btn_set_monthly_budget))

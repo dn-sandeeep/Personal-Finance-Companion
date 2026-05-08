@@ -183,6 +183,9 @@
     <string name="label_goal_progress">लक्ष्य प्रगति</string>
     <string name="desc_goal_progress">आपकी बचत लक्ष्यों पर समय-समय पर अपडेट</string>
     <string name="label_account_settings">खाता सेटिंग्स</string>
+    <string name="label_privacy">गोपनीयता</string>
+    <string name="label_usage_analytics">उपयोग और क्रैश एनालिटिक्स</string>
+    <string name="desc_usage_analytics">ऐप को बेहतर बनाने के लिए गोपनीयता-सुरक्षित उपयोग और क्रैश रिपोर्ट साझा करें</string>
     <string name="label_language">भाषा (Language)</string>
     <string name="title_select_language">भाषा चुनें</string>
     <string name="label_currency">मुद्रा (Currency)</string>

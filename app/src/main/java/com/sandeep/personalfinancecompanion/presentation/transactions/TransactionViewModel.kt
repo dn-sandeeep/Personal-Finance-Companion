@@ -2,6 +2,9 @@ package com.sandeep.personalfinancecompanion.presentation.transactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsEvent
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsParam
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.Currency
@@ -36,7 +39,8 @@ class TransactionViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val repository: TransactionRepository,
     private val preferencesRepository: UserPreferencesRepository,
-    private val notificationHelper: NotificationHelper
+    private val notificationHelper: NotificationHelper,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -83,6 +87,10 @@ class TransactionViewModel @Inject constructor(
 
     fun onFilterChanged(filter: TransactionType?) {
         _selectedFilter.value = filter
+        analyticsTracker.trackEvent(
+            AnalyticsEvent.TRANSACTION_FILTER_CHANGED,
+            mapOf(AnalyticsParam.FILTER_TYPE to (filter?.name?.lowercase() ?: "all"))
+        )
     }
 
     fun addTransaction(

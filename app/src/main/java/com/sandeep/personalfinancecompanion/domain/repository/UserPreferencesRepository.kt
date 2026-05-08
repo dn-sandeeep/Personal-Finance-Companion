@@ -12,6 +12,7 @@ interface UserPreferencesRepository {
     val budgetAlertsEnabledFlow: Flow<Boolean>
     val goalRemindersEnabledFlow: Flow<Boolean>
     val noSpendTargetFlow: Flow<Int>
+    val analyticsEnabledFlow: Flow<Boolean>
 
     suspend fun updateBudgetLimit(limit: Double)
     suspend fun updateLanguage(languageCode: String)
@@ -21,4 +22,5 @@ interface UserPreferencesRepository {
     suspend fun updateBudgetAlertsEnabled(enabled: Boolean)
     suspend fun updateGoalRemindersEnabled(enabled: Boolean)
     suspend fun updateNoSpendTarget(days: Int)
+    suspend fun updateAnalyticsEnabled(enabled: Boolean)
 }

@@ -6,6 +6,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
+import com.sandeep.personalfinancecompanion.analytics.CrashReporter
+import com.sandeep.personalfinancecompanion.analytics.FirebaseCrashReporter
+import com.sandeep.personalfinancecompanion.analytics.FirebaseAnalyticsTracker
 import com.sandeep.personalfinancecompanion.data.local.AppDatabase
 import com.sandeep.personalfinancecompanion.data.local.dao.TransactionDao
 import com.sandeep.personalfinancecompanion.data.local.dao.GoalDao
@@ -98,5 +102,21 @@ object AppModule {
         parser: SmartTransactionParser
     ): SmartParserRepository {
         return SmartParserRepositoryImpl(parser)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAnalyticsTracker(
+        tracker: FirebaseAnalyticsTracker
+    ): AnalyticsTracker {
+        return tracker
+    }
+
+    @Provides
+    @Singleton
+    fun provideCrashReporter(
+        reporter: FirebaseCrashReporter
+    ): CrashReporter {
+        return reporter
     }
 }

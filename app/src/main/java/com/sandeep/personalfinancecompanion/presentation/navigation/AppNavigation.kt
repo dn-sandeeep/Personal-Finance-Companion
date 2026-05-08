@@ -13,6 +13,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsEvent
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsParam
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.presentation.goal.GoalScreen
 import com.sandeep.personalfinancecompanion.presentation.home.HomeScreen
@@ -27,7 +30,8 @@ fun AppNavigation(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
     innerPadding: androidx.compose.foundation.layout.PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    analyticsTracker: AnalyticsTracker
 ) {
     val transactionViewModel: TransactionViewModel = hiltViewModel()
 
@@ -68,6 +72,13 @@ fun AppNavigation(
             HomeScreen(
                 innerPadding = innerPadding,
                 onNavigateToTransactions = {
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.NAV_ITEM_SELECTED,
+                        mapOf(
+                            AnalyticsParam.SOURCE to "home_category_breakdown",
+                            AnalyticsParam.ROUTE to Screen.Transactions.route
+                        )
+                    )
                     navController.navigate(Screen.Transactions.route) {
                         popUpTo(Screen.Home.route) { saveState = true }
                         launchSingleTop = true
@@ -75,13 +86,34 @@ fun AppNavigation(
                     }
                 },
                 onAddIncome = {
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.ADD_TRANSACTION_CLICKED,
+                        mapOf(AnalyticsParam.SOURCE to "home_income", AnalyticsParam.TYPE to "income")
+                    )
                     navController.navigate(Screen.AddTransaction.createRoute("INCOME"))
                 },
                 onAddExpense = {
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.ADD_TRANSACTION_CLICKED,
+                        mapOf(AnalyticsParam.SOURCE to "home_expense", AnalyticsParam.TYPE to "expense")
+                    )
                     navController.navigate(Screen.AddTransaction.createRoute("EXPENSE"))
                 },
                 onNavigateToDebt = {
-                    navController.navigate(Screen.Debt.route)}
+                    analyticsTracker.trackEvent(AnalyticsEvent.DEBT_OPENED)
+                    navController.navigate(Screen.Debt.route)},
+                onBudgetDialogOpened = {
+                    analyticsTracker.trackEvent(AnalyticsEvent.BUDGET_DIALOG_OPENED)
+                },
+                onBudgetSaved = {
+                    analyticsTracker.trackEvent(AnalyticsEvent.BUDGET_SAVED)
+                },
+                onCategoryBreakdownSelected = { category ->
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.CATEGORY_SELECTED,
+                        mapOf(AnalyticsParam.CATEGORY to category.name.lowercase())
+                    )
+                }
             )
         }
 
@@ -90,6 +122,10 @@ fun AppNavigation(
                 innerPadding = innerPadding,
                 snackbarHostState = snackbarHostState,
                 onAddTransaction = {
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.ADD_TRANSACTION_CLICKED,
+                        mapOf(AnalyticsParam.SOURCE to "transactions")
+                    )
                     navController.navigate(Screen.AddTransaction.createRoute())
                 },
                 onEditTransaction = { transactionId ->
@@ -151,6 +187,13 @@ fun AppNavigation(
                 TransactionType.EXPENSE
             }
 
+            androidx.compose.runtime.LaunchedEffect(initialType) {
+                analyticsTracker.trackEvent(
+                    AnalyticsEvent.TRANSACTION_ADD_STARTED,
+                    mapOf(AnalyticsParam.TYPE to initialType.name.lowercase())
+                )
+            }
+
             AddEditTransactionScreen(
                 innerPadding = innerPadding,
                 initialType = initialType,
@@ -162,6 +205,13 @@ fun AppNavigation(
                         transaction.notes,
                         transaction.date,
                         transaction.peerName
+                    )
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.TRANSACTION_ADD_SAVED,
+                        mapOf(
+                            AnalyticsParam.TYPE to transaction.type.name.lowercase(),
+                            AnalyticsParam.CATEGORY to transaction.category.name.lowercase()
+                        )
                     )
                     navController.popBackStack()
                 },
@@ -192,11 +242,22 @@ fun AppNavigation(
         ) { backStackEntry ->
             val transactionId = backStackEntry.arguments?.getString("transactionId")
 
+            androidx.compose.runtime.LaunchedEffect(transactionId) {
+                analyticsTracker.trackEvent(AnalyticsEvent.TRANSACTION_EDIT_OPENED)
+            }
+
             AddEditTransactionScreen(
                 innerPadding = innerPadding,
                 transactionId = transactionId,
                 onSave = { transaction ->
                     transactionViewModel.updateTransaction(transaction)
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvent.TRANSACTION_EDIT_SAVED,
+                        mapOf(
+                            AnalyticsParam.TYPE to transaction.type.name.lowercase(),
+                            AnalyticsParam.CATEGORY to transaction.category.name.lowercase()
+                        )
+                    )
                     navController.popBackStack()
                 },
                 onBack = { navController.popBackStack() },

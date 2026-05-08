@@ -39,6 +39,9 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsEvent
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsParam
+import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
 import com.sandeep.personalfinancecompanion.appfunctions.AgentLifecycleManager
 import com.sandeep.personalfinancecompanion.presentation.navigation.AppNavigation
 import com.sandeep.personalfinancecompanion.presentation.navigation.Screen
@@ -57,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     @Inject lateinit var agentLifecycleManager: AgentLifecycleManager
+    @Inject lateinit var analyticsTracker: AnalyticsTracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,14 +78,14 @@ class MainActivity : AppCompatActivity() {
             // Register AI Agent capabilities for Android 16+ discovery
             agentLifecycleManager.registerAgentCapabilities(this)
 
-            PersonalFinanceCompanionTheme { FinanceApp() }
+            PersonalFinanceCompanionTheme { FinanceApp(analyticsTracker = analyticsTracker) }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FinanceApp() {
+fun FinanceApp(analyticsTracker: AnalyticsTracker) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -91,6 +95,12 @@ fun FinanceApp() {
 
     // Show bottom bar only on main tabs
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }
+
+    LaunchedEffect(currentRoute) {
+        currentRoute?.let { route ->
+            analyticsTracker.trackScreen(screenNameForRoute(route), route)
+        }
+    }
 
     val topBarTitle =
         when {
@@ -142,6 +152,7 @@ fun FinanceApp() {
 //                                                        navController.navigate(
 //                                                                Screen.Profile.route
 //                                                        ) { launchSingleTop = true }
+                                    analyticsTracker.trackEvent(AnalyticsEvent.PROFILE_OPENED)
                                     navController.navigate(Screen.Profile.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
                                             saveState = true
@@ -195,6 +206,10 @@ fun FinanceApp() {
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
+                                analyticsTracker.trackEvent(
+                                    AnalyticsEvent.NAV_ITEM_SELECTED,
+                                    mapOf(AnalyticsParam.ROUTE to item.route)
+                                )
                                 navController.navigate(item.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
@@ -242,6 +257,7 @@ fun FinanceApp() {
                     FloatingActionButton(
                         onClick = {
                             voiceViewModel.clear()
+                            analyticsTracker.trackEvent(AnalyticsEvent.VOICE_AGENT_OPENED)
                             showVoiceAgent = true
                         },
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -258,6 +274,10 @@ fun FinanceApp() {
                     // Existing Add Transaction FAB
                     FloatingActionButton(
                         onClick = {
+                            analyticsTracker.trackEvent(
+                                AnalyticsEvent.ADD_TRANSACTION_CLICKED,
+                                mapOf(AnalyticsParam.SOURCE to "fab")
+                            )
                             navController.navigate(Screen.AddTransaction.createRoute())
                         },
                         containerColor = PrimaryAccent,
@@ -276,7 +296,22 @@ fun FinanceApp() {
         AppNavigation(
             navController = navController,
             snackbarHostState = snackbarHostState,
-            innerPadding = innerPadding
+            innerPadding = innerPadding,
+            analyticsTracker = analyticsTracker
         )
+    }
+}
+
+private fun screenNameForRoute(route: String): String {
+    return when {
+        route == Screen.Home.route -> "home"
+        route == Screen.Transactions.route -> "transactions"
+        route == Screen.Goals.route -> "goals"
+        route == Screen.Insights.route -> "insights"
+        route == Screen.Profile.route -> "profile"
+        route == Screen.Debt.route -> "debt"
+        route.startsWith("add_transaction") -> "add_transaction"
+        route.startsWith("edit_transaction") -> "edit_transaction"
+        else -> route
     }
 }
