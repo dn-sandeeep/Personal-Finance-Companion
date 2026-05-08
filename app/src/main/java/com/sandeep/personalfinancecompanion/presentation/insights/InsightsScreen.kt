@@ -39,6 +39,7 @@ import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 
 @Composable
 fun InsightsScreen(
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -83,13 +84,17 @@ fun InsightsScreen(
         }
 
         else -> {
-            InsightsContent(state = state, currency = currency)
+            InsightsContent(innerPadding = innerPadding, state = state, currency = currency)
         }
     }
 }
 
 @Composable
-private fun InsightsContent(state: InsightsState, currency: Currency) {
+private fun InsightsContent(
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    state: InsightsState,
+    currency: Currency
+) {
     val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
@@ -97,7 +102,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 10.dp)
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding() + 10.dp))
 
         // Quick Stats Row
         Row(
@@ -204,7 +209,7 @@ private fun InsightsContent(state: InsightsState, currency: Currency) {
             )
         }
 
-        Spacer(modifier = Modifier.height(100.dp)) // Bottom nav padding
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 100.dp))
     }
 }
 

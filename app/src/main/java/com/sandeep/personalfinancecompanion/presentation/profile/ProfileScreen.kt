@@ -71,6 +71,7 @@ import androidx.core.os.LocaleListCompat
 
 @Composable
 fun ProfileScreen(
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
     onBack: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -134,6 +135,8 @@ fun ProfileScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        
         ProfileHeader()
 
         Column(
@@ -221,7 +224,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = stringResource(R.string.label_version),
@@ -229,6 +232,7 @@ fun ProfileScreen(
                     color = MaterialTheme.colorScheme.outline
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 

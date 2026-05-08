@@ -41,6 +41,7 @@ import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    innerPadding: PaddingValues,
     onNavigateToTransactions: () -> Unit,
     onNavigateToDebt: () -> Unit,
     onAddIncome: () -> Unit,
@@ -84,6 +85,7 @@ fun HomeScreen(
 
         is HomeUiState.Success -> {
             HomeContent(
+                innerPadding = innerPadding,
                 state = state,
                 onNavigateToTransactions = onNavigateToTransactions,
                 onNavigateToDebt = onNavigateToDebt,
@@ -233,6 +235,7 @@ private fun DayDetailsContent(
 
 @Composable
 private fun HomeContent(
+    innerPadding: PaddingValues,
     state: HomeUiState.Success,
     onNavigateToTransactions: () -> Unit,
     onNavigateToDebt: () -> Unit,
@@ -262,8 +265,9 @@ private fun HomeContent(
             .fillMaxSize()
             .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 10.dp, vertical = 10.dp)
+            .padding(horizontal = 10.dp)
     ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding() + 10.dp))
 
         // ──── Balance Card ────
         Box(
@@ -589,9 +593,9 @@ private fun HomeContent(
             }
             Spacer(modifier = Modifier.height(15.dp))
         }
-    }
 
-    Spacer(modifier = Modifier.height(100.dp)) // Bottom nav padding
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 100.dp))
+    }
 }
 
 

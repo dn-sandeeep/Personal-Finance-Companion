@@ -8,6 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,6 +37,7 @@ import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTransactionScreen(
+    innerPadding: PaddingValues,
     transactionId: String? = null,
     initialType: TransactionType = TransactionType.EXPENSE,
     onSave: (Transaction) -> Unit,
@@ -84,10 +90,12 @@ fun AddEditTransactionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding() + 16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -297,6 +305,6 @@ fun AddEditTransactionScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 40.dp))
     }
 }

@@ -26,6 +26,7 @@ import com.sandeep.personalfinancecompanion.presentation.transactions.Transactio
 fun AppNavigation(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
     modifier: Modifier = Modifier
 ) {
     val transactionViewModel: TransactionViewModel = hiltViewModel()
@@ -65,6 +66,7 @@ fun AppNavigation(
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
+                innerPadding = innerPadding,
                 onNavigateToTransactions = {
                     navController.navigate(Screen.Transactions.route) {
                         popUpTo(Screen.Home.route) { saveState = true }
@@ -85,6 +87,7 @@ fun AppNavigation(
 
         composable(Screen.Transactions.route) {
             TransactionListScreen(
+                innerPadding = innerPadding,
                 snackbarHostState = snackbarHostState,
                 onAddTransaction = {
                     navController.navigate(Screen.AddTransaction.createRoute())
@@ -97,15 +100,16 @@ fun AppNavigation(
         }
 
         composable(Screen.Goals.route) {
-            GoalScreen()
+            GoalScreen(innerPadding = innerPadding)
         }
 
         composable(Screen.Insights.route) {
-            InsightsScreen()
+            InsightsScreen(innerPadding = innerPadding)
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
+                innerPadding = innerPadding,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -113,6 +117,7 @@ fun AppNavigation(
         composable(Screen.Debt.route) {
             val debtViewModel: com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementViewModel = hiltViewModel()
             com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementScreen(
+                innerPadding = innerPadding,
                 //onBack = { navController.popBackStack() },
                 viewModel = debtViewModel
             )
@@ -147,6 +152,7 @@ fun AppNavigation(
             }
 
             AddEditTransactionScreen(
+                innerPadding = innerPadding,
                 initialType = initialType,
                 onSave = { transaction ->
                     transactionViewModel.addTransaction(
@@ -187,6 +193,7 @@ fun AppNavigation(
             val transactionId = backStackEntry.arguments?.getString("transactionId")
 
             AddEditTransactionScreen(
+                innerPadding = innerPadding,
                 transactionId = transactionId,
                 onSave = { transaction ->
                     transactionViewModel.updateTransaction(transaction)

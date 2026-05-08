@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -109,6 +111,7 @@ import com.sandeep.personalfinancecompanion.util.LocalizationUtils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalScreen(
+    innerPadding: PaddingValues,
     viewModel: GoalViewModel = hiltViewModel()
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -151,6 +154,7 @@ fun GoalScreen(
 
         is GoalUiState.Success -> {
             GoalContent(
+                innerPadding = innerPadding,
                 goals = state.goals,
                 currency = state.currency,
                 noSpendStreak = state.noSpendStreak,
@@ -164,6 +168,7 @@ fun GoalScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalContent(
+    innerPadding: PaddingValues,
     goals: List<Goal>,
     currency: Currency,
     noSpendStreak: NoSpendStreak,
@@ -282,21 +287,20 @@ fun GoalContent(
         }
     }
 
-    Scaffold(
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(colorScheme.background)
-                .verticalScroll(rememberScrollState())
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorScheme.background)
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
 
         // Content Padding
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -367,10 +371,9 @@ fun GoalContent(
 
             SavingVelocityCard(velocity = savingVelocity)
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 100.dp))
         }
     }
-}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

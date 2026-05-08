@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,6 +71,7 @@ import com.sandeep.personalfinancecompanion.R
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TransactionListScreen(
+    innerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState,
     onAddTransaction: () -> Unit,
     onEditTransaction: (String) -> Unit,
@@ -83,9 +87,10 @@ fun TransactionListScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
+            .imePadding()
     ) {
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding() + 8.dp))
 
         // ──── Headers ────
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -200,8 +205,13 @@ fun TransactionListScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .animateContentSize()
-                        .padding(horizontal = 8.dp),
+                        .animateContentSize(),
+                    contentPadding = PaddingValues(
+                        top = 0.dp,
+                        bottom = innerPadding.calculateBottomPadding() + 100.dp, // Space for FABs
+                        start = 8.dp,
+                        end = 8.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     groupedByDate.forEach { (dateHeader, transactions) ->
@@ -212,7 +222,7 @@ fun TransactionListScreen(
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -264,8 +274,6 @@ fun TransactionListScreen(
                             )
                         }
                     }
-
-                    item { Spacer(modifier = Modifier.height(100.dp)) } // Bottom nav & FAB padding
                 }
             }
         }

@@ -35,7 +35,7 @@ import com.sandeep.personalfinancecompanion.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DebtManagementScreen(
-    //onBack: () -> Unit,
+    innerPadding: PaddingValues,
     viewModel: DebtManagementViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,68 +55,70 @@ fun DebtManagementScreen(
         )
     }
 
-    Scaffold(
-    ) { padding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorScheme.background)
+            .imePadding()
+    ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding() + 8.dp))
+
+        // ──── Summary Cards ────
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(colorScheme.background)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // ──── Summary Cards ────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                DebtSummaryCard(
-                    title = stringResource(R.string.label_owed_to_you),
-                    amount = uiState.totalLent,
-                    currency = uiState.selectedCurrency,
-                    color = IncomeGreen,
-                    modifier = Modifier.weight(1f)
-                )
-                DebtSummaryCard(
-                    title = stringResource(R.string.label_you_owe),
-                    amount = uiState.totalBorrowed,
-                    currency = uiState.selectedCurrency,
-                    color = ExpenseRed,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(R.string.label_people_ledgers),
-                style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp,
-                modifier = Modifier.padding(horizontal = 20.dp)
+            DebtSummaryCard(
+                title = stringResource(R.string.label_owed_to_you),
+                amount = uiState.totalLent,
+                currency = uiState.selectedCurrency,
+                color = IncomeGreen,
+                modifier = Modifier.weight(1f)
             )
+            DebtSummaryCard(
+                title = stringResource(R.string.label_you_owe),
+                amount = uiState.totalBorrowed,
+                currency = uiState.selectedCurrency,
+                color = ExpenseRed,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            if (uiState.peerSummaries.isEmpty()) {
-                DebtEmptyState()
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.peerSummaries) { summary ->
-                        PeerDebtCard(
-                            summary = summary,
-                            currency = uiState.selectedCurrency,
-                            onRecordRepayment = { showRepaymentDialog = summary },
-                            onSettleAll = { viewModel.settleAllForPeer(summary.peerName) }
-                        )
-                    }
+        Text(
+            text = stringResource(R.string.label_people_ledgers),
+            style = MaterialTheme.typography.labelSmall,
+            color = colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (uiState.peerSummaries.isEmpty()) {
+            DebtEmptyState()
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = 8.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 100.dp, // Extra space for FABs
+                    start = 20.dp,
+                    end = 20.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(uiState.peerSummaries) { summary ->
+                    PeerDebtCard(
+                        summary = summary,
+                        currency = uiState.selectedCurrency,
+                        onRecordRepayment = { showRepaymentDialog = summary },
+                        onSettleAll = { viewModel.settleAllForPeer(summary.peerName) }
+                    )
                 }
             }
         }

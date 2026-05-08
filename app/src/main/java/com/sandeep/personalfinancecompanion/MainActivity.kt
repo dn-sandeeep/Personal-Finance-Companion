@@ -276,7 +276,7 @@ fun FinanceApp() {
         AppNavigation(
             navController = navController,
             snackbarHostState = snackbarHostState,
-            modifier = Modifier.padding(innerPadding)
+            innerPadding = innerPadding
         )
     }
 }
