@@ -33,6 +33,8 @@ data class ProfileState(
     val selectedCurrency: Currency = Currency.INR,
     val selectedLanguage: String = "en",
     val analyticsEnabled: Boolean = false,
+    val smsDetectionEnabled: Boolean = false,
+    val autoSaveSmsTransactions: Boolean = false,
     val isLoading: Boolean = true,
     val exportStatus: ExportStatus = ExportStatus.Idle
 )
@@ -67,6 +69,10 @@ class ProfileViewModel @Inject constructor(
         currentState.copy(analyticsEnabled = analyticsEnabled)
     }.combine(preferencesRepository.languageFlow) { currentState, language ->
         currentState.copy(selectedLanguage = language)
+    }.combine(preferencesRepository.smsDetectionEnabledFlow) { currentState, smsEnabled ->
+        currentState.copy(smsDetectionEnabled = smsEnabled)
+    }.combine(preferencesRepository.autoSaveSmsTransactionsFlow) { currentState, autoSave ->
+        currentState.copy(autoSaveSmsTransactions = autoSave)
     }.combine(_exportStatus) { currentState, export ->
         currentState.copy(exportStatus = export)
     }.stateIn(
@@ -138,6 +144,36 @@ class ProfileViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun updateSmsDetectionEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.updateSmsDetectionEnabled(enabled)
+            analyticsTracker.trackEvent(
+                AnalyticsEvent.NAV_ITEM_SELECTED, // Reusing event or use a generic one
+                mapOf("sms_detection_enabled" to enabled)
+            )
+        }
+    }
+
+    fun updateAutoSaveSmsTransactions(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.updateAutoSaveSmsTransactions(enabled)
+        }
+    }
+
+    fun isNotificationListenerEnabled(context: android.content.Context): Boolean {
+        val packageName = context.packageName
+        val flat = android.provider.Settings.Secure.getString(
+            context.contentResolver,
+            "enabled_notification_listeners"
+        )
+        return flat != null && flat.contains(packageName)
+    }
+
+    fun openNotificationListenerSettings(context: android.content.Context) {
+        val intent = android.content.Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+        context.startActivity(intent)
     }
 
     fun exportData() {

@@ -100,6 +100,20 @@ fun FinanceApp(analyticsTracker: AnalyticsTracker) {
     val currentRoute = navBackStackEntry?.destination?.route
     var showVoiceAgent by remember { mutableStateOf(false) }
     val voiceViewModel: VoiceAgentViewModel = hiltViewModel()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Handle intent from SMS notification
+    LaunchedEffect(Unit) {
+        val intent = (context as? android.app.Activity)?.intent
+        if (intent?.getBooleanExtra("FROM_SMS", false) == true) {
+            val amount = intent.getDoubleExtra("EXTRA_AMOUNT", 0.0)
+            val type = intent.getStringExtra("EXTRA_TYPE") ?: "EXPENSE"
+            val merchant = intent.getStringExtra("EXTRA_MERCHANT") ?: ""
+            
+            navController.navigate(Screen.AddTransaction.createRoute(type, amount, merchant))
+            intent.removeExtra("FROM_SMS") // Clear to avoid re-triggering
+        }
+    }
 
     // Show bottom bar only on main tabs
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }

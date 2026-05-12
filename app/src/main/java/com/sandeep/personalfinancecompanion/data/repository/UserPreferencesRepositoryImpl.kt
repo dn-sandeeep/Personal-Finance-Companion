@@ -29,6 +29,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val GOAL_REMINDERS_ENABLED = booleanPreferencesKey("goal_reminders_enabled")
         val NO_SPEND_TARGET = intPreferencesKey("no_spend_target")
         val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
+        val SMS_DETECTION_ENABLED = booleanPreferencesKey("sms_detection_enabled")
+        val AUTO_SAVE_SMS_TRANSACTIONS = booleanPreferencesKey("auto_save_sms_transactions")
     }
 
     override val budgetLimitFlow: Flow<Double> = dataStore.data
@@ -74,6 +76,16 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val analyticsEnabledFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.ANALYTICS_ENABLED] ?: false
+        }
+
+    override val smsDetectionEnabledFlow: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.SMS_DETECTION_ENABLED] ?: false
+        }
+
+    override val autoSaveSmsTransactionsFlow: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.AUTO_SAVE_SMS_TRANSACTIONS] ?: false
         }
 
     override suspend fun updateBudgetLimit(limit: Double) {
@@ -127,6 +139,18 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateAnalyticsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ANALYTICS_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun updateSmsDetectionEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SMS_DETECTION_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun updateAutoSaveSmsTransactions(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.AUTO_SAVE_SMS_TRANSACTIONS] = enabled
         }
     }
 }

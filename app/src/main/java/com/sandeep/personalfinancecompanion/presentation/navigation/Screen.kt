@@ -20,8 +20,19 @@ sealed class Screen(val route: String) {
     data object Transactions : Screen("transactions")
     data object Goals : Screen("goals")
     data object Insights : Screen("insights")
-    data object AddTransaction : Screen("add_transaction/{type}") {
-        fun createRoute(type: String = "EXPENSE") = "add_transaction/$type"
+    data object AddTransaction : Screen("add_transaction/{type}?amount={amount}&notes={notes}") {
+        fun createRoute(type: String = "EXPENSE", amount: Double? = null, notes: String? = null): String {
+            var route = "add_transaction/$type"
+            if (amount != null || notes != null) {
+                route += "?"
+                if (amount != null) route += "amount=$amount"
+                if (notes != null) {
+                    if (amount != null) route += "&"
+                    route += "notes=$notes"
+                }
+            }
+            return route
+        }
     }
     data object EditTransaction : Screen("edit_transaction/{transactionId}") {
         fun createRoute(transactionId: String) = "edit_transaction/$transactionId"

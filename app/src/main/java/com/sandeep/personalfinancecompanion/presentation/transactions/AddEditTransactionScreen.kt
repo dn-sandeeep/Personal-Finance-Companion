@@ -40,11 +40,13 @@ fun AddEditTransactionScreen(
     innerPadding: PaddingValues,
     transactionId: String? = null,
     initialType: TransactionType = TransactionType.EXPENSE,
+    prefilledAmount: Double? = null,
+    prefilledNotes: String? = null,
     onSave: (Transaction) -> Unit,
     onBack: () -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
 ) {
-    var amount by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf(prefilledAmount?.toString() ?: "") }
     var type by remember { mutableStateOf(initialType) }
     var selectedCategory by remember {
         mutableStateOf(
@@ -56,7 +58,7 @@ fun AddEditTransactionScreen(
             }
         )
     }
-    var notes by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf(prefilledNotes ?: "") }
     var peerName by remember { mutableStateOf("") }
     var date by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var expanded by remember { mutableStateOf(false) }

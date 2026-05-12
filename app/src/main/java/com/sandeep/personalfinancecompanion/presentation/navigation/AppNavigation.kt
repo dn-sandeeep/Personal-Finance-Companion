@@ -183,6 +183,16 @@ fun AppNavigation(
                 navArgument("type") {
                     type = NavType.StringType
                     defaultValue = "EXPENSE"
+                },
+                navArgument("amount") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("notes") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
                 }
             ),
             enterTransition = {
@@ -199,6 +209,9 @@ fun AppNavigation(
             }
         ) { backStackEntry ->
             val typeArg = backStackEntry.arguments?.getString("type") ?: "EXPENSE"
+            val amountArg = backStackEntry.arguments?.getString("amount")?.toDoubleOrNull()
+            val notesArg = backStackEntry.arguments?.getString("notes")
+
             val initialType = try {
                 TransactionType.valueOf(typeArg)
             } catch (e: Exception) {
@@ -215,6 +228,8 @@ fun AppNavigation(
             AddEditTransactionScreen(
                 innerPadding = innerPadding,
                 initialType = initialType,
+                prefilledAmount = amountArg,
+                prefilledNotes = notesArg,
                 onSave = { transaction ->
                     transactionViewModel.addTransaction(
                         transaction.amount,

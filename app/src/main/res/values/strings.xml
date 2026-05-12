@@ -317,4 +317,14 @@
     <string name="nt_goal_reminder_single">You\'ve saved %d%% so far. Keep going!</string>
     <string name="nt_goal_reminder_multiple_title">Multiple Goals</string>
     <string name="nt_goal_reminder_multiple_text">You have %d active goals. Don\'t forget to contribute today!</string>
+    
+    <!-- Notification Detection -->
+    <string name="label_sms_detection">Detect from Notifications</string>
+    <string name="desc_sms_detection">Detect transactions from SMS, RCS, and Banking apps</string>
+    <string name="label_auto_save_sms">Auto-save Transactions</string>
+    <string name="desc_auto_save_sms">Instantly save detected transactions without asking</string>
+    <string name="nt_sms_detection_title">Finance Detection</string>
+    <string name="nt_sms_detection_desc">Notifications for transactions detected from apps and messages</string>
+    <string name="nt_sms_transaction_title">Transaction Detected</string>
+    <string name="nt_sms_transaction_text">%1$s %2$s detected. Tap to add to your records.</string>
 </resources>

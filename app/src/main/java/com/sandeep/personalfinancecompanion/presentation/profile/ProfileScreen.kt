@@ -29,8 +29,11 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -87,6 +90,15 @@ fun ProfileScreen(
     ) { isGranted ->
         if (isGranted) {
             viewModel.toggleDailyReminder(true)
+        }
+    }
+
+    val smsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            viewModel.updateSmsDetectionEnabled(true)
         }
     }
 
@@ -187,6 +199,38 @@ fun ProfileScreen(
                     checked = state.goalRemindersEnabled,
                     onCheckedChange = { viewModel.toggleGoalReminders(it) }
                 )
+
+                Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+
+                SettingsToggleItem(
+                    title = stringResource(R.string.label_sms_detection),
+                    description = stringResource(R.string.desc_sms_detection),
+                    icon = if (state.smsDetectionEnabled) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
+                    checked = state.smsDetectionEnabled,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            if (viewModel.isNotificationListenerEnabled(context)) {
+                                viewModel.updateSmsDetectionEnabled(true)
+                            } else {
+                                viewModel.openNotificationListenerSettings(context)
+                                // We don't enable yet, wait for user to come back after giving permission
+                            }
+                        } else {
+                            viewModel.updateSmsDetectionEnabled(false)
+                        }
+                    }
+                )
+
+                if (state.smsDetectionEnabled) {
+                    Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingsToggleItem(
+                        title = stringResource(R.string.label_auto_save_sms),
+                        description = stringResource(R.string.desc_auto_save_sms),
+                        icon = Icons.Default.AccountBalanceWallet,
+                        checked = state.autoSaveSmsTransactions,
+                        onCheckedChange = { viewModel.updateAutoSaveSmsTransactions(it) }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
