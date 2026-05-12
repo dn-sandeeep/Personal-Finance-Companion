@@ -154,6 +154,8 @@
     <string name="msg_target_date">लक्ष्य: %s</string>
     <string name="title_delete_goal">लक्ष्य हटाएं?</string>
     <string name="msg_delete_goal_confirm">क्या आप वाकई \'%s\' को हटाना चाहते हैं? यह इस लक्ष्य के सभी बचत इतिहास को भी हटा देगा।</string>
+    <string name="title_delete_person">खाता हटाएं?</string>
+    <string name="msg_delete_person_confirm">क्या आप वाकई \'%s\' का खाता हटाना चाहते हैं? सभी एंट्री स्थायी रूप से हटा दी जाएंगी।</string>
     <string name="title_no_active_goals">कोई सक्रिय लक्ष्य नहीं</string>
     <string name="subtitle_no_active_goals">आज ही अपना पहला वित्तीय मील का पत्थर निर्धारित करें!</string>
 

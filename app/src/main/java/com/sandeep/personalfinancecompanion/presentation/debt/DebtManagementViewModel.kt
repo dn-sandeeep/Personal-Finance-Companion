@@ -104,6 +104,12 @@ class DebtManagementViewModel @Inject constructor(
             )
         }
     }
+
+    fun deletePerson(personId: String) {
+        viewModelScope.launch {
+            udhaarRepository.deletePerson(personId)
+        }
+    }
 }
 
 data class DebtUiState(

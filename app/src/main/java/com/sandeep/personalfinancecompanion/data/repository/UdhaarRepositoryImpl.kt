@@ -72,6 +72,12 @@ class UdhaarRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deletePerson(id: String) {
+        withContext(Dispatchers.IO) {
+            dao.deletePerson(id)
+        }
+    }
+
     override suspend fun addEntry(entry: UdhaarEntry) {
         withContext(Dispatchers.IO) {
             dao.insertEntry(entry.toEntity())

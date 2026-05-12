@@ -10,6 +10,7 @@ import android.provider.ContactsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +34,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -88,6 +91,7 @@ fun DebtManagementScreen(
     val context = LocalContext.current
     var showEntryDialog by remember { mutableStateOf<EntryDialogState?>(null) }
     var showEditPersonDialog by remember { mutableStateOf<UdhaarPerson?>(null) }
+    var personToDelete by remember { mutableStateOf<UdhaarPersonSummary?>(null) }
     var pickedContact by remember { mutableStateOf<PickedContact?>(null) }
 
     val contactLauncher = rememberLauncherForActivityResult(
@@ -139,6 +143,30 @@ fun DebtManagementScreen(
                 viewModel.updatePerson(person, name, phone)
                 pickedContact = null
                 showEditPersonDialog = null
+            }
+        )
+    }
+
+    personToDelete?.let { summary ->
+        AlertDialog(
+            onDismissRequest = { personToDelete = null },
+            title = { Text(stringResource(R.string.title_delete_person)) },
+            text = { Text(stringResource(R.string.msg_delete_person_confirm, summary.person.name)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deletePerson(summary.person.id)
+                        personToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.btn_delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { personToDelete = null }) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
             }
         )
     }
@@ -236,6 +264,7 @@ fun DebtManagementScreen(
                             currency = uiState.selectedCurrency,
                             onCall = { dialPhone(context, summary.person.phoneNumber) },
                             onEditPerson = { showEditPersonDialog = summary.person },
+                            onDelete = { personToDelete = summary },
                             onClick = { onPersonClick(summary.person.id) }
                         )
                     }
@@ -282,6 +311,7 @@ fun PeerDebtCard(
     currency: Currency,
     onCall: () -> Unit,
     onEditPerson: () -> Unit,
+    onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -345,24 +375,35 @@ fun PeerDebtCard(
                 }
             )
 
-            if (!phone.isNullOrBlank()) {
-                IconButton(onClick = onCall) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!phone.isNullOrBlank()) {
+                    IconButton(onClick = onCall, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Default.Call,
+                            contentDescription = stringResource(R.string.cd_call_person),
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+
+                IconButton(onClick = onEditPerson, modifier = Modifier.size(32.dp)) {
                     Icon(
-                        Icons.Default.Call,
-                        contentDescription = stringResource(R.string.cd_call_person),
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.btn_edit_person),
                         tint = colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-            }
 
-            IconButton(onClick = onEditPerson) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.btn_edit_person),
-                    tint = colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = stringResource(R.string.btn_delete),
+                        tint = colorScheme.error.copy(alpha = 0.7f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
@@ -654,15 +695,6 @@ data class EntryDialogState(
     val title: String,
     val isRepayment: Boolean = false
 )
-
-data class PaymentDialogState(
-    val summary: UdhaarPersonSummary,
-    val entryType: UdhaarEntryType
-) {
-    val person: UdhaarPerson = summary.person
-    val outstandingAmount: Double = summary.netAmount
-    val isOwedToYou: Boolean = summary.isOwedToYou
-}
 
 data class PickedContact(
     val name: String,

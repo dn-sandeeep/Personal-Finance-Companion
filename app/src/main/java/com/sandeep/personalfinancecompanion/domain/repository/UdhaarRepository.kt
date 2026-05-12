@@ -11,6 +11,7 @@ interface UdhaarRepository {
     fun getSummaries(): Flow<List<UdhaarPersonSummary>>
     fun getOverview(): Flow<UdhaarOverview>
     suspend fun savePerson(person: UdhaarPerson)
+    suspend fun deletePerson(id: String)
     suspend fun addEntry(entry: UdhaarEntry)
     suspend fun deleteEntry(id: String)
 }

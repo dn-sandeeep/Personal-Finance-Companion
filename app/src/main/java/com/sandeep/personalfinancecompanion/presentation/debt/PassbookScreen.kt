@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -125,8 +124,7 @@ fun PassbookScreen(
                             PassbookEntryRow(
                                 entry = entry,
                                 balanceAfter = balanceAfter,
-                                currency = uiState.selectedCurrency,
-                                onDelete = { viewModel.deleteEntry(entry.id) }
+                                currency = uiState.selectedCurrency
                             )
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -201,8 +199,7 @@ fun PassbookTableHeader() {
 fun PassbookEntryRow(
     entry: UdhaarEntry,
     balanceAfter: Double,
-    currency: Currency,
-    onDelete: () -> Unit
+    currency: Currency
 ) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yy\nhh:mm a", Locale.getDefault()) }
     
@@ -242,11 +239,6 @@ fun PassbookEntryRow(
                     color = IncomeGreen
                 )
             }
-        }
-        
-        // Options (Delete) - maybe on long press or icon
-        IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
-            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
         }
     }
     

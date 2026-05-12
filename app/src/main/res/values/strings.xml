@@ -154,6 +154,8 @@
     <string name="msg_target_date">Target: %s</string>
     <string name="title_delete_goal">Delete Goal?</string>
     <string name="msg_delete_goal_confirm">Are you sure you want to delete \'%s\'? This will also remove all savings history for this goal.</string>
+    <string name="title_delete_person">Delete Ledger?</string>
+    <string name="msg_delete_person_confirm">Are you sure you want to delete the ledger for \'%s\'? All entries will be permanently removed.</string>
     <string name="title_no_active_goals">No active goals</string>
     <string name="subtitle_no_active_goals">Set your first financial milestone today!</string>
 

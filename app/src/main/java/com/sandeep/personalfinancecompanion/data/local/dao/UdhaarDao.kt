@@ -41,4 +41,7 @@ interface UdhaarDao {
 
     @Query("DELETE FROM udhaar_entries WHERE id = :id")
     suspend fun deleteEntry(id: String)
+
+    @Query("DELETE FROM udhaar_people WHERE id = :id")
+    suspend fun deletePerson(id: String)
 }
