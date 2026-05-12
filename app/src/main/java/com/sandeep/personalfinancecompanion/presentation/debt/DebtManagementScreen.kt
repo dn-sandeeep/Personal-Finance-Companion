@@ -29,10 +29,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Contacts
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
@@ -48,8 +51,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -305,6 +311,7 @@ fun DebtSummaryCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeerDebtCard(
     summary: UdhaarPersonSummary,
@@ -317,96 +324,133 @@ fun PeerDebtCard(
     val colorScheme = MaterialTheme.colorScheme
     val phone = summary.person.phoneNumber
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onEditPerson()
+                    false
+                }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete()
+                    false
+                }
+                SwipeToDismissBoxValue.Settled -> false
+            }
+        }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val direction = dismissState.dismissDirection
+            val color by animateColorAsState(
+                when (dismissState.targetValue) {
+                    SwipeToDismissBoxValue.Settled -> Color.Transparent
+                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFF3B82F6) // Blue for Edit
+                    SwipeToDismissBoxValue.EndToStart -> colorScheme.error // Red for Delete
+                }, label = "swipe_color"
+            )
+            val alignment = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                else -> Alignment.Center
+            }
+            val icon = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Edit
+                SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                else -> Icons.Default.Delete
+            }
+
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .background(color, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 24.dp),
+                contentAlignment = alignment
             ) {
-                Text(
-                    summary.person.name.take(1).uppercase(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    summary.person.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = if (summary.netAmount == 0.0) {
-                        stringResource(R.string.label_settled)
-                    } else if (summary.isOwedToYou) {
-                        stringResource(R.string.label_net_owed_to_you)
-                    } else {
-                        stringResource(R.string.label_net_you_owe)
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colorScheme.onSurfaceVariant
-                )
-            }
-
-            Text(
-                text = CurrencyFormatter.formatAmount(summary.netAmount, currency),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = when {
-                    summary.netAmount == 0.0 -> colorScheme.onSurfaceVariant
-                    summary.isOwedToYou -> IncomeGreen
-                    else -> ExpenseRed
+                if (direction != SwipeToDismissBoxValue.Settled) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
                 }
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (!phone.isNullOrBlank()) {
-                    IconButton(onClick = onCall, modifier = Modifier.size(32.dp)) {
-                        Icon(
-                            Icons.Default.Call,
-                            contentDescription = stringResource(R.string.cd_call_person),
-                            tint = colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
+            }
+        },
+        content = {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                onClick = onClick
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            summary.person.name.take(1).uppercase(),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
                         )
                     }
-                }
 
-                IconButton(onClick = onEditPerson, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.btn_edit_person),
-                        tint = colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        imageVector = Icons.Outlined.Delete,
-                        contentDescription = stringResource(R.string.btn_delete),
-                        tint = colorScheme.error.copy(alpha = 0.7f),
-                        modifier = Modifier.size(18.dp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            summary.person.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = if (summary.netAmount == 0.0) {
+                                stringResource(R.string.label_settled)
+                            } else if (summary.isOwedToYou) {
+                                stringResource(R.string.label_net_owed_to_you)
+                            } else {
+                                stringResource(R.string.label_net_you_owe)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Text(
+                        text = CurrencyFormatter.formatAmount(summary.netAmount, currency),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            summary.netAmount == 0.0 -> colorScheme.onSurfaceVariant
+                            summary.isOwedToYou -> IncomeGreen
+                            else -> ExpenseRed
+                        }
                     )
+
+                    if (!phone.isNullOrBlank()) {
+                        IconButton(onClick = onCall, modifier = Modifier.size(32.dp)) {
+                            Icon(
+                                Icons.Default.Call,
+                                contentDescription = stringResource(R.string.cd_call_person),
+                                tint = colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
