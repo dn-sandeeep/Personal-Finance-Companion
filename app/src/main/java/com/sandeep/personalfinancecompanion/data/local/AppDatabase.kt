@@ -1,20 +1,76 @@
 package com.sandeep.personalfinancecompanion.data.local
 
 import androidx.room.Database
+import androidx.room.migration.Migration
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.sandeep.personalfinancecompanion.data.local.dao.TransactionDao
 import com.sandeep.personalfinancecompanion.data.local.dao.GoalDao
+import com.sandeep.personalfinancecompanion.data.local.dao.UdhaarDao
 import com.sandeep.personalfinancecompanion.data.local.entity.TransactionEntity
 import com.sandeep.personalfinancecompanion.data.local.entity.GoalEntity
 import com.sandeep.personalfinancecompanion.data.local.entity.GoalContributionEntity
+import com.sandeep.personalfinancecompanion.data.local.entity.UdhaarEntryEntity
+import com.sandeep.personalfinancecompanion.data.local.entity.UdhaarPersonEntity
 
 @Database(
-    entities = [TransactionEntity::class, GoalEntity::class, GoalContributionEntity::class],
-    version = 5,
+    entities = [
+        TransactionEntity::class,
+        GoalEntity::class,
+        GoalContributionEntity::class,
+        UdhaarPersonEntity::class,
+        UdhaarEntryEntity::class
+    ],
+    version = 6,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract val transactionDao: TransactionDao
     abstract val goalDao: GoalDao
+    abstract val udhaarDao: UdhaarDao
+
+    companion object {
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE transactions ADD COLUMN peerName TEXT")
+                db.execSQL("ALTER TABLE transactions ADD COLUMN isSettled INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `udhaar_people` (
+                        `id` TEXT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `phoneNumber` TEXT,
+                        `createdAt` INTEGER NOT NULL,
+                        `updatedAt` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `udhaar_entries` (
+                        `id` TEXT NOT NULL,
+                        `personId` TEXT NOT NULL,
+                        `amount` REAL NOT NULL,
+                        `type` TEXT NOT NULL,
+                        `note` TEXT NOT NULL,
+                        `date` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`),
+                        FOREIGN KEY(`personId`) REFERENCES `udhaar_people`(`id`)
+                        ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_udhaar_entries_personId` ON `udhaar_entries` (`personId`)"
+                )
+            }
+        }
+    }
 }

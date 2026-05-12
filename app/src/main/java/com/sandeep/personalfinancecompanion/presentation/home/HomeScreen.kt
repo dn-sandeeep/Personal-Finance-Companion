@@ -401,6 +401,83 @@ private fun HomeContent(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        // ──── Udhari Ledger Card ────
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onNavigateToDebt() },
+            shape = RoundedCornerShape(15.dp),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Handshake,
+                                contentDescription = null,
+                                tint = colorScheme.onPrimaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.title_lending_debts),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.label_active_people_count, state.activeUdhaarPeople),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = stringResource(R.string.cd_view_details),
+                        tint = colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    UdhariAmountPill(
+                        label = stringResource(R.string.label_you_will_get),
+                        amount = state.totalLent,
+                        currency = state.selectedCurrency,
+                        color = Color(0xFF4ADE80),
+                        modifier = Modifier.weight(1f)
+                    )
+                    UdhariAmountPill(
+                        label = stringResource(R.string.label_you_owe),
+                        amount = state.totalBorrowed,
+                        currency = state.selectedCurrency,
+                        color = Color(0xFFFB7185),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         // ──── Weekly Trend Card ────
         Card(
             modifier = Modifier
@@ -608,6 +685,35 @@ private fun HomeContent(
         }
 
         Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 100.dp))
+    }
+}
+
+@Composable
+private fun UdhariAmountPill(
+    label: String,
+    amount: Double,
+    currency: Currency,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .padding(12.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = CurrencyFormatter.formatAmount(amount, currency),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
     }
 }
 

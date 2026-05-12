@@ -13,11 +13,14 @@ import com.sandeep.personalfinancecompanion.analytics.FirebaseAnalyticsTracker
 import com.sandeep.personalfinancecompanion.data.local.AppDatabase
 import com.sandeep.personalfinancecompanion.data.local.dao.TransactionDao
 import com.sandeep.personalfinancecompanion.data.local.dao.GoalDao
+import com.sandeep.personalfinancecompanion.data.local.dao.UdhaarDao
 import com.sandeep.personalfinancecompanion.data.repository.TransactionRepositoryImpl
 import com.sandeep.personalfinancecompanion.data.repository.GoalRepositoryImpl
+import com.sandeep.personalfinancecompanion.data.repository.UdhaarRepositoryImpl
 import com.sandeep.personalfinancecompanion.data.repository.UserPreferencesRepositoryImpl
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
 import com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
+import com.sandeep.personalfinancecompanion.domain.repository.UdhaarRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.domain.repository.SmartParserRepository
 import com.sandeep.personalfinancecompanion.data.repository.SmartParserRepositoryImpl
@@ -45,6 +48,7 @@ object AppModule {
             AppDatabase::class.java,
             "finance_db"
         )
+        .addMigrations(AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
         .build()
     }
 
@@ -62,6 +66,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideUdhaarDao(appDatabase: AppDatabase): UdhaarDao {
+        return appDatabase.udhaarDao
+    }
+
+    @Provides
+    @Singleton
     fun provideTransactionRepository(
         dao: TransactionDao
     ): TransactionRepository {
@@ -74,6 +84,14 @@ object AppModule {
         dao: GoalDao
     ): GoalRepository {
         return GoalRepositoryImpl(dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUdhaarRepository(
+        dao: UdhaarDao
+    ): UdhaarRepository {
+        return UdhaarRepositoryImpl(dao)
     }
 
     @Provides

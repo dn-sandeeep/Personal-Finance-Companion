@@ -7,6 +7,7 @@ import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.model.Transaction
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import com.sandeep.personalfinancecompanion.domain.repository.TransactionRepository
+import com.sandeep.personalfinancecompanion.domain.repository.UdhaarRepository
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.BalanceSummary
 import com.sandeep.personalfinancecompanion.domain.usecase.CalculateBalanceUseCase
@@ -43,7 +44,8 @@ sealed interface HomeUiState {
         val selectedCategoryLabel: String? = null,
         val goalTargetAmount: Double = 0.0,
         val totalLent: Double = 0.0,
-        val totalBorrowed: Double = 0.0
+        val totalBorrowed: Double = 0.0,
+        val activeUdhaarPeople: Int = 0
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
@@ -54,7 +56,8 @@ class HomeViewModel @Inject constructor(
     private val calculateBalanceUseCase: CalculateBalanceUseCase,
     private val repository: TransactionRepository,
     private val preferencesRepository: UserPreferencesRepository,
-    private val goalRepository: com.sandeep.personalfinancecompanion.domain.repository.GoalRepository
+    private val goalRepository: com.sandeep.personalfinancecompanion.domain.repository.GoalRepository,
+    private val udhaarRepository: UdhaarRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -90,6 +93,19 @@ class HomeViewModel @Inject constructor(
                         val currentState = _uiState.value
                         if (currentState is HomeUiState.Success) {
                             _uiState.value = currentState.copy(selectedCurrency = currency)
+                        }
+                    }
+                }
+
+                launch {
+                    udhaarRepository.getOverview().collect { overview ->
+                        val currentState = _uiState.value
+                        if (currentState is HomeUiState.Success) {
+                            _uiState.value = currentState.copy(
+                                totalLent = overview.totalReceivable,
+                                totalBorrowed = overview.totalPayable,
+                                activeUdhaarPeople = overview.activePeople
+                            )
                         }
                     }
                 }
@@ -135,12 +151,6 @@ class HomeViewModel @Inject constructor(
                         }
                     }
 
-                    val unsettledUdhaar = transactions.filter { !it.isSettled }
-                    val totalLentAmount = unsettledUdhaar.filter { it.type == TransactionType.LENT }.sumOf { it.amount } - 
-                                         unsettledUdhaar.filter { it.type == TransactionType.LENT_REPAYMENT }.sumOf { it.amount }
-                    val totalBorrowedAmount = unsettledUdhaar.filter { it.type == TransactionType.BORROWED }.sumOf { it.amount } - 
-                                             unsettledUdhaar.filter { it.type == TransactionType.BORROWED_REPAYMENT }.sumOf { it.amount }
-
                     _uiState.value = HomeUiState.Success(
                         balance = balance,
                         recentTransactions = transactions.take(5),
@@ -149,9 +159,7 @@ class HomeViewModel @Inject constructor(
                         selectedCurrency = currentCurrency,
                         weeklyTrend = weeklyTrend,
                         categoryExpenses = categoryStatsList,
-                        goalTargetAmount = 0.0, // It will be updated by the goalCollector below
-                        totalLent = totalLentAmount,
-                        totalBorrowed = totalBorrowedAmount
+                        goalTargetAmount = 0.0 // It will be updated by the goalCollector below
                     )
                 }
             } catch (e: Exception) {

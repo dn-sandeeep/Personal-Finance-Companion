@@ -154,8 +154,26 @@ fun AppNavigation(
             val debtViewModel: com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementViewModel = hiltViewModel()
             com.sandeep.personalfinancecompanion.presentation.debt.DebtManagementScreen(
                 innerPadding = innerPadding,
-                //onBack = { navController.popBackStack() },
+                onPersonClick = { personId ->
+                    navController.navigate(Screen.Passbook.createRoute(personId))
+                },
                 viewModel = debtViewModel
+            )
+        }
+
+        composable(
+            route = Screen.Passbook.route,
+            arguments = listOf(
+                navArgument("personId") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val passbookViewModel: com.sandeep.personalfinancecompanion.presentation.debt.PassbookViewModel = hiltViewModel()
+            com.sandeep.personalfinancecompanion.presentation.debt.PassbookScreen(
+                innerPadding = innerPadding,
+                onBack = { navController.popBackStack() },
+                viewModel = passbookViewModel
             )
         }
 

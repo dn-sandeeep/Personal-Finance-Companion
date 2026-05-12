@@ -2,26 +2,26 @@ package com.sandeep.personalfinancecompanion.presentation.debt
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sandeep.personalfinancecompanion.domain.model.Transaction
-import com.sandeep.personalfinancecompanion.domain.model.TransactionType
-import com.sandeep.personalfinancecompanion.domain.usecase.GetUnsettledUdhaarUseCase
-import com.sandeep.personalfinancecompanion.domain.usecase.SettleDebtUseCase
+import com.sandeep.personalfinancecompanion.domain.model.Currency
+import com.sandeep.personalfinancecompanion.domain.model.UdhaarEntry
+import com.sandeep.personalfinancecompanion.domain.model.UdhaarEntryType
+import com.sandeep.personalfinancecompanion.domain.model.UdhaarOverview
+import com.sandeep.personalfinancecompanion.domain.model.UdhaarPerson
+import com.sandeep.personalfinancecompanion.domain.model.UdhaarPersonSummary
+import com.sandeep.personalfinancecompanion.domain.repository.UdhaarRepository
+import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-import com.sandeep.personalfinancecompanion.domain.model.Currency
-import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DebtManagementViewModel @Inject constructor(
-    private val getUnsettledUdhaarUseCase: GetUnsettledUdhaarUseCase,
-    private val settleDebtUseCase: SettleDebtUseCase,
-    private val addTransactionUseCase: com.sandeep.personalfinancecompanion.domain.usecase.AddTransactionUseCase,
+    private val udhaarRepository: UdhaarRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
@@ -29,103 +29,86 @@ class DebtManagementViewModel @Inject constructor(
     val uiState: StateFlow<DebtUiState> = _uiState.asStateFlow()
 
     init {
-        loadDebts()
+        loadLedger()
     }
 
-    private fun loadDebts() {
+    private fun loadLedger() {
         viewModelScope.launch {
             combine(
-                getUnsettledUdhaarUseCase(),
+                udhaarRepository.getSummaries(),
+                udhaarRepository.getOverview(),
                 userPreferencesRepository.currencyFlow
-            ) { debts, currency ->
-                // Calculate global totals
-                val totalBorrowed = debts.filter { it.type == TransactionType.BORROWED }.sumOf { it.amount } - 
-                                   debts.filter { it.type == TransactionType.BORROWED_REPAYMENT }.sumOf { it.amount }
-                
-                val totalLent = debts.filter { it.type == TransactionType.LENT }.sumOf { it.amount } - 
-                               debts.filter { it.type == TransactionType.LENT_REPAYMENT }.sumOf { it.amount }
-
-                // Group by peerName
-                val summaries = debts
-                    .filter { !it.peerName.isNullOrBlank() }
-                    .groupBy { it.peerName!! }
-                    .map { (name, peerTransactions) ->
-                        val lentAmount = peerTransactions
-                            .filter { it.type == TransactionType.LENT }
-                            .sumOf { it.amount }
-                        val lentRepaid = peerTransactions
-                            .filter { it.type == TransactionType.LENT_REPAYMENT }
-                            .sumOf { it.amount }
-                        
-                        val borrowedAmount = peerTransactions
-                            .filter { it.type == TransactionType.BORROWED }
-                            .sumOf { it.amount }
-                        val borrowedRepaid = peerTransactions
-                            .filter { it.type == TransactionType.BORROWED_REPAYMENT }
-                            .sumOf { it.amount }
-
-                        val netLent = lentAmount - lentRepaid
-                        val netBorrowed = borrowedAmount - borrowedRepaid
-                        
-                        val balance = netLent - netBorrowed
-                        
-                        PeerDebtSummary(
-                            peerName = name,
-                            netAmount = kotlin.math.abs(balance),
-                            isOwedToYou = balance > 0,
-                            history = peerTransactions.sortedByDescending { it.date }
-                        )
-                    }
-                    .filter { it.netAmount > 0 }
-                    .sortedByDescending { it.netAmount }
-
+            ) { summaries, overview, currency ->
                 DebtUiState(
                     peerSummaries = summaries,
-                    totalBorrowed = if (totalBorrowed > 0) totalBorrowed else 0.0,
-                    totalLent = if (totalLent > 0) totalLent else 0.0,
+                    overview = overview,
                     selectedCurrency = currency,
                     isLoading = false
                 )
-            }.collect {
-                _uiState.value = it
+            }.collect { state ->
+                _uiState.value = state
             }
         }
     }
 
-    fun recordRepayment(peerName: String, amount: Double, isOwedToYou: Boolean, notes: String = "Repayment") {
+    fun saveEntry(
+        personId: String?,
+        personName: String,
+        phoneNumber: String?,
+        amount: Double,
+        type: UdhaarEntryType,
+        note: String,
+        date: Long
+    ) {
         viewModelScope.launch {
-            val repaymentType = if (isOwedToYou) TransactionType.LENT_REPAYMENT else TransactionType.BORROWED_REPAYMENT
-            addTransactionUseCase(
-                amount = amount,
-                category = com.sandeep.personalfinancecompanion.domain.model.Category.UDHAAR,
-                type = repaymentType,
-                notes = notes,
-                peerName = peerName
+            val now = System.currentTimeMillis()
+            val cleanedPhone = phoneNumber?.trim()?.takeIf { it.isNotBlank() }
+            val existingPerson = _uiState.value.peerSummaries
+                .map { it.person }
+                .firstOrNull { it.id == personId }
+
+            val person = existingPerson?.copy(
+                name = personName.trim(),
+                phoneNumber = cleanedPhone,
+                updatedAt = now
+            ) ?: UdhaarPerson(
+                id = UUID.randomUUID().toString(),
+                name = personName.trim(),
+                phoneNumber = cleanedPhone,
+                createdAt = now,
+                updatedAt = now
+            )
+
+            udhaarRepository.savePerson(person)
+            udhaarRepository.addEntry(
+                UdhaarEntry(
+                    id = UUID.randomUUID().toString(),
+                    personId = person.id,
+                    amount = amount,
+                    type = type,
+                    note = note.trim(),
+                    date = date
+                )
             )
         }
     }
 
-    fun settleAllForPeer(peerName: String) {
+    fun updatePerson(person: UdhaarPerson, name: String, phoneNumber: String?) {
         viewModelScope.launch {
-            val peerSummary = _uiState.value.peerSummaries.find { it.peerName == peerName }
-            peerSummary?.history?.forEach { transaction ->
-                settleDebtUseCase(transaction.id)
-            }
+            udhaarRepository.savePerson(
+                person.copy(
+                    name = name.trim(),
+                    phoneNumber = phoneNumber?.trim()?.takeIf { it.isNotBlank() },
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
         }
     }
 }
 
-data class PeerDebtSummary(
-    val peerName: String,
-    val netAmount: Double,
-    val isOwedToYou: Boolean,
-    val history: List<Transaction>
-)
-
 data class DebtUiState(
-    val peerSummaries: List<PeerDebtSummary> = emptyList(),
-    val totalBorrowed: Double = 0.0,
-    val totalLent: Double = 0.0,
+    val peerSummaries: List<UdhaarPersonSummary> = emptyList(),
+    val overview: UdhaarOverview = UdhaarOverview(),
     val selectedCurrency: Currency = Currency.INR,
     val isLoading: Boolean = true
 )

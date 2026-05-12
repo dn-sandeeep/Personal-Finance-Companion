@@ -60,6 +60,9 @@ class TransactionViewModel @Inject constructor(
     ) { transactions, currency, query, filter, loading ->
         val filtered = transactions
             .filter { transaction ->
+                transaction.type == TransactionType.INCOME || transaction.type == TransactionType.EXPENSE
+            }
+            .filter { transaction ->
                 if (filter != null) transaction.type == filter else true
             }
             .filter { transaction ->
