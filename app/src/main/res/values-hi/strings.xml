@@ -178,7 +178,7 @@
     <string name="label_settled">चुकता</string>
     <string name="label_person_name">व्यक्ति का नाम</string>
     <string name="label_phone_optional">फोन नंबर (वैकल्पिक)</string>
-    <string name="btn_add_udhaar_entry">उधारी एंट्री जोड़ें</string>
+    <string name="btn_add_udhaar_entry">नई एंट्री जोड़ें</string>
     <string name="btn_you_gave">भुगतान किया ₹</string>
     <string name="btn_you_got">प्राप्त हुआ ₹</string>
     <string name="btn_edit_person">व्यक्ति संपादित करें</string>

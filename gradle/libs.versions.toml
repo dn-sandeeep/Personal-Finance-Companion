@@ -25,6 +25,7 @@ firebaseBom = "34.7.0"
 googleServices = "4.4.4"
 crashlyticsPlugin = "3.0.6"
 clarityCompose = "3.8.1"
+material3 = "1.4.0"
 
 [libraries]
 # Core
@@ -80,6 +81,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 clarity-compose = { group = "com.microsoft.clarity", name = "clarity-compose", version.ref = "clarityCompose" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

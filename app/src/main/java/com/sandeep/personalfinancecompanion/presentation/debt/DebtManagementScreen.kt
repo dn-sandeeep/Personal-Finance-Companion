@@ -47,10 +47,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -484,69 +488,93 @@ fun UdhaarEntryDialog(
     val errorAmountTooLarge = stringResource(R.string.error_amount_too_large)
     val errorPersonRequired = stringResource(R.string.error_person_required)
 
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text(state.title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        sheetState = sheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 48.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = state.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = {
+                    name = it
+                    error = null
+                },
+                label = { Text(stringResource(R.string.label_person_name)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it
-                        error = null
-                    },
-                    label = { Text(stringResource(R.string.label_person_name)) },
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text(stringResource(R.string.label_phone_optional)) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.weight(1f)
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = { phone = it },
-                        label = { Text(stringResource(R.string.label_phone_optional)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        modifier = Modifier.weight(1f)
+                IconButton(
+                    onClick = onPickContact,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Contacts,
+                        contentDescription = stringResource(R.string.cd_pick_contact),
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
-                    IconButton(onClick = onPickContact) {
-                        Icon(
-                            Icons.Default.Contacts,
-                            contentDescription = stringResource(R.string.cd_pick_contact)
-                        )
-                    }
                 }
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { input ->
-                        val filtered = input.filter { it.isDigit() || it == '.' }
-                        if (filtered.length <= 13) {
-                            amount = filtered
-                            error = null
-                        }
-                    },
-                    label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    isError = error != null,
-                    supportingText = error?.let { { Text(it) } },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (!state.isRepayment) {
-                    UdhaarTypeChips(selected = type, onSelected = { type = it })
-                }
-                DateTimeSelector(
-                    dateTime = selectedDateTime,
-                    onDateTimeChanged = { selectedDateTime = it }
-                )
-                OutlinedTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    label = { Text(stringResource(R.string.label_note)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
-        },
-        confirmButton = {
+
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { input ->
+                    val filtered = input.filter { it.isDigit() || it == '.' }
+                    if (filtered.length <= 13) {
+                        amount = filtered
+                        error = null
+                    }
+                },
+                label = { Text(stringResource(R.string.label_amount, currency.symbol)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+                isError = error != null,
+                supportingText = error?.let { { Text(it) } },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (!state.isRepayment) {
+                UdhaarTypeChips(selected = type, onSelected = { type = it })
+            }
+
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text(stringResource(R.string.label_note)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Button(
                 onClick = {
                     val parsed = amount.toDoubleOrNull()
@@ -556,19 +584,19 @@ fun UdhaarEntryDialog(
                         parsed > 1000000000.0 -> error = errorAmountTooLarge
                         else -> onSave(state.personId, name, phone, parsed, type, note, selectedDateTime)
                     }
-                }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text(stringResource(R.string.btn_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.btn_cancel))
+                Text(stringResource(R.string.btn_save), style = MaterialTheme.typography.titleMedium)
             }
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPersonDialog(
     person: UdhaarPerson,
@@ -589,47 +617,74 @@ fun EditPersonDialog(
         }
     }
 
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.btn_edit_person)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        sheetState = sheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 48.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.btn_edit_person),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(stringResource(R.string.label_person_name)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.label_person_name)) },
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text(stringResource(R.string.label_phone_optional)) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.weight(1f)
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = { phone = it },
-                        label = { Text(stringResource(R.string.label_phone_optional)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        modifier = Modifier.weight(1f)
+                IconButton(
+                    onClick = onPickContact,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Contacts,
+                        contentDescription = stringResource(R.string.cd_pick_contact),
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
-                    IconButton(onClick = onPickContact) {
-                        Icon(
-                            Icons.Default.Contacts,
-                            contentDescription = stringResource(R.string.cd_pick_contact)
-                        )
-                    }
                 }
             }
-        },
-        confirmButton = {
-            Button(onClick = { onSave(name, phone) }, enabled = name.isNotBlank()) {
-                Text(stringResource(R.string.btn_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.btn_cancel))
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { onSave(name, phone) },
+                enabled = name.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(stringResource(R.string.btn_save), style = MaterialTheme.typography.titleMedium)
             }
         }
-    )
+    }
 }
 
 @Composable

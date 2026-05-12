@@ -178,7 +178,7 @@
     <string name="label_settled">Settled</string>
     <string name="label_person_name">Person name</string>
     <string name="label_phone_optional">Phone number (optional)</string>
-    <string name="btn_add_udhaar_entry">Add Udhari Entry</string>
+    <string name="btn_add_udhaar_entry">Add New Entry</string>
     <string name="btn_you_gave">PAID ₹</string>
     <string name="btn_you_got">RECEIVED ₹</string>
     <string name="btn_edit_person">Edit Person</string>
@@ -191,7 +191,7 @@
     <string name="title_record_payment">Record Payment</string>
     <string name="title_record_payment_received">Record Payment Received</string>
     <string name="title_record_payment_made">Record Payment Made</string>
-    <string name="title_add_udhaar_entry">Add Udhari Entry</string>
+    <string name="title_add_udhaar_entry">Add New Entry</string>
     <string name="title_passbook">Passbook</string>
     <string name="title_you_gave">Paid</string>
     <string name="title_you_got">Received</string>
