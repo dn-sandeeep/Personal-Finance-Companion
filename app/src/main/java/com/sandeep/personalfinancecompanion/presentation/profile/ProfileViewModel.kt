@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsEvent
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsParam
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
-import com.sandeep.personalfinancecompanion.analytics.CrashReporter
 import com.sandeep.personalfinancecompanion.domain.model.Currency
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.domain.usecase.ExportDataUseCase
@@ -32,9 +31,7 @@ data class ProfileState(
     val goalRemindersEnabled: Boolean = true,
     val selectedCurrency: Currency = Currency.INR,
     val selectedLanguage: String = "en",
-    val analyticsEnabled: Boolean = false,
-    val smsDetectionEnabled: Boolean = false,
-    val autoSaveSmsTransactions: Boolean = false,
+
     val isLoading: Boolean = true,
     val exportStatus: ExportStatus = ExportStatus.Idle
 )
@@ -44,8 +41,7 @@ class ProfileViewModel @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository,
     private val changeCurrencyUseCase: com.sandeep.personalfinancecompanion.domain.usecase.ChangeCurrencyUseCase,
     private val exportDataUseCase: ExportDataUseCase,
-    private val analyticsTracker: AnalyticsTracker,
-    private val crashReporter: CrashReporter
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _exportStatus = MutableStateFlow<ExportStatus>(ExportStatus.Idle)
@@ -65,14 +61,8 @@ class ProfileViewModel @Inject constructor(
             selectedCurrency = currency,
             isLoading = false
         )
-    }.combine(preferencesRepository.analyticsEnabledFlow) { currentState, analyticsEnabled ->
-        currentState.copy(analyticsEnabled = analyticsEnabled)
     }.combine(preferencesRepository.languageFlow) { currentState, language ->
         currentState.copy(selectedLanguage = language)
-    }.combine(preferencesRepository.smsDetectionEnabledFlow) { currentState, smsEnabled ->
-        currentState.copy(smsDetectionEnabled = smsEnabled)
-    }.combine(preferencesRepository.autoSaveSmsTransactionsFlow) { currentState, autoSave ->
-        currentState.copy(autoSaveSmsTransactions = autoSave)
     }.combine(_exportStatus) { currentState, export ->
         currentState.copy(exportStatus = export)
     }.stateIn(
@@ -125,56 +115,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateAnalyticsEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            if (!enabled) {
-                analyticsTracker.trackEvent(
-                    AnalyticsEvent.ANALYTICS_CONSENT_CHANGED,
-                    mapOf(AnalyticsParam.ENABLED to false)
-                )
-            }
-            preferencesRepository.updateAnalyticsEnabled(enabled)
-            analyticsTracker.setCollectionEnabled(enabled)
-            crashReporter.setCollectionEnabled(enabled)
-            crashReporter.setUserProperty("telemetry_opt_in", enabled.toString())
-            if (enabled) {
-                analyticsTracker.trackEvent(
-                    AnalyticsEvent.ANALYTICS_CONSENT_CHANGED,
-                    mapOf(AnalyticsParam.ENABLED to true)
-                )
-            }
-        }
-    }
 
-    fun updateSmsDetectionEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            preferencesRepository.updateSmsDetectionEnabled(enabled)
-            analyticsTracker.trackEvent(
-                AnalyticsEvent.NAV_ITEM_SELECTED, // Reusing event or use a generic one
-                mapOf("sms_detection_enabled" to enabled)
-            )
-        }
-    }
-
-    fun updateAutoSaveSmsTransactions(enabled: Boolean) {
-        viewModelScope.launch {
-            preferencesRepository.updateAutoSaveSmsTransactions(enabled)
-        }
-    }
-
-    fun isNotificationListenerEnabled(context: android.content.Context): Boolean {
-        val packageName = context.packageName
-        val flat = android.provider.Settings.Secure.getString(
-            context.contentResolver,
-            "enabled_notification_listeners"
-        )
-        return flat != null && flat.contains(packageName)
-    }
-
-    fun openNotificationListenerSettings(context: android.content.Context) {
-        val intent = android.content.Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
-        context.startActivity(intent)
-    }
 
     fun exportData() {
         viewModelScope.launch {

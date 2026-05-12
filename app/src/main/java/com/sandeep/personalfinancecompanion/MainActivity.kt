@@ -1,11 +1,16 @@
 package com.sandeep.personalfinancecompanion
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -82,12 +87,34 @@ class MainActivity : AppCompatActivity() {
         // Triggering mainViewModel initialization to start observing and scheduling
         mainViewModel
         enableEdgeToEdge()
+        // Request notification permission on app start for Android 13+
+        requestNotificationPermission()
+
         setContent {
             // Register AI Agent capabilities for Android 16+ discovery
             agentLifecycleManager.registerAgentCapabilities(this)
 
             PersonalFinanceCompanionTheme { FinanceApp(analyticsTracker = analyticsTracker) }
         }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    REQUEST_NOTIFICATION_PERMISSION
+                )
+            }
+        }
+    }
+
+    companion object {
+        private const val REQUEST_NOTIFICATION_PERMISSION = 1001
     }
 }
 

@@ -1,11 +1,8 @@
 package com.sandeep.personalfinancecompanion.presentation.profile
 
-import android.Manifest
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,10 +28,8 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
-import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -84,23 +79,7 @@ fun ProfileScreen(
     var showCurrencyDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
-    // Permission launcher for Android 13+
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.toggleDailyReminder(true)
-        }
-    }
 
-    val smsPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.entries.all { it.value }
-        if (allGranted) {
-            viewModel.updateSmsDetectionEnabled(true)
-        }
-    }
 
     val context = LocalContext.current
     var csvDataToSave by remember { mutableStateOf<String?>(null) }
@@ -171,13 +150,7 @@ fun ProfileScreen(
                     description = stringResource(R.string.desc_daily_reminder),
                     icon = Icons.Default.NotificationsActive,
                     checked = state.dailyReminderEnabled,
-                    onCheckedChange = { enabled ->
-                        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                            viewModel.toggleDailyReminder(enabled)
-                        }
-                    }
+                    onCheckedChange = { viewModel.toggleDailyReminder(it) }
                 )
                 
                 Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
@@ -199,38 +172,6 @@ fun ProfileScreen(
                     checked = state.goalRemindersEnabled,
                     onCheckedChange = { viewModel.toggleGoalReminders(it) }
                 )
-
-                Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
-
-                SettingsToggleItem(
-                    title = stringResource(R.string.label_sms_detection),
-                    description = stringResource(R.string.desc_sms_detection),
-                    icon = if (state.smsDetectionEnabled) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
-                    checked = state.smsDetectionEnabled,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            if (viewModel.isNotificationListenerEnabled(context)) {
-                                viewModel.updateSmsDetectionEnabled(true)
-                            } else {
-                                viewModel.openNotificationListenerSettings(context)
-                                // We don't enable yet, wait for user to come back after giving permission
-                            }
-                        } else {
-                            viewModel.updateSmsDetectionEnabled(false)
-                        }
-                    }
-                )
-
-                if (state.smsDetectionEnabled) {
-                    Divider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
-                    SettingsToggleItem(
-                        title = stringResource(R.string.label_auto_save_sms),
-                        description = stringResource(R.string.desc_auto_save_sms),
-                        icon = Icons.Default.AccountBalanceWallet,
-                        checked = state.autoSaveSmsTransactions,
-                        onCheckedChange = { viewModel.updateAutoSaveSmsTransactions(it) }
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -267,25 +208,6 @@ fun ProfileScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = stringResource(R.string.label_privacy),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            SettingsCard {
-                SettingsToggleItem(
-                    title = stringResource(R.string.label_usage_analytics),
-                    description = stringResource(R.string.desc_usage_analytics),
-                    icon = Icons.Default.QueryStats,
-                    checked = state.analyticsEnabled,
-                    onCheckedChange = { viewModel.updateAnalyticsEnabled(it) }
-                )
-            }
 
             Spacer(modifier = Modifier.height(32.dp))
             

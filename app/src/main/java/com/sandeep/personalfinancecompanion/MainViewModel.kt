@@ -3,7 +3,6 @@ package com.sandeep.personalfinancecompanion
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.personalfinancecompanion.analytics.AnalyticsTracker
-import com.sandeep.personalfinancecompanion.analytics.CrashReporter
 import com.sandeep.personalfinancecompanion.domain.repository.UserPreferencesRepository
 import com.sandeep.personalfinancecompanion.util.WorkManagerScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,13 +14,11 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository,
     private val scheduler: WorkManagerScheduler,
-    private val analyticsTracker: AnalyticsTracker,
-    private val crashReporter: CrashReporter
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     init {
         observeReminders()
-        observeAnalyticsConsent()
     }
 
     val languageCode = preferencesRepository.languageFlow
@@ -46,15 +43,6 @@ class MainViewModel @Inject constructor(
                 } else {
                     scheduler.cancelGoalReminders()
                 }
-            }
-        }
-    }
-
-    private fun observeAnalyticsConsent() {
-        viewModelScope.launch {
-            preferencesRepository.analyticsEnabledFlow.collectLatest { enabled ->
-                analyticsTracker.setCollectionEnabled(enabled)
-                crashReporter.setCollectionEnabled(enabled)
             }
         }
     }

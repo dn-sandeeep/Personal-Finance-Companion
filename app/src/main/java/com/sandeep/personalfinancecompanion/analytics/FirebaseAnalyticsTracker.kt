@@ -12,10 +12,10 @@ class FirebaseAnalyticsTracker @Inject constructor(
 ) : AnalyticsTracker {
 
     private val analytics = if (app.hasFirebaseConfig()) FirebaseAnalytics.getInstance(app) else null
-    @Volatile private var collectionEnabled = false
+    @Volatile private var collectionEnabled = true
 
     init {
-        analytics?.setAnalyticsCollectionEnabled(false)
+        analytics?.setAnalyticsCollectionEnabled(true)
     }
 
     override fun setCollectionEnabled(enabled: Boolean) {

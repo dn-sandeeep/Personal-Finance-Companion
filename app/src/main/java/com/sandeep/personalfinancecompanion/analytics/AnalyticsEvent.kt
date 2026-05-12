@@ -20,7 +20,6 @@ object AnalyticsEvent {
     const val EXPORT_FAILED = "export_failed"
     const val LANGUAGE_CHANGED = "language_changed"
     const val CURRENCY_CHANGED = "currency_changed"
-    const val ANALYTICS_CONSENT_CHANGED = "analytics_consent_changed"
 }
 
 object AnalyticsParam {
@@ -30,7 +29,6 @@ object AnalyticsParam {
     const val TYPE = "type"
     const val FILTER_TYPE = "filter_type"
     const val CATEGORY = "category"
-    const val ENABLED = "enabled"
     const val LANGUAGE = "language"
     const val CURRENCY = "currency"
     const val RESULT = "result"

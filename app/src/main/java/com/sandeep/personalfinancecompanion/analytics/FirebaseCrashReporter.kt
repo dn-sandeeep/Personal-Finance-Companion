@@ -13,7 +13,7 @@ class FirebaseCrashReporter @Inject constructor(
     private val crashlytics = if (app.hasFirebaseConfig()) FirebaseCrashlytics.getInstance() else null
 
     init {
-        crashlytics?.setCrashlyticsCollectionEnabled(false)
+        crashlytics?.setCrashlyticsCollectionEnabled(true)
     }
 
     override fun setCollectionEnabled(enabled: Boolean) {
