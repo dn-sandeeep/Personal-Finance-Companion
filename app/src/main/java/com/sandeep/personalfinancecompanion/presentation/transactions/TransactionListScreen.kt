@@ -39,8 +39,12 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -315,6 +319,7 @@ private fun SwipeableTransactionItem(
     onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
+    var editTriggered by remember(transaction.id) { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             when (dismissValue) {
@@ -322,20 +327,34 @@ private fun SwipeableTransactionItem(
                     onDelete()
                     true
                 }
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onEdit()
-                    false
-                }
+                SwipeToDismissBoxValue.StartToEnd -> false
                 else -> false
             }
         }
     )
+    LaunchedEffect(dismissState.targetValue, editTriggered) {
+        if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd && !editTriggered) {
+            editTriggered = true
+            onEdit()
+            dismissState.reset()
+        }
+
+        if (dismissState.currentValue == SwipeToDismissBoxValue.Settled &&
+            dismissState.targetValue == SwipeToDismissBoxValue.Settled
+        ) {
+            editTriggered = false
+        }
+    }
+    val activeSwipeDirection = dismissState.dismissDirection
+    val activeDismissValue = activeSwipeDirection ?: dismissState.targetValue.takeIf {
+        it != SwipeToDismissBoxValue.Settled
+    }
 
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
             val color by animateColorAsState(
-                targetValue = when (dismissState.targetValue) {
+                targetValue = when (activeDismissValue) {
                     SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
                     SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
                     else -> Color.Transparent
@@ -343,13 +362,13 @@ private fun SwipeableTransactionItem(
                 label = "swipe_color"
             )
 
-            val alignment = when (dismissState.targetValue) {
+            val alignment = when (activeDismissValue) {
                 SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
                 SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
                 else -> Alignment.Center
             }
 
-            val icon = when (dismissState.targetValue) {
+            val icon = when (activeDismissValue) {
                 SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
                 SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Edit
                 else -> null
@@ -367,7 +386,7 @@ private fun SwipeableTransactionItem(
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        tint = if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) 
+                        tint = if (activeDismissValue == SwipeToDismissBoxValue.EndToStart)
                             MaterialTheme.colorScheme.onError 
                         else 
                             MaterialTheme.colorScheme.onPrimary

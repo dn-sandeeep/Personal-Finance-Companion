@@ -7,13 +7,24 @@ import com.google.mlkit.nl.entityextraction.EntityExtractorOptions
 import com.sandeep.personalfinancecompanion.domain.model.Category
 import com.sandeep.personalfinancecompanion.domain.model.TransactionType
 import kotlinx.coroutines.tasks.await
-import java.text.Normalizer
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SmartTransactionParser @Inject constructor() {
+
+    private data class CandidateScore(
+        val candidate: AmountCandidate,
+        val score: Int
+    )
+
+    private data class AmountCandidate(
+        val amount: Double,
+        val rawText: String,
+        val start: Int,
+        val end: Int
+    )
 
     private val categoryKeywords = mapOf(
         Category.FOOD to listOf("pizza", "burger", "lunch", "dinner", "tea", "chai", "swiggy", "zomato", "ice cream", "restaurant", "coffee", "starbucks", "khana", "khane", "nashta", "nashte", "biscuit", "doodh", "milk", "egg", "ande", "hotel"),
@@ -30,6 +41,14 @@ class SmartTransactionParser @Inject constructor() {
 
     private val incomeKeywords = listOf("received", "income", "earned", "salary", "bonus", "get", "got", "credit", "credited", "aaye", "mile", "jama", "pagaar", "stipend", "added", "cashback", "refund", "deposit")
     private val expenseKeywords = listOf("spent", "paid", "bought", "kharch", "debit", "debited", "diye", "nikale", "dia", "bhara", "gave", "lowered", "withdrawn", "purchase")
+    private val transactionAmountKeywords = listOf(
+        "debited", "credited", "spent", "paid", "received", "withdrawn", "withdrawal",
+        "purchase", "purchased", "txn", "transaction", "upi", "vpa", "sent", "deposit"
+    )
+    private val balanceKeywords = listOf(
+        "avl bal", "available balance", "available bal", "bal:", "bal is", "current balance",
+        "remaining balance", "closing balance", "ledger balance", "total balance"
+    )
 
     /**
      * Normalizes Unicode text by converting Mathematical Alphanumeric Symbols
@@ -87,6 +106,13 @@ class SmartTransactionParser @Inject constructor() {
         return sb.toString()
     }
 
+    fun normalizeForMatching(text: String): String {
+        return normalizeUnicode(text)
+            .lowercase()
+            .replace(Regex("\\s+"), " ")
+            .trim()
+    }
+
     suspend fun parse(context: Context, text: String): List<ParsedTransaction> {
         // Normalize Unicode (RCS messages from banks use fancy Unicode characters)
         val normalizedText = normalizeUnicode(text)
@@ -95,62 +121,99 @@ class SmartTransactionParser @Inject constructor() {
         )
 
         val results = mutableListOf<ParsedTransaction>()
+        val isFinancialMessage = isLikelyFinancialMessage(normalizedText)
         try {
             extractor.downloadModelIfNeeded().await()
             val annotations = extractor.annotate(normalizedText).await()
-
-            if (annotations.isEmpty()) {
-                // Fallback to manual extraction if ML Kit finds nothing
-                val amounts = extractAllNumbers(normalizedText)
-                if (amounts.isEmpty()) return emptyList()
-
-                for (amount in amounts) {
-                    results.add(
-                        ParsedTransaction(
-                            amount = amount,
-                            category = detectCategory(normalizedText),
-                            type = detectType(normalizedText),
-                            notes = normalizedText
-                        )
-                    )
-                }
-                return results
-            }
+            val mlKitCandidates = mutableListOf<AmountCandidate>()
 
             for (annotation in annotations) {
                 for (entity in annotation.entities) {
                     if (entity.type == Entity.TYPE_MONEY) {
                         val moneyText = normalizedText.substring(annotation.start, annotation.end)
                         val amount = extractNumber(moneyText) ?: continue
-                        
-                        // Look at surrounding context (40 chars before/after) to find category
-                        // A wider window helps identify Income vs Expense more specifically
-                        val start = (annotation.start - 40).coerceAtLeast(0)
-                        val end = (annotation.end + 40).coerceAtMost(normalizedText.length)
-                        val contextText = normalizedText.substring(start, end).lowercase()
-                        
-                        results.add(
-                            ParsedTransaction(
-                                amount = amount,
-                                category = detectCategory(contextText),
-                                type = detectType(contextText),
-                                notes = "Detected: $moneyText"
+                        if (isValidAmountCandidate(normalizedText, annotation.start, annotation.end, moneyText)) {
+                            mlKitCandidates.add(
+                                AmountCandidate(
+                                    amount = amount,
+                                    rawText = moneyText,
+                                    start = annotation.start,
+                                    end = annotation.end
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
-            
-            if (results.isEmpty()) {
-                extractAllNumbers(normalizedText).forEach { amount ->
-                   results.add(ParsedTransaction(amount = amount, category = detectCategory(normalizedText), type = detectType(normalizedText), notes = normalizedText))
+
+            val finalCandidates = when {
+                mlKitCandidates.isNotEmpty() -> mlKitCandidates
+                isFinancialMessage -> extractAnchoredAmounts(normalizedText)
+                else -> extractAllNumbers(normalizedText).mapIndexed { index, amount ->
+                    AmountCandidate(
+                        amount = amount,
+                        rawText = amount.toString(),
+                        start = index,
+                        end = index
+                    )
                 }
+            }
+            val distinctCandidates = finalCandidates
+                .distinctBy { candidate -> candidate.amount to candidate.rawText }
+                .let { candidates ->
+                    if (isFinancialMessage) {
+                        selectPrimaryFinancialCandidate(candidates, normalizedText)?.let(::listOf) ?: emptyList()
+                    } else {
+                        candidates
+                    }
+                }
+
+            distinctCandidates.forEach { candidate ->
+                val start = (candidate.start - 40).coerceAtLeast(0)
+                val end = (candidate.end + 40).coerceAtMost(normalizedText.length)
+                val contextText = normalizedText.substring(start, end).lowercase()
+
+                results.add(
+                    ParsedTransaction(
+                        amount = candidate.amount,
+                        category = detectCategory(contextText),
+                        type = detectType(contextText),
+                        notes = "Detected: ${candidate.rawText}"
+                    )
+                )
             }
 
         } catch (e: Exception) {
-            extractAllNumbers(normalizedText).forEach { amount ->
-                results.add(ParsedTransaction(amount = amount, category = detectCategory(normalizedText), type = detectType(normalizedText), notes = normalizedText))
+            val fallbackCandidates = if (isFinancialMessage) {
+                extractAnchoredAmounts(normalizedText)
+            } else {
+                extractAllNumbers(normalizedText).mapIndexed { index, amount ->
+                    AmountCandidate(
+                        amount = amount,
+                        rawText = amount.toString(),
+                        start = index,
+                        end = index
+                    )
+                }
             }
+            fallbackCandidates
+                .let { candidates ->
+                    if (isFinancialMessage) {
+                        selectPrimaryFinancialCandidate(candidates, normalizedText)?.let(::listOf) ?: emptyList()
+                    } else {
+                        candidates
+                    }
+                }
+                .forEach { candidate ->
+                    results.add(
+                        ParsedTransaction(
+                            amount = candidate.amount,
+                            category = detectCategory(normalizedText),
+                            type = detectType(normalizedText),
+                            notes = "Detected: ${candidate.rawText}"
+                        )
+                    )
+                }
         } finally {
             extractor.close()
         }
@@ -180,12 +243,149 @@ class SmartTransactionParser @Inject constructor() {
     }
 
     private fun extractNumber(text: String): Double? {
-        val regex = Regex("""\d+(\.\d+)?""")
-        return regex.find(text)?.value?.toDoubleOrNull()
+        val regex = Regex("""[0-9][\d,]*(\.\d+)?""")
+        return regex.find(text)?.value?.replace(",", "")?.toDoubleOrNull()
     }
 
     private fun extractAllNumbers(text: String): List<Double> {
-        val regex = Regex("""\d+(\.\d+)?""")
-        return regex.findAll(text).mapNotNull { it.value.toDoubleOrNull() }.toList()
+        val regex = Regex("""[0-9][\d,]*(\.\d+)?""")
+        return regex.findAll(text).mapNotNull { it.value.replace(",", "").toDoubleOrNull() }.toList()
+    }
+
+    internal fun extractAnchoredAmountValuesForTesting(text: String): List<Double> {
+        return extractAnchoredAmounts(normalizeUnicode(text)).map { it.amount }
+    }
+
+    internal fun extractPrimaryFinancialAmountForTesting(text: String): Double? {
+        val normalizedText = normalizeUnicode(text)
+        return selectPrimaryFinancialCandidate(
+            extractAnchoredAmounts(normalizedText),
+            normalizedText
+        )?.amount
+    }
+
+    internal fun isLikelyFinancialMessageForTesting(text: String): Boolean {
+        return isLikelyFinancialMessage(normalizeUnicode(text))
+    }
+
+    private fun isLikelyFinancialMessage(text: String): Boolean {
+        val lowerText = text.lowercase()
+        val hasFinancialKeyword = listOf(
+            "debited",
+            "credited",
+            "withdrawn",
+            "received",
+            "spent",
+            "paid",
+            "txn",
+            "upi",
+            "vpa",
+            "a/c",
+            "acct",
+            "account",
+            "card",
+            "amt",
+            "amount"
+        ).any { lowerText.contains(it) }
+        val hasCurrencySignal = Regex("""(?i)(rs\.?|inr|₹)\s*[0-9]""").containsMatchIn(text)
+        return hasFinancialKeyword || hasCurrencySignal
+    }
+
+    private fun extractAnchoredAmounts(text: String): List<AmountCandidate> {
+        val patterns = listOf(
+            Regex("""(?i)(?:rs\.?|inr|₹)\s*([0-9][\d,]*(?:\.\d{1,2})?)"""),
+            Regex("""(?i)(?:amt|amount)\s*(?:of|is|:)?\s*(?:rs\.?|inr|₹)?\s*([0-9][\d,]*(?:\.\d{1,2})?)"""),
+            Regex("""(?i)([0-9][\d,]*(?:\.\d{1,2})?)\s*(?:rs\.?|inr)\b""")
+        )
+
+        return patterns.flatMap { pattern ->
+            pattern.findAll(text).mapNotNull { match ->
+                val amountText = match.groupValues.getOrNull(1) ?: return@mapNotNull null
+                val amount = amountText.replace(",", "").toDoubleOrNull() ?: return@mapNotNull null
+                val start = match.range.first
+                val end = match.range.last + 1
+                if (isValidAmountCandidate(text, start, end, match.value)) {
+                    AmountCandidate(
+                        amount = amount,
+                        rawText = match.value,
+                        start = start,
+                        end = end
+                    )
+                } else {
+                    null
+                }
+            }.toList()
+        }
+    }
+
+    private fun selectPrimaryFinancialCandidate(
+        candidates: List<AmountCandidate>,
+        text: String
+    ): AmountCandidate? {
+        return candidates
+            .distinctBy { it.amount to it.rawText to it.start }
+            .map { candidate ->
+                CandidateScore(candidate, scoreFinancialCandidate(candidate, text))
+            }
+            .filter { it.score > 0 }
+            .maxWithOrNull(
+                compareBy<CandidateScore> { it.score }
+                    .thenByDescending { it.candidate.start }
+            )
+            ?.candidate
+    }
+
+    private fun scoreFinancialCandidate(candidate: AmountCandidate, text: String): Int {
+        val contextStart = (candidate.start - 40).coerceAtLeast(0)
+        val contextEnd = (candidate.end + 40).coerceAtMost(text.length)
+        val context = text.substring(contextStart, contextEnd).lowercase()
+        val raw = candidate.rawText.lowercase()
+
+        val hasCurrencySignal = Regex("""(?i)(rs\.?|inr|₹|amt|amount)""").containsMatchIn(raw)
+        val hasTransactionContext = transactionAmountKeywords.any { context.contains(it) }
+        val hasBalanceContext = balanceKeywords.any { context.contains(it) }
+        val hasAccountContext = Regex(
+            """(?i)(a/c|acct|account|card|ending(?:\s+in)?)\s*[:\-]?\s*(?:[*xX]{1,}|\bxx\b|\bxxxx\b)?\s*\d{3,4}"""
+        ).containsMatchIn(context)
+
+        if (hasAccountContext && !hasCurrencySignal) return Int.MIN_VALUE
+        if (hasBalanceContext && !hasTransactionContext) return Int.MIN_VALUE
+
+        var score = 0
+        if (hasCurrencySignal) score += 3
+        if (hasTransactionContext) score += 6
+        if (Regex("""(?i)(debited|credited|spent|paid|received|withdrawn)\s*(?:by|with|for|of|:)?\s*$""")
+                .containsMatchIn(text.substring(contextStart, candidate.start).lowercase())
+        ) {
+            score += 4
+        }
+        if (hasBalanceContext) score -= 6
+        if (hasAccountContext) score -= 4
+        return score
+    }
+
+    private fun isValidAmountCandidate(
+        text: String,
+        start: Int,
+        end: Int,
+        rawText: String
+    ): Boolean {
+        val lowerRawText = rawText.lowercase()
+        val contextStart = (start - 24).coerceAtLeast(0)
+        val contextEnd = (end + 24).coerceAtMost(text.length)
+        val context = text.substring(contextStart, contextEnd).lowercase()
+
+        val accountContext = Regex(
+            """(?i)(a/c|acct|account|card|ending(?:\s+in)?)\s*[:\-]?\s*(?:[*xX]{1,}|\bxx\b|\bxxxx\b)?\s*\d{3,4}"""
+        ).containsMatchIn(context)
+        val currencySignal = Regex("""(?i)(rs\.?|inr|₹|amt|amount)""").containsMatchIn(lowerRawText)
+        val moneyContext = Regex(
+            """(?i)(debited|credited|spent|paid|withdrawn|received|purchase|txn|upi|vpa|amt|amount)"""
+        ).containsMatchIn(context)
+        val balanceContext = balanceKeywords.any { context.contains(it) }
+
+        if (accountContext && !currencySignal) return false
+        if (balanceContext && !moneyContext) return false
+        return currencySignal || moneyContext
     }
 }

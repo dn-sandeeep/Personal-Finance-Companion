@@ -21,7 +21,7 @@ import com.sandeep.personalfinancecompanion.data.local.entity.UdhaarPersonEntity
         UdhaarPersonEntity::class,
         UdhaarEntryEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -69,6 +69,17 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_udhaar_entries_personId` ON `udhaar_entries` (`personId`)"
+                )
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE transactions ADD COLUMN sourceType TEXT")
+                db.execSQL("ALTER TABLE transactions ADD COLUMN sourceFingerprint TEXT")
+                db.execSQL("ALTER TABLE transactions ADD COLUMN rawSourceText TEXT")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_transactions_sourceFingerprint ON transactions(sourceFingerprint)"
                 )
             }
         }

@@ -8,5 +8,8 @@ data class Transaction(
     val date: Long, // Unix timestamp in millis
     val notes: String,
     val peerName: String? = null,
-    val isSettled: Boolean = false
+    val isSettled: Boolean = false,
+    val sourceType: String? = null,
+    val sourceFingerprint: String? = null,
+    val rawSourceText: String? = null
 )

@@ -31,6 +31,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
         val SMS_DETECTION_ENABLED = booleanPreferencesKey("sms_detection_enabled")
         val AUTO_SAVE_SMS_TRANSACTIONS = booleanPreferencesKey("auto_save_sms_transactions")
+        val MAY_13_2026_NOTIFICATION_CLEANUP_COMPLETED = booleanPreferencesKey("may_13_2026_notification_cleanup_completed")
     }
 
     override val budgetLimitFlow: Flow<Double> = dataStore.data
@@ -86,6 +87,11 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val autoSaveSmsTransactionsFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.AUTO_SAVE_SMS_TRANSACTIONS] ?: false
+        }
+
+    override val may132026NotificationCleanupCompletedFlow: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.MAY_13_2026_NOTIFICATION_CLEANUP_COMPLETED] ?: false
         }
 
     override suspend fun updateBudgetLimit(limit: Double) {
@@ -151,6 +157,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateAutoSaveSmsTransactions(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.AUTO_SAVE_SMS_TRANSACTIONS] = enabled
+        }
+    }
+
+    override suspend fun updateMay132026NotificationCleanupCompleted(completed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MAY_13_2026_NOTIFICATION_CLEANUP_COMPLETED] = completed
         }
     }
 }

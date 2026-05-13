@@ -15,6 +15,7 @@ interface UserPreferencesRepository {
     val analyticsEnabledFlow: Flow<Boolean>
     val smsDetectionEnabledFlow: Flow<Boolean>
     val autoSaveSmsTransactionsFlow: Flow<Boolean>
+    val may132026NotificationCleanupCompletedFlow: Flow<Boolean>
 
     suspend fun updateBudgetLimit(limit: Double)
     suspend fun updateLanguage(languageCode: String)
@@ -27,4 +28,5 @@ interface UserPreferencesRepository {
     suspend fun updateAnalyticsEnabled(enabled: Boolean)
     suspend fun updateSmsDetectionEnabled(enabled: Boolean)
     suspend fun updateAutoSaveSmsTransactions(enabled: Boolean)
+    suspend fun updateMay132026NotificationCleanupCompleted(completed: Boolean)
 }

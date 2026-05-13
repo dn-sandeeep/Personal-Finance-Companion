@@ -129,7 +129,16 @@ fun AppNavigation(
                     navController.navigate(Screen.AddTransaction.createRoute())
                 },
                 onEditTransaction = { transactionId ->
-                    navController.navigate(Screen.EditTransaction.createRoute(transactionId))
+                    val currentEntry = navController.currentBackStackEntry
+                    val currentRoute = currentEntry?.destination?.route
+                    val currentTransactionId = currentEntry?.arguments?.getString("transactionId")
+                    if (currentRoute == Screen.EditTransaction.route && currentTransactionId == transactionId) {
+                        return@TransactionListScreen
+                    }
+
+                    navController.navigate(Screen.EditTransaction.createRoute(transactionId)) {
+                        launchSingleTop = true
+                    }
                 },
                 viewModel = transactionViewModel
             )

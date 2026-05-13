@@ -19,9 +19,15 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE date >= :sinceDate ORDER BY date DESC")
     fun getTransactionsSince(sinceDate: Long): Flow<List<TransactionEntity>>
+
+    @Query("SELECT * FROM transactions WHERE date >= :startDate AND date < :endDate ORDER BY date DESC")
+    suspend fun getTransactionsBetween(startDate: Long, endDate: Long): List<TransactionEntity>
     
     @Query("SELECT * FROM transactions WHERE id = :id")
     fun getTransactionById(id: String): TransactionEntity?
+
+    @Query("SELECT * FROM transactions WHERE sourceFingerprint = :fingerprint LIMIT 1")
+    fun getTransactionBySourceFingerprint(fingerprint: String): TransactionEntity?
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTransaction(transaction: TransactionEntity)
@@ -31,6 +37,9 @@ interface TransactionDao {
     
     @Query("DELETE FROM transactions WHERE id = :id")
     fun deleteTransaction(id: String)
+
+    @Query("DELETE FROM transactions WHERE id IN (:ids)")
+    suspend fun deleteTransactionsByIds(ids: List<String>)
 
     @Query("UPDATE transactions SET isSettled = :isSettled WHERE id = :id")
     suspend fun updateSettlementStatus(id: String, isSettled: Boolean)

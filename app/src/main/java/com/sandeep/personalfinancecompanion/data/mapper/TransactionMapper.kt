@@ -22,7 +22,10 @@ fun TransactionEntity.toDomain(): Transaction {
         date = date,
         notes = notes,
         peerName = peerName,
-        isSettled = isSettled
+        isSettled = isSettled,
+        sourceType = sourceType,
+        sourceFingerprint = sourceFingerprint,
+        rawSourceText = rawSourceText
     )
 }
 
@@ -35,6 +38,9 @@ fun Transaction.toEntity(): TransactionEntity {
         date = date,
         notes = notes,
         peerName = peerName,
-        isSettled = isSettled
+        isSettled = isSettled,
+        sourceType = sourceType,
+        sourceFingerprint = sourceFingerprint,
+        rawSourceText = rawSourceText
     )
 }
