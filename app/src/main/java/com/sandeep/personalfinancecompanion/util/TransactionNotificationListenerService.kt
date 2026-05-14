@@ -36,44 +36,9 @@ class TransactionNotificationListenerService : NotificationListenerService() {
 
         Log.d("NotificationListener", "Received notification from $packageName: $title - $text")
 
-        // Filter for potential finance related notifications
-        // Check if it's from a messaging app or a banking app
-        if (isPotentialFinanceApp(packageName, title, text)) {
+        if (NotificationTransactionFilter.shouldProcess(packageName, title, text)) {
             processNotification(packageName, title, text)
         }
-    }
-
-    private fun isPotentialFinanceApp(packageName: String, title: String, text: String): Boolean {
-        // Banking and finance apps - always process their notifications
-        val bankingApps = listOf(
-            "com.pnb.pnbone",                      // PNB One
-            "com.sbi.lotusintouch",                 // SBI YONO
-            "com.csam.icici.bank.imobile",          // iMobile Pay
-            "com.axis.mobile",                      // Axis Mobile
-            "net.one97.paytm",                      // Paytm
-            "com.phonepe.app",                      // PhonePe
-            "com.google.android.apps.nbu.paisa.user", // Google Pay
-            "in.amazon.mShop.android.shopping",     // Amazon Pay
-            "com.whatsapp"                          // WhatsApp Pay notifications
-        )
-        
-        if (bankingApps.contains(packageName)) return true
-        
-        // Messaging apps - only process if text has strong financial signals
-        val messagingApps = listOf(
-            "com.google.android.apps.messaging",    // Google Messages (SMS/RCS)
-            "com.samsung.android.messaging"          // Samsung Messages
-        )
-        
-        if (!messagingApps.contains(packageName)) return false
-        
-        // For messaging apps, require BOTH a financial keyword AND a currency/amount pattern
-        val textLower = text.lowercase()
-        val hasFinancialKeyword = listOf("debited", "credited", "txn", "vpa", "upi", "a/c", "acct", "neft", "imps", "rtgs")
-            .any { textLower.contains(it) }
-        val hasAmountPattern = Regex("""(rs\.?|inr|₹)\s*[\d,]+""", RegexOption.IGNORE_CASE).containsMatchIn(text)
-        
-        return hasFinancialKeyword && hasAmountPattern
     }
 
     private fun processNotification(packageName: String, title: String, text: String) {

@@ -208,9 +208,9 @@ class NotificationHelper @Inject constructor(
         )
 
         // Undo intent to delete
-        val undoIntent = Intent(context, SmsReceiver::class.java).apply {
-            action = "ACTION_UNDO_TRANSACTION"
-            putExtra("EXTRA_TRANSACTION_ID", transactionId)
+        val undoIntent = Intent(context, UndoTransactionReceiver::class.java).apply {
+            action = UndoTransactionReceiver.ACTION_UNDO_TRANSACTION
+            putExtra(UndoTransactionReceiver.EXTRA_TRANSACTION_ID, transactionId)
         }
         val undoPendingIntent = PendingIntent.getBroadcast(
             context, 5, undoIntent,
