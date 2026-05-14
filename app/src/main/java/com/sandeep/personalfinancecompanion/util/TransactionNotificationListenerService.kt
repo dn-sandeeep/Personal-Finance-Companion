@@ -30,14 +30,20 @@ class TransactionNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val packageName = sbn.packageName
+        if (packageName == applicationContext.packageName) return
+
         val extras = sbn.notification.extras
-        val title = extras.getString("android.title") ?: ""
-        val text = extras.getCharSequence("android.text")?.toString() ?: ""
+        val snapshot = NotificationTextExtractor.fromExtras(extras)
+        val title = snapshot.title
+        val text = NotificationTextExtractor.fromSnapshot(snapshot.copy(title = ""))
 
         Log.d("NotificationListener", "Received notification from $packageName: $title - $text")
 
-        if (NotificationTransactionFilter.shouldProcess(packageName, title, text)) {
+        val decision = NotificationTransactionFilter.evaluate(packageName, title, text)
+        if (decision.shouldProcess) {
             processNotification(packageName, title, text)
+        } else {
+            Log.d("NotificationListener", "Skipped notification from $packageName: ${decision.reason}")
         }
     }
 

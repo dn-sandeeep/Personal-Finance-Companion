@@ -9,8 +9,7 @@ object NotificationTransactionFilter {
         "net.one97.paytm",
         "com.phonepe.app",
         "com.google.android.apps.nbu.paisa.user",
-        "in.amazon.mShop.android.shopping",
-        "com.whatsapp"
+        "in.amazon.mShop.android.shopping"
     )
 
     private val messagingApps = setOf(
@@ -66,13 +65,26 @@ object NotificationTransactionFilter {
     private val amountPattern = Regex("""(?i)(rs\.?|inr|₹)\s*[\d,]+(?:\.\d{1,2})?""")
     private val accountPattern = Regex("""(?i)(a/c|acct|account|card|ending(?:\s+in)?)\s*[:\-]?\s*(?:[*xX]{1,}|\bxx\b|\bxxxx\b)?\s*\d{3,4}""")
 
+    data class Decision(
+        val shouldProcess: Boolean,
+        val reason: String
+    )
+
     fun shouldProcess(packageName: String, title: String, text: String): Boolean {
-        if (packageName !in bankingApps && packageName !in messagingApps) return false
+        return evaluate(packageName, title, text).shouldProcess
+    }
+
+    fun evaluate(packageName: String, title: String, text: String): Decision {
+        if (packageName !in bankingApps && packageName !in messagingApps) {
+            return Decision(false, "package_not_allowed")
+        }
 
         val combinedText = listOf(title.trim(), text.trim())
             .filter { it.isNotBlank() }
             .joinToString(" ")
-        if (combinedText.isBlank()) return false
+        if (combinedText.isBlank()) {
+            return Decision(false, "empty_notification")
+        }
 
         val lowerText = combinedText.lowercase()
         val hasAmount = amountPattern.containsMatchIn(combinedText)
@@ -80,9 +92,16 @@ object NotificationTransactionFilter {
         val hasAccountContext = accountPattern.containsMatchIn(combinedText)
         val looksPromotional = promotionalKeywords.any { lowerText.contains(it) }
 
-        if (!hasAmount || !hasTransactionKeyword) return false
-        if (looksPromotional && !hasAccountContext) return false
+        if (!hasAmount) {
+            return Decision(false, "missing_amount")
+        }
+        if (!hasTransactionKeyword) {
+            return Decision(false, "missing_transaction_keyword")
+        }
+        if (looksPromotional && !hasAccountContext) {
+            return Decision(false, "promotional_content")
+        }
 
-        return true
+        return Decision(true, "accepted")
     }
 }
