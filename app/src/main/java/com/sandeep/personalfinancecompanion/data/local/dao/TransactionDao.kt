@@ -41,6 +41,20 @@ interface TransactionDao {
     @Query("DELETE FROM transactions WHERE id IN (:ids)")
     suspend fun deleteTransactionsByIds(ids: List<String>)
 
+    @Query(
+        """
+        DELETE FROM transactions
+        WHERE sourceType = 'notification'
+            AND rawSourceText LIKE '%Punjab National Bank%'
+            AND rawSourceText LIKE '%15-05-26%'
+            AND (
+                notes LIKE 'Detected: Dt %'
+                OR amount IN (31097.42, 31253.42, 31143.42, 31113.42)
+            )
+        """
+    )
+    suspend fun deleteMalformedPnbNotificationCandidatesForMay152026(): Int
+
     @Query("UPDATE transactions SET isSettled = :isSettled WHERE id = :id")
     suspend fun updateSettlementStatus(id: String, isSettled: Boolean)
 

@@ -36,6 +36,7 @@ class FinanceApplication : Application(), Configuration.Provider {
                 transactionRepository.cleanupBrokenAutoImportedTransactionsForMay132026()
                 preferencesRepository.updateMay132026NotificationCleanupCompleted(true)
             }
+            transactionRepository.cleanupMalformedPnbNotificationCandidatesForMay152026()
         }
     }
 

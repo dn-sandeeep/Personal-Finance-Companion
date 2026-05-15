@@ -1,22 +1,8 @@
 package com.sandeep.personalfinancecompanion.util
 
+import java.text.Normalizer
+
 object NotificationTransactionFilter {
-    private val bankingApps = setOf(
-        "com.pnb.pnbone",
-        "com.sbi.lotusintouch",
-        "com.csam.icici.bank.imobile",
-        "com.axis.mobile",
-        "net.one97.paytm",
-        "com.phonepe.app",
-        "com.google.android.apps.nbu.paisa.user",
-        "in.amazon.mShop.android.shopping"
-    )
-
-    private val messagingApps = setOf(
-        "com.google.android.apps.messaging",
-        "com.samsung.android.messaging"
-    )
-
     private val promotionalKeywords = listOf(
         "advertisement",
         "ad ",
@@ -48,9 +34,12 @@ object NotificationTransactionFilter {
         "withdrawn",
         "spent",
         "paid",
+        "payment",
         "received",
         "sent",
         "deposited",
+        "completed",
+        "successful",
         "purchase",
         "purchased",
         "txn",
@@ -70,26 +59,37 @@ object NotificationTransactionFilter {
         val reason: String
     )
 
-    fun shouldProcess(packageName: String, title: String, text: String): Boolean {
-        return evaluate(packageName, title, text).shouldProcess
+    fun shouldProcess(
+        packageName: String,
+        title: String,
+        text: String,
+        extraTexts: List<String> = emptyList()
+    ): Boolean {
+        return evaluate(packageName, title, text, extraTexts).shouldProcess
     }
 
-    fun evaluate(packageName: String, title: String, text: String): Decision {
-        if (packageName !in bankingApps && packageName !in messagingApps) {
-            return Decision(false, "package_not_allowed")
+    fun evaluate(
+        packageName: String,
+        title: String,
+        text: String,
+        extraTexts: List<String> = emptyList()
+    ): Decision {
+        val combinedText = buildList {
+            add(title.trim())
+            add(text.trim())
+            extraTexts.forEach { add(it.trim()) }
         }
-
-        val combinedText = listOf(title.trim(), text.trim())
             .filter { it.isNotBlank() }
             .joinToString(" ")
         if (combinedText.isBlank()) {
             return Decision(false, "empty_notification")
         }
 
-        val lowerText = combinedText.lowercase()
-        val hasAmount = amountPattern.containsMatchIn(combinedText)
+        val normalizedText = normalizeForMatching(combinedText)
+        val lowerText = normalizedText.lowercase()
+        val hasAmount = amountPattern.containsMatchIn(normalizedText)
         val hasTransactionKeyword = strongTransactionKeywords.any { lowerText.contains(it) }
-        val hasAccountContext = accountPattern.containsMatchIn(combinedText)
+        val hasAccountContext = accountPattern.containsMatchIn(normalizedText)
         val looksPromotional = promotionalKeywords.any { lowerText.contains(it) }
 
         if (!hasAmount) {
@@ -103,5 +103,11 @@ object NotificationTransactionFilter {
         }
 
         return Decision(true, "accepted")
+    }
+
+    private fun normalizeForMatching(text: String): String {
+        return Normalizer.normalize(text, Normalizer.Form.NFKC)
+            .replace(Regex("\\s+"), " ")
+            .trim()
     }
 }

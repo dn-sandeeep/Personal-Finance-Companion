@@ -28,6 +28,18 @@ object NotificationTextExtractor {
             .trim()
     }
 
+    fun candidateTextsFromSnapshot(snapshot: NotificationTextSnapshot): List<String> {
+        return buildList {
+            addIfNotBlank(snapshot.title)
+            addIfNotBlank(snapshot.text)
+            addIfNotBlank(snapshot.bigText)
+            addIfNotBlank(snapshot.titleBig)
+            addIfNotBlank(snapshot.tickerText)
+            snapshot.textLines.forEach { addIfNotBlank(it) }
+            snapshot.messageTexts.forEach { addIfNotBlank(it) }
+        }.distinctBy { normalizeCandidateText(it) }
+    }
+
     fun fromExtras(extras: Bundle): NotificationTextSnapshot {
         val textLines = extras.getCharSequenceArray("android.textLines")
             ?.mapNotNull { it?.toString()?.trim()?.takeIf { value -> value.isNotBlank() } }
@@ -63,5 +75,12 @@ object NotificationTextExtractor {
 
     private fun MutableList<String>.addIfNotBlank(value: String) {
         if (value.isNotBlank()) add(value)
+    }
+
+    private fun normalizeCandidateText(value: String): String {
+        return value
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .lowercase()
     }
 }

@@ -14,4 +14,5 @@ interface TransactionRepository {
     suspend fun convertAllTransactions(factor: Double)
     suspend fun updateSettlementStatus(id: String, isSettled: Boolean)
     suspend fun cleanupBrokenAutoImportedTransactionsForMay132026(): Int
+    suspend fun cleanupMalformedPnbNotificationCandidatesForMay152026(): Int
 }

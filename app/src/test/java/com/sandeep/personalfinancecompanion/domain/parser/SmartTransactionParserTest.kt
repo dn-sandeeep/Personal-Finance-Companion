@@ -42,4 +42,20 @@ class SmartTransactionParserTest {
 
         assertNull(amount)
     }
+
+    @Test
+    fun anchoredAmountExtraction_extractsMultipleTransactionsFromGroupedMessage() {
+        val message = """
+            A/c XX9770 debited INR 21.00 Dt 15-05-26 00:57:56 thru UPI: 613507000211.Bal INR 31253.42.
+            A/c XX9770 debited INR 70.00 Dt 15-05-26 13:24:27 thru UPI: 206191080871.Bal INR 31143.42.
+            A/c XX9770 debited INR 30.00 Dt 15-05-26 13:35:56 thru UPI: 606183867231.Bal INR 3113.42.
+        """.trimIndent()
+
+        val amounts = parser.extractAnchoredAmountValuesForTesting(message)
+
+        assertEquals(
+            listOf(21.0, 31253.42, 70.0, 31143.42, 30.0, 3113.42),
+            amounts
+        )
+    }
 }

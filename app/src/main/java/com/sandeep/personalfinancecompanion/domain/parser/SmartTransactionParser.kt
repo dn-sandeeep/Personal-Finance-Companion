@@ -113,7 +113,11 @@ class SmartTransactionParser @Inject constructor() {
             .trim()
     }
 
-    suspend fun parse(context: Context, text: String): List<ParsedTransaction> {
+    suspend fun parse(
+        context: Context,
+        text: String,
+        keepAllFinancialCandidates: Boolean = false
+    ): List<ParsedTransaction> {
         // Normalize Unicode (RCS messages from banks use fancy Unicode characters)
         val normalizedText = normalizeUnicode(text)
         val extractor = EntityExtraction.getClient(
@@ -161,7 +165,7 @@ class SmartTransactionParser @Inject constructor() {
             val distinctCandidates = finalCandidates
                 .distinctBy { candidate -> candidate.amount to candidate.rawText }
                 .let { candidates ->
-                    if (isFinancialMessage) {
+                    if (!keepAllFinancialCandidates && isFinancialMessage) {
                         selectPrimaryFinancialCandidate(candidates, normalizedText)?.let(::listOf) ?: emptyList()
                     } else {
                         candidates
@@ -198,7 +202,7 @@ class SmartTransactionParser @Inject constructor() {
             }
             fallbackCandidates
                 .let { candidates ->
-                    if (isFinancialMessage) {
+                    if (!keepAllFinancialCandidates && isFinancialMessage) {
                         selectPrimaryFinancialCandidate(candidates, normalizedText)?.let(::listOf) ?: emptyList()
                     } else {
                         candidates

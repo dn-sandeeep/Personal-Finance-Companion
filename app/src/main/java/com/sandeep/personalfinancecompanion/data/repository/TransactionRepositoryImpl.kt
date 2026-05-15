@@ -127,6 +127,12 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun cleanupMalformedPnbNotificationCandidatesForMay152026(): Int {
+        return withContext(Dispatchers.IO) {
+            dao.deleteMalformedPnbNotificationCandidatesForMay152026()
+        }
+    }
+
     private fun cleanupScore(transaction: TransactionEntity): Int {
         var score = 0
         if (!transaction.sourceFingerprint.isNullOrBlank()) score += 4

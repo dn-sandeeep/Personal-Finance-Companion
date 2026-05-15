@@ -28,7 +28,24 @@ class TransactionNotificationListenerService : NotificationListenerService() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        activeNotifications
+            ?.filter { it.packageName != applicationContext.packageName }
+            ?.forEach { notification ->
+                Log.d(
+                    "NotificationListener",
+                    "Scanning active notification from ${notification.packageName}"
+                )
+                handleNotification(notification)
+            }
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        handleNotification(sbn)
+    }
+
+    private fun handleNotification(sbn: StatusBarNotification) {
         val packageName = sbn.packageName
         if (packageName == applicationContext.packageName) return
 
@@ -36,30 +53,81 @@ class TransactionNotificationListenerService : NotificationListenerService() {
         val snapshot = NotificationTextExtractor.fromExtras(extras)
         val title = snapshot.title
         val text = NotificationTextExtractor.fromSnapshot(snapshot.copy(title = ""))
+        val candidateTexts = NotificationTextExtractor.candidateTextsFromSnapshot(snapshot)
 
-        Log.d("NotificationListener", "Received notification from $packageName: $title - $text")
+        Log.d(
+            "NotificationListener",
+            "Received notification from $packageName: $title - $text (segments=${candidateTexts.size})"
+        )
 
-        val decision = NotificationTransactionFilter.evaluate(packageName, title, text)
+        val decision = NotificationTransactionFilter.evaluate(packageName, title, text, candidateTexts)
         if (decision.shouldProcess) {
-            processNotification(packageName, title, text)
+            processNotification(packageName, snapshot)
         } else {
             Log.d("NotificationListener", "Skipped notification from $packageName: ${decision.reason}")
         }
     }
 
-    private fun processNotification(packageName: String, title: String, text: String) {
+    private fun processNotification(
+        packageName: String,
+        snapshot: NotificationTextSnapshot
+    ) {
         scope.launch {
             try {
-                val parsedResults = parser.parse(applicationContext, text)
-                if (parsedResults.isNotEmpty()) {
-                    val result = parsedResults.firstOrNull { it.amount != null } ?: return@launch
-                    val rawSourceText = listOf(title.trim(), text.trim())
-                        .filter { it.isNotBlank() }
-                        .joinToString("\n")
+                data class ParsedNotificationEntry(
+                    val sourceText: String,
+                    val result: com.sandeep.personalfinancecompanion.domain.parser.ParsedTransaction,
+                    val isFallback: Boolean
+                )
+
+                val normalizedSegments = parseSegments(snapshot)
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+                    .distinctBy { parser.normalizeForMatching(it) }
+
+                val parsedEntries = mutableListOf<ParsedNotificationEntry>()
+
+                for (segment in normalizedSegments) {
+                    val parsedResults = parser.parse(
+                        applicationContext,
+                        segment
+                    )
+                    parsedEntries += parsedResults
+                        .filter { it.amount != null }
+                        .map { result -> ParsedNotificationEntry(segment, result, false) }
+                }
+
+                if (parsedEntries.isEmpty()) {
+                    val fallbackText = listOf(snapshot.title.trim(), textForFingerprint(snapshot)).joinToString(" ").trim()
+                    if (fallbackText.isNotBlank()) {
+                        val fallbackResults = parser.parse(
+                            applicationContext,
+                            fallbackText
+                        )
+                        parsedEntries += fallbackResults
+                            .filter { it.amount != null }
+                            .map { result -> ParsedNotificationEntry(fallbackText, result, true) }
+                    }
+                }
+
+                for (entry in parsedEntries) {
+                    val rawSourceText = if (entry.isFallback) {
+                        entry.sourceText.trim()
+                    } else {
+                        listOf(snapshot.title.trim(), entry.sourceText.trim())
+                            .filter { it.isNotBlank() }
+                            .joinToString("\n")
+                    }
                     val fingerprintInput = buildString {
                         append(packageName.trim())
                         append('\n')
                         append(parser.normalizeForMatching(rawSourceText))
+                        append('\n')
+                        append(entry.result.amount ?: 0.0)
+                        append('\n')
+                        append(entry.result.type.name)
+                        append('\n')
+                        append(entry.result.category.name)
                     }
                     val sourceFingerprint = UUID.nameUUIDFromBytes(
                         fingerprintInput.toByteArray(Charsets.UTF_8)
@@ -67,11 +135,11 @@ class TransactionNotificationListenerService : NotificationListenerService() {
                     val transactionId = UUID.randomUUID().toString()
                     val transaction = Transaction(
                         id = transactionId,
-                        amount = result.amount ?: 0.0,
-                        category = result.category,
-                        type = result.type,
-                        notes = result.notes,
-                        date = result.date.time,
+                        amount = entry.result.amount ?: 0.0,
+                        category = entry.result.category,
+                        type = entry.result.type,
+                        notes = entry.result.notes,
+                        date = entry.result.date.time,
                         sourceType = "notification",
                         sourceFingerprint = sourceFingerprint,
                         rawSourceText = rawSourceText
@@ -80,15 +148,27 @@ class TransactionNotificationListenerService : NotificationListenerService() {
                     if (inserted) {
                         notificationHelper.showTransactionAutoSaved(
                             transactionId = transactionId,
-                            amount = result.amount ?: 0.0,
-                            type = result.type.name,
-                            merchant = result.notes
+                            amount = entry.result.amount ?: 0.0,
+                            type = entry.result.type.name,
+                            merchant = entry.result.notes
                         )
                     }
                 }
             } catch (e: Exception) {
                 Log.e("NotificationListener", "Error processing notification", e)
             }
+        }
+    }
+
+    private fun textForFingerprint(snapshot: NotificationTextSnapshot): String {
+        return NotificationTextExtractor.fromSnapshot(snapshot.copy(title = ""))
+    }
+
+    private fun parseSegments(snapshot: NotificationTextSnapshot): List<String> {
+        return when {
+            snapshot.messageTexts.isNotEmpty() -> snapshot.messageTexts
+            snapshot.textLines.isNotEmpty() -> snapshot.textLines
+            else -> NotificationTextExtractor.candidateTextsFromSnapshot(snapshot)
         }
     }
 }
